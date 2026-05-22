@@ -13,9 +13,12 @@ npm install
 npm run dev
 ```
 
-## GitHub Pages
+## GitHub Pages — activar (solo una vez)
 
-El despliegue es automático con GitHub Actions al hacer push a `main`.
+1. Entra a **Settings → Pages** del repositorio.
+2. En **Source** / **Build and deployment**, elige **Deploy from a branch**.
+3. En **Branch**, selecciona **`gh-pages`** y carpeta **`/ (root)`**.
+4. Pulsa **Save**.
+5. Espera 1–2 minutos. La URL será: https://brayanagudelo1423-png.github.io/OZONO/
 
-1. En el repositorio: **Settings → Pages → Source: GitHub Actions**
-2. Tras el push, la Action publica el sitio en la URL de arriba.
+Cada push a `main` vuelve a publicar el sitio automáticamente.
