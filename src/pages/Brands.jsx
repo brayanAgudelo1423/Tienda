@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { products, getBrandBySlug } from '../data';
+import { motion } from 'framer-motion';
+import ProductDetail from '../components/ProductDetail';
+import StarRating from '../components/StarRating';
+
+const Brands = ({ onAddToCart }) => {
+  const { brandSlug } = useParams();
+  const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(500);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const activeBrand = getBrandBySlug(brandSlug);
+
+  if (!activeBrand) {
+    return <Navigate to="/marcas/nike" replace />;
+  }
+
+  const brandProducts = products.filter((p) => p.brand === activeBrand);
+  const maxProductPrice = Math.max(...brandProducts.map((p) => p.price), 500);
+  const filteredProducts = brandProducts.filter((product) => product.price <= maxPrice);
+
+  return (
+    <>
+      <div className="container" style={styles.container}>
+        <div style={styles.header}>
+          <h1 style={styles.pageTitle} className="brands-page-title">
+            {activeBrand}
+          </h1>
+          <p style={styles.resultCount}>{filteredProducts.length} productos</p>
+        </div>
+
+        <div className="brands-layout" style={styles.layout}>
+          <aside className="brands-sidebar" style={styles.sidebar}>
+            <div style={styles.filterGroup}>
+              <h3 style={styles.filterTitle}>Precio máximo: ${maxPrice}</h3>
+              <input
+                type="range"
+                min="50"
+                max={maxProductPrice}
+                value={Math.min(maxPrice, maxProductPrice)}
+                onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))}
+                style={styles.rangeInput}
+              />
+              <div style={styles.rangeLabels}>
+                <span>$50</span>
+                <span>${maxProductPrice}</span>
+              </div>
+            </div>
+          </aside>
+
+          <main style={styles.grid}>
+            {filteredProducts.length === 0 ? (
+              <p style={styles.emptyMessage}>
+                No hay productos de {activeBrand} en este rango de precio.
+              </p>
+            ) : (
+              filteredProducts.map((product, index) => (
+                <motion.article
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  style={styles.card}
+                  onMouseEnter={() => setHoveredProduct(product.id)}
+                  onMouseLeave={() => setHoveredProduct(null)}
+                  onClick={() => setSelectedProduct(product)}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedProduct(product)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div style={styles.imageContainer}>
+                    <img
+                      src={hoveredProduct === product.id ? product.hoverImage : product.image}
+                      alt={product.name}
+                      style={styles.image}
+                    />
+                  </div>
+                  <div style={styles.info}>
+                    <p style={styles.cardBrand}>{product.brand}</p>
+                    <h3 style={styles.name}>{product.name}</h3>
+                    <p style={styles.productType}>{product.productType}</p>
+                    <StarRating rating={product.rating} size={14} />
+                    <p style={styles.price}>${product.price}</p>
+                  </div>
+                </motion.article>
+              ))
+            )}
+          </main>
+        </div>
+
+        <style>{`
+          @media (max-width: 768px) {
+            .brands-layout { flex-direction: column !important; }
+            .brands-sidebar { width: 100% !important; margin-bottom: 2rem; border-right: none !important; padding-right: 0 !important; }
+            .brands-page-title { font-size: 2rem !important; }
+          }
+        `}</style>
+      </div>
+
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={onAddToCart}
+        />
+      )}
+    </>
+  );
+};
+
+const styles = {
+  container: { padding: '3rem 1.2rem', minHeight: '70vh' },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    borderBottom: '1px solid var(--color-bg-alt)',
+    paddingBottom: '1rem',
+    marginBottom: '2rem',
+  },
+  pageTitle: {
+    fontSize: '2.75rem',
+    fontFamily: 'var(--font-heading)',
+    fontWeight: 500,
+    margin: 0,
+    lineHeight: 1,
+    textTransform: 'none',
+  },
+  resultCount: { fontSize: '1rem', color: 'var(--color-text-light)', margin: 0 },
+  layout: { display: 'flex', gap: '3rem', alignItems: 'flex-start' },
+  sidebar: {
+    width: '220px',
+    flexShrink: 0,
+    paddingRight: '2rem',
+    borderRight: '1px solid var(--color-bg-alt)',
+  },
+  filterGroup: { marginBottom: 0 },
+  filterTitle: {
+    fontSize: '0.95rem',
+    fontWeight: 500,
+    marginBottom: '1.2rem',
+    fontFamily: 'var(--font-body)',
+    textTransform: 'none',
+  },
+  rangeInput: {
+    width: '100%',
+    cursor: 'pointer',
+    height: '4px',
+    backgroundColor: 'var(--color-bg-alt)',
+    accentColor: 'var(--color-primary)',
+  },
+  rangeLabels: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '0.85rem',
+    color: 'var(--color-text-light)',
+    marginTop: '0.8rem',
+    fontWeight: 400,
+  },
+  grid: {
+    flex: 1,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: '2rem',
+  },
+  emptyMessage: { fontSize: '1.1rem', marginTop: '2rem', color: 'var(--color-text-light)' },
+  card: { cursor: 'pointer', display: 'flex', flexDirection: 'column' },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: '1/1',
+    backgroundColor: '#f6f6f6',
+    marginBottom: '1rem',
+    overflow: 'hidden',
+  },
+  image: { width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.5s ease' },
+  info: { padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' },
+  cardBrand: {
+    fontSize: '0.7rem',
+    fontWeight: 600,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: 'var(--color-text-light)',
+    margin: 0,
+  },
+  name: { fontSize: '1.05rem', fontWeight: '500', fontFamily: 'var(--font-body)', margin: 0 },
+  productType: { fontSize: '0.8rem', color: 'var(--color-secondary)', margin: 0 },
+  price: { fontSize: '1.05rem', fontWeight: '500', marginTop: '0.25rem' },
+};
+
+export default Brands;
