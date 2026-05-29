@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './load-env.mjs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 

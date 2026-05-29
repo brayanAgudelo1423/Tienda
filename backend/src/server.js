@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '../scripts/load-env.mjs';
 import express from 'express';
 import cors from 'cors';
 import fs from 'node:fs';
