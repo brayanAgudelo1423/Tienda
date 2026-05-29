@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "render:start": "node scripts/start-production.mjs",
     "dev": "node --watch src/server.js",
     "seed": "node scripts/seed.mjs",
     "postinstall": "node -e \"console.log('OZONO backend listo')\""

@@ -26,14 +26,37 @@ GitHub Pages (frontend)  ──API──►  Render (backend + SQLite)
 - **Frontend:** React + Vite → rama `gh-pages` (automático al push en `main`).
 - **Backend:** Express en carpeta `backend/` → Render Blueprint (`render.yaml`).
 
-## Desplegar backend en Render (una vez)
+## Desplegar backend en Render (obligatorio para admin)
 
-1. [render.com](https://render.com) → **New → Blueprint**.
-2. Conecta `brayanagudelo1423-png/OZONO`.
-3. Espera el deploy de **ozono-api**.
-4. Verifica: https://ozono-api.onrender.com/api/health
+El backend **no se activa solo**: debes crearlo en Render una vez.
 
-El frontend ya apunta a esa API (`VITE_API_URL` en `.env.production`).
+### Opción A — Blueprint (recomendado)
+
+1. Abre: [render.com/deploy?repo=https://github.com/brayanagudelo1423-png/OZONO](https://render.com/deploy?repo=https://github.com/brayanagudelo1423-png/OZONO)
+2. Inicia sesión con GitHub y confirma el deploy.
+3. Espera 3–5 minutos hasta que el estado sea **Live**.
+4. Prueba: https://ozono-api.onrender.com/api/health  
+   Debe responder: `{"ok":true,"service":"ozono-backend",...}`
+
+### Opción B — Manual
+
+1. [dashboard.render.com](https://dashboard.render.com) → **New +** → **Web Service**.
+2. Conecta el repo **OZONO**.
+3. Configura:
+   - **Root Directory:** `backend`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm run render:start`
+   - **Health Check Path:** `/api/health`
+4. Variables de entorno:
+   - `FRONTEND_URL` = `https://brayanagudelo1423-png.github.io`
+   - `ADMIN_USER` = `admin`
+   - `ADMIN_PASSWORD` = `ozono2026`
+   - `JWT_SECRET` = (genera uno aleatorio)
+5. **Create Web Service**.
+
+El frontend ya apunta a `https://ozono-api.onrender.com` (`VITE_API_URL`).
+
+> En plan gratis, la API puede tardar ~30 s en responder si estuvo inactiva.
 
 ## Desarrollo local
 

@@ -4,10 +4,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const dataPath = pathToFileURL(
-  path.join(__dirname, '..', '..', 'src', 'data.js')
-).href;
+const dataFile = path.join(__dirname, '..', '..', 'src', 'data.js');
+const { existsSync } = await import('node:fs');
 
+if (!existsSync(dataFile)) {
+  console.error('No se encontró src/data.js. Verifica que el repo completo esté en Render.');
+  process.exit(1);
+}
+
+const dataPath = pathToFileURL(dataFile).href;
 const { products, NAV_BRANDS } = await import(dataPath);
 
 const {

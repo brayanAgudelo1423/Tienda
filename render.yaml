@@ -1,5 +1,5 @@
-# Despliegue en Render: https://dashboard.render.com
-# New → Blueprint → conectar repo brayanagudelo1423-png/OZONO
+# Render Blueprint — repo: brayanagudelo1423-png/OZONO
+# Crear: https://dashboard.render.com → New → Blueprint
 
 services:
   - type: web
@@ -8,7 +8,7 @@ services:
     rootDir: backend
     plan: free
     buildCommand: npm install
-    startCommand: npm run seed && npm start
+    startCommand: npm run render:start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
