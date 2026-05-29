@@ -1,3 +1,5 @@
+import { imageUrl, hugoBossImageUrl } from './utils/assets.js';
+
 export const NAV_BRANDS = [
   { name: 'Hugo Boss', slug: 'hugo-boss' },
   { name: 'Lacoste', slug: 'lacoste' },
@@ -41,9 +43,21 @@ const TOMI_IMAGE_FILES = [
 const NOVEDADES_IMAGE_FILES = [
   'Billeteras Fossil.jpeg',
   'Bolso Coach Cafe Dama.jpeg',
+  'Bolso Coach Negro Ref1.jpeg',
+  'Bolso Tory Burch Blanca Ref1.jpeg',
+  'Bolso Tory Burch Negro Ref1.jpeg',
+  'Bolso Tory Burch Negro Ref2.jpeg',
+  'Bolso Tory Burch Negro Ref3.jpeg',
+  'Bolso Tory Burch Rojo Ref1.jpeg',
+  'Bolso Tory Burch Rosado Ref1.jpeg',
+  'Bolsos Tory Burch.jpeg',
+  'Buso Under Ref1.jpeg',
   'Chaqueta Jordan Ref1.jpeg',
   'Chaqueta Nike Pastel Ref1.jpeg',
+  'Chaqueta Nike Vino Ref1.jpeg',
+  'Chaqueta The North Face Negra Ref1.jpeg',
   'Chaqueta Under Armour Ref1.jpeg',
+  'Chaqueta Under negra Ref1.jpeg',
   'Gafas Burberry.jpeg',
   'Gafas Prada.jpeg',
   'Gafas RayBan Cafe Ref1.jpeg',
@@ -51,9 +65,23 @@ const NOVEDADES_IMAGE_FILES = [
   'Gafas RayBan Negras Ref1.jpeg',
   'Gafas RayBan Negras Ref2.jpeg',
   'Gafas Versace.jpeg',
+  'Gorra Under Azul Ref1.jpeg',
+  'Gorra Under Blanca Ref1.jpeg',
+  'Gorra Under Cafe Ref1.jpeg',
+  'Gorra Under Negra Ref1.jpeg',
   'Polo Michael Kors Cafe Ref1.jpeg',
+  'Polo Nautica Roja.jpeg',
+  'Polo Puma Ferrari.jpeg',
+  'Riñonera Coach Negra.jpeg',
+  'Riñonera Coach Ref1.jpeg',
+  'Tennis Adidas Azul Ref1.jpeg',
   'Tennis Adidas Mujer Ref1.jpeg',
+  'Tennis Adidas mujer Ref2.jpeg',
+  'Tennis Lacoste Ref2.jpeg',
+  'Tennis Nike Azul Ref1.jpeg',
   'Tennis Nike Ref1.jpeg',
+  'Tennis Nike Ref2.jpeg',
+  'Tennis Samba Ref1.jpeg',
 ];
 
 const CALVIN_KLEIN_IMAGE_FILES = [
@@ -82,8 +110,6 @@ const BUNNY_IMAGE_FILES = [
   'Camiseta Psycho Bunny Verde Ref1.jpeg',
 ];
 
-const imageUrl = (folder, filename) => `/images/${encodeURIComponent(folder)}/${encodeURIComponent(filename)}`;
-
 const inferFromFilename = (filename) => {
   const lower = filename.toLowerCase();
   const productType = (() => {
@@ -96,7 +122,10 @@ const inferFromFilename = (filename) => {
     if (lower.includes('zapatos')) return 'Zapatos';
     if (lower.includes('gafas')) return 'Gafas';
     if (lower.includes('billeteras')) return 'Billetera';
-    if (lower.includes('bolso')) return 'Bolso';
+    if (lower.includes('bolso') || lower.includes('riñonera') || lower.includes('rionera'))
+      return 'Bolso';
+    if (lower.includes('gorra')) return 'Gorra';
+    if (lower.includes('buso')) return 'Buso';
     if (lower.includes('sandalias')) return 'Sandalias';
     if (lower.includes('chanclas')) return 'Chanclas';
     return 'Producto';
@@ -106,7 +135,10 @@ const inferFromFilename = (filename) => {
     if (['tennis', 'zapatos', 'sandalias', 'chanclas'].some((k) => lower.includes(k))) return 'Calzado';
     if (lower.includes('gafas')) return 'Accesorios';
     if (lower.includes('billeteras')) return 'Accesorios';
-    if (lower.includes('bolso')) return 'Accesorios';
+    if (lower.includes('bolso') || lower.includes('riñonera') || lower.includes('rionera'))
+      return 'Accesorios';
+    if (lower.includes('gorra')) return 'Accesorios';
+    if (lower.includes('buso')) return 'Buzos';
     if (lower.includes('chaqueta')) return 'Chaquetas';
     if (lower.includes('conjunto')) return 'Conjuntos';
     if (lower.includes('polo')) return 'Polos';
@@ -117,7 +149,13 @@ const inferFromFilename = (filename) => {
 
   const sizes = (() => {
     if (['tennis', 'zapatos', 'sandalias', 'chanclas'].some((k) => lower.includes(k))) return SHOE_SIZES;
-    if (['gafas', 'billeteras', 'bolso'].some((k) => lower.includes(k))) return ['ÚNICA'];
+    if (
+      ['gafas', 'billeteras', 'bolso', 'gorra', 'riñonera', 'rionera'].some((k) =>
+        lower.includes(k)
+      )
+    )
+      return ['ÚNICA'];
+    if (lower.includes('buso')) return CLOTHING_SIZES;
     return CLOTHING_SIZES;
   })();
 
@@ -185,8 +223,6 @@ const HUGO_BOSS_IMAGE_FILES = [
   'Zapatos HUGO Rojos.jpeg',
   'Zapatos HUGO.jpeg',
 ];
-
-const hugoBossImageUrl = (filename) => `/images/hugo%20boss/${encodeURIComponent(filename)}`;
 
 const inferHugoBossProductType = (filename) => {
   const lower = filename.toLowerCase();

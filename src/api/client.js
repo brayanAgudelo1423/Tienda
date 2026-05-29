@@ -1,3 +1,5 @@
+import { assetUrl } from '../utils/assets.js';
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getAdminToken() {
@@ -70,6 +72,13 @@ export const api = {
 export function mediaUrl(path) {
   if (!path) return '';
   if (path.startsWith('http')) return path;
+  if (path.startsWith('/uploads') || path.startsWith('uploads')) {
+    const uploadsPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_BASE}${uploadsPath}`;
+  }
+  if (path.startsWith('/images') || path.startsWith('images')) {
+    return assetUrl(path);
+  }
   return `${API_BASE}${path}`;
 }
 

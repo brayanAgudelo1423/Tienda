@@ -1,32 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { imageUrl, hugoBossImageUrl } from '../utils/assets';
 
 const HERO_IMAGES = [
+  { src: imageUrl('Novedades', 'Polo Michael Kors Cafe Ref1.jpeg'), alt: 'Polo Michael Kors' },
+  { src: imageUrl('CK', 'Polo CK Negra Ref1.jpeg'), alt: 'Polo Calvin Klein' },
+  { src: imageUrl('Novedades', 'Chaqueta Jordan Ref1.jpeg'), alt: 'Chaqueta Jordan' },
+  { src: imageUrl('Tomi', 'Polo Tomi Azul Ref1.jpeg'), alt: 'Polo Tomi' },
   {
-    src: '/images/Novedades/Polo%20Michael%20Kors%20Cafe%20Ref1.jpeg',
-    alt: 'Polo Michael Kors',
-  },
-  {
-    src: '/images/CK/Polo%20CK%20Negra%20Ref1.jpeg',
-    alt: 'Polo Calvin Klein',
-  },
-  {
-    src: '/images/Novedades/Chaqueta%20Jordan%20Ref1.jpeg',
-    alt: 'Chaqueta Jordan',
-  },
-  {
-    src: '/images/Tomi/Polo%20Tomi%20Azul%20Ref1.jpeg',
-    alt: 'Polo Tomi',
-  },
-  {
-    src: '/images/Lacoste/Conjunto%20o%20separado%20Lacoste%20Azul.jpeg',
+    src: imageUrl('Lacoste', 'Conjunto o separado Lacoste Azul.jpeg'),
     alt: 'Conjunto Lacoste Azul',
   },
-  {
-    src: '/images/hugo%20boss/Conjunto%20Boss.jpeg',
-    alt: 'Conjunto Boss',
-  },
+  { src: hugoBossImageUrl('Conjunto Boss.jpeg'), alt: 'Conjunto Boss' },
 ];
 
 const Hero = () => {
