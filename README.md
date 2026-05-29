@@ -56,18 +56,29 @@ El backend **no se activa solo**: debes crearlo en Render una vez.
 
 El frontend ya apunta a `https://ozono.onrender.com` (`VITE_API_URL`).
 
-### Si el servicio en Render no arranca
+### Si ves `Missing script: "start"` en Render
 
-En el dashboard de Render → servicio **ozono** → **Settings**, verifica:
+Render está en la carpeta equivocada. Usa **una** de estas dos opciones:
 
-| Campo | Valor correcto |
-|-------|----------------|
+**Opción 1 (recomendada)** — Root Directory = `backend`:
+
+| Campo | Valor |
+|-------|--------|
 | Root Directory | `backend` |
 | Build Command | `npm install && npm run seed` |
 | Start Command | `npm start` |
 | Health Check Path | `/api/health` |
 
-Luego **Manual Deploy → Deploy latest commit**. Revisa **Logs** si falla el build.
+**Opción 2** — Root Directory vacío (raíz del repo):
+
+| Campo | Valor |
+|-------|--------|
+| Root Directory | *(vacío)* |
+| Build Command | `npm run render:build` |
+| Start Command | `npm start` |
+| Health Check Path | `/api/health` |
+
+Luego **Manual Deploy → Deploy latest commit**.
 
 > En plan gratis, la API puede tardar ~30 s en responder si estuvo inactiva.
 
