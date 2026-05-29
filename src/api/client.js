@@ -16,14 +16,21 @@ async function request(path, options = {}) {
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-    body:
-      options.body instanceof FormData || options.body === undefined
-        ? options.body
-        : JSON.stringify(options.body),
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+      body:
+        options.body instanceof FormData || options.body === undefined
+          ? options.body
+          : JSON.stringify(options.body),
+    });
+  } catch {
+    throw new Error(
+      'No se pudo conectar con el servidor. Activa la API en Render (ozono-api) y espera 1 minuto.'
+    );
+  }
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

@@ -25,13 +25,22 @@ const allowedOrigins = new Set(
   ].filter(Boolean)
 );
 
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.has(origin)) return true;
+  if (origin.includes('github.io')) return true;
+  if (/^http:\/\/localhost:\d+$/.test(origin)) return true;
+  if (/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) return true;
+  return false;
+}
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Origen no permitido por CORS'));
+        callback(new Error(`Origen no permitido por CORS: ${origin}`));
       }
     },
     credentials: true,
@@ -42,7 +51,12 @@ app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'ozono-backend' });
+  res.json({
+    ok: true,
+    service: 'ozono-backend',
+    currency: 'COP',
+    frontend: process.env.FRONTEND_URL || null,
+  });
 });
 
 app.use('/api/auth', authRoutes);
@@ -58,5 +72,5 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`OZONO API escuchando en puerto ${PORT}`);
+  console.log(`OZONO API escuchando en puerto ${PORT} (COP)`);
 });

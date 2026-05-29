@@ -1,21 +1,39 @@
-# OZONO — Tienda + Admin (Colombia)
+# OZONO — Tienda + Admin (Colombia, COP)
 
-Tienda web con panel de administración. El frontend se publica en GitHub Pages y la API en Render.
+Tienda web y panel de administración. Precios en **pesos colombianos (COP)**.
 
-## Sitio en vivo
+## Sitios en vivo
 
-- **Tienda:** https://brayanagudelo1423-png.github.io/OZONO/
-- **Admin:** https://brayanagudelo1423-png.github.io/OZONO/admin
-- **API:** https://ozono-api.onrender.com
+| Servicio | URL |
+|----------|-----|
+| Tienda | https://brayanagudelo1423-png.github.io/OZONO/ |
+| Admin | https://brayanagudelo1423-png.github.io/OZONO/admin |
+| API (Render) | https://ozono-api.onrender.com |
 
-## Credenciales admin
+**Login admin:** footer → **Ayuda → Ozono** (o `/admin`)
 
-| Campo | Valor |
-|--------|--------|
-| Usuario | `admin` |
-| Contraseña | `ozono2026` |
+| Usuario | Contraseña |
+|---------|------------|
+| `admin` | `ozono2026` |
 
-En el footer: **Ayuda → Ozono** para iniciar sesión.
+## Arquitectura
+
+```
+GitHub Pages (frontend)  ──API──►  Render (backend + SQLite)
+     /OZONO/                         ozono-api.onrender.com
+```
+
+- **Frontend:** React + Vite → rama `gh-pages` (automático al push en `main`).
+- **Backend:** Express en carpeta `backend/` → Render Blueprint (`render.yaml`).
+
+## Desplegar backend en Render (una vez)
+
+1. [render.com](https://render.com) → **New → Blueprint**.
+2. Conecta `brayanagudelo1423-png/OZONO`.
+3. Espera el deploy de **ozono-api**.
+4. Verifica: https://ozono-api.onrender.com/api/health
+
+El frontend ya apunta a esa API (`VITE_API_URL` en `.env.production`).
 
 ## Desarrollo local
 
@@ -29,8 +47,6 @@ npm run seed
 npm run dev
 ```
 
-API: http://localhost:3001
-
 ### Frontend
 
 ```bash
@@ -38,32 +54,17 @@ npm install
 npm run dev
 ```
 
-Tienda: http://localhost:5173 (el proxy de Vite conecta `/api` al backend).
+Tienda: http://localhost:5173 (proxy `/api` → backend).
 
-## Despliegue (una vez)
+## Precios (COP)
 
-### 1. API en Render
+- La tienda muestra precios con formato colombiano (`$ 189.000`, etc.).
+- El catálogo inicial se siembra en COP desde `src/data.js`.
+- En el admin, ingresa precios en pesos (ej. `189000`).
 
-1. Entra a [render.com](https://render.com) e inicia sesión con GitHub.
-2. **New → Blueprint** y conecta el repo `brayanagudelo1423-png/OZONO`.
-3. Render leerá `render.yaml` y creará el servicio **ozono-api**.
-4. Espera a que el deploy termine (la URL será `https://ozono-api.onrender.com`).
+## Estructura del repo
 
-### 2. Frontend en GitHub Pages
-
-Ya está configurado: cada push a `main` compila y publica en la rama `gh-pages`.
-
-En **Settings → Pages**, origen: rama **gh-pages**, carpeta **/ (root)**.
-
-El build usa `.env.production` con `VITE_API_URL=https://ozono-api.onrender.com`.
-
-### Sincronización tienda ↔ admin
-
-- La tienda carga productos desde la API.
-- Cada cambio en el admin actualiza la base de datos al instante.
-- La tienda se refresca al volver a la pestaña y cada 30 segundos.
-
-## Estructura
-
-- `src/` — React (tienda + admin)
-- `backend/` — API Node.js, SQLite, subida de fotos
+- `src/` — Frontend React (tienda + admin)
+- `backend/` — API Node.js
+- `render.yaml` — Configuración Render
+- `public/images/` — Fotos del catálogo (107 imágenes)

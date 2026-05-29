@@ -1,3 +1,5 @@
+import { toCopPrice } from './utils/currency.js';
+
 export const NAV_BRANDS = [
   { name: 'Hugo Boss', slug: 'hugo-boss' },
   { name: 'Lacoste', slug: 'lacoste' },
@@ -326,7 +328,7 @@ const hugoBossProducts = HUGO_BOSS_IMAGE_FILES.map((filename, index) => {
   };
 });
 
-export const products = [
+const catalogProducts = [
   ...LACOSTE_IMAGE_FILES.map((filename, index) => {
     const meta = inferFromFilename(filename);
     const url = imageUrl('Lacoste', filename);
@@ -425,7 +427,14 @@ export const products = [
   ...hugoBossProducts,
 ];
 
+/** Catálogo con precios en COP (pesos colombianos) */
+export const products = catalogProducts.map((p) => ({
+  ...p,
+  price: toCopPrice(p.price),
+}));
+
 export const getBrandBySlug = (slug) =>
+
   NAV_BRANDS.find((b) => b.slug === slug)?.name ?? null;
 
 export { getCartItemId } from './utils/product.js';

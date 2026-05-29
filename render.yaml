@@ -1,14 +1,20 @@
+# Despliegue en Render: https://dashboard.render.com
+# New → Blueprint → conectar repo brayanagudelo1423-png/OZONO
+
 services:
   - type: web
     name: ozono-api
     runtime: node
     rootDir: backend
+    plan: free
     buildCommand: npm install
     startCommand: npm run seed && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "20"
+      - key: NODE_ENV
+        value: production
       - key: FRONTEND_URL
         value: https://brayanagudelo1423-png.github.io
       - key: JWT_SECRET

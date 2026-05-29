@@ -17,12 +17,6 @@ const {
   default: db,
 } = await import('../src/db.js');
 
-const COP_MULTIPLIER = 4000;
-
-function toCop(usdLikePrice) {
-  return Math.round(Number(usdLikePrice) * COP_MULTIPLIER);
-}
-
 if (getProductCount() > 0) {
   console.log('La base de datos ya tiene productos. Seed omitido.');
   process.exit(0);
@@ -45,7 +39,7 @@ for (const p of products) {
     brand: p.brand,
     brandSlug,
     productType: p.productType,
-    price: toCop(p.price),
+    price: p.price,
     category: p.category,
     rating: p.rating,
     reviewCount: p.reviewCount,

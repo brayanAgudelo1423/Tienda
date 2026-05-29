@@ -1,12 +1,35 @@
-# OZONO Backend
+# OZONO Backend — API (Colombia, COP)
 
-API y panel de administración para la tienda OZONO (Colombia — precios en COP).
+API Node.js + SQLite para la tienda OZONO. Precios en **pesos colombianos (COP)**.
 
-## Requisitos
+## Despliegue en Render
 
-- Node.js 18+
+1. [render.com](https://render.com) → inicia sesión con GitHub.
+2. **New → Blueprint**.
+3. Repo: `brayanagudelo1423-png/OZONO`.
+4. Render lee `render.yaml` en la raíz y crea **ozono-api**.
+5. Cuando termine, la URL será: **https://ozono-api.onrender.com**
 
-## Instalación
+Comprueba: `https://ozono-api.onrender.com/api/health` → `{"ok":true,...}`
+
+### Variables en Render (automáticas vía `render.yaml`)
+
+| Variable | Uso |
+|----------|-----|
+| `FRONTEND_URL` | CORS — GitHub Pages |
+| `JWT_SECRET` | Sesión admin |
+| `ADMIN_USER` / `ADMIN_PASSWORD` | Login admin |
+| `PORT` | Lo asigna Render |
+
+### Frontend conectado
+
+El frontend en GitHub Pages usa:
+
+`VITE_API_URL=https://ozono-api.onrender.com`
+
+(definido en `.env.production` y en el workflow de deploy).
+
+## Desarrollo local
 
 ```bash
 cd backend
@@ -16,38 +39,24 @@ npm run seed
 npm run dev
 ```
 
-La API queda en `http://localhost:3001`.
+API: http://localhost:3001
 
-## Credenciales admin (por defecto)
+## Credenciales admin
 
 - Usuario: `admin`
 - Contraseña: `ozono2026`
 
-Cámbialas en `.env` (`ADMIN_USER`, `ADMIN_PASSWORD`).
-
-## Panel admin (frontend)
-
-Con el backend y el frontend en marcha:
-
-`http://localhost:5173/admin`
-
-## Endpoints principales
+## Endpoints
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
+| GET | `/api/health` | Estado del servicio |
 | GET | `/api/products` | Productos activos (tienda) |
 | POST | `/api/sales` | Registrar venta |
 | POST | `/api/auth/login` | Login admin |
-| GET | `/api/products/admin/all` | Todos los productos (admin) |
-| POST | `/api/upload` | Subir foto (admin, multipart) |
+| GET | `/api/products/admin/all` | Productos (admin) |
+| POST | `/api/upload` | Subir foto (admin) |
 
-## Desarrollo con la tienda
+## Nota sobre datos en Render (plan free)
 
-En otra terminal:
-
-```bash
-cd OZONO
-npm run dev
-```
-
-Vite redirige `/api` y `/uploads` al backend.
+SQLite y fotos subidas viven en el disco del contenedor. Si Render redepliega, puede vaciarse la base; el comando `npm run seed` vuelve a cargar el catálogo inicial.
