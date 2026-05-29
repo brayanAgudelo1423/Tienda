@@ -1,33 +1,28 @@
 # OZONO Backend — API (Colombia, COP)
 
-API Node.js + SQLite para la tienda OZONO. Precios en **pesos colombianos (COP)**.
+API Node.js + SQLite. URL en producción: **https://ozono.onrender.com**
 
-## Despliegue en Render
+## Comprobar que está activa
 
-1. [render.com](https://render.com) → inicia sesión con GitHub.
-2. **New → Blueprint**.
-3. Repo: `brayanagudelo1423-png/OZONO`.
-4. Render lee `render.yaml` en la raíz y crea **ozono-api**.
-5. Cuando termine, la URL será: **https://ozono-api.onrender.com**
+- https://ozono.onrender.com/
+- https://ozono.onrender.com/api/health
+- https://ozono.onrender.com/api/products
 
-Comprueba: `https://ozono-api.onrender.com/api/health` → `{"ok":true,...}`
+## Configuración en Render (dashboard)
 
-### Variables en Render (automáticas vía `render.yaml`)
+| Campo | Valor |
+|-------|--------|
+| **Root Directory** | `backend` |
+| **Build Command** | `npm install && npm run seed` |
+| **Start Command** | `npm start` |
+| **Health Check Path** | `/api/health` |
 
-| Variable | Uso |
-|----------|-----|
-| `FRONTEND_URL` | CORS — GitHub Pages |
-| `JWT_SECRET` | Sesión admin |
-| `ADMIN_USER` / `ADMIN_PASSWORD` | Login admin |
-| `PORT` | Lo asigna Render |
+Variables de entorno:
 
-### Frontend conectado
-
-El frontend en GitHub Pages usa:
-
-`VITE_API_URL=https://ozono-api.onrender.com`
-
-(definido en `.env.production` y en el workflow de deploy).
+- `FRONTEND_URL` = `https://brayanagudelo1423-png.github.io`
+- `ADMIN_USER` = `admin`
+- `ADMIN_PASSWORD` = `ozono2026`
+- `JWT_SECRET` = (texto aleatorio largo)
 
 ## Desarrollo local
 
@@ -45,18 +40,3 @@ API: http://localhost:3001
 
 - Usuario: `admin`
 - Contraseña: `ozono2026`
-
-## Endpoints
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/health` | Estado del servicio |
-| GET | `/api/products` | Productos activos (tienda) |
-| POST | `/api/sales` | Registrar venta |
-| POST | `/api/auth/login` | Login admin |
-| GET | `/api/products/admin/all` | Productos (admin) |
-| POST | `/api/upload` | Subir foto (admin) |
-
-## Nota sobre datos en Render (plan free)
-
-SQLite y fotos subidas viven en el disco del contenedor. Si Render redepliega, puede vaciarse la base; el comando `npm run seed` vuelve a cargar el catálogo inicial.

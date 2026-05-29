@@ -8,7 +8,7 @@ Tienda web y panel de administración. Precios en **pesos colombianos (COP)**.
 |----------|-----|
 | Tienda | https://brayanagudelo1423-png.github.io/OZONO/ |
 | Admin | https://brayanagudelo1423-png.github.io/OZONO/admin |
-| API (Render) | https://ozono-api.onrender.com |
+| API (Render) | https://ozono.onrender.com |
 
 **Login admin:** footer → **Ayuda → Ozono** (o `/admin`)
 
@@ -20,7 +20,7 @@ Tienda web y panel de administración. Precios en **pesos colombianos (COP)**.
 
 ```
 GitHub Pages (frontend)  ──API──►  Render (backend + SQLite)
-     /OZONO/                         ozono-api.onrender.com
+     /OZONO/                         ozono.onrender.com
 ```
 
 - **Frontend:** React + Vite → rama `gh-pages` (automático al push en `main`).
@@ -35,7 +35,7 @@ El backend **no se activa solo**: debes crearlo en Render una vez.
 1. Abre: [render.com/deploy?repo=https://github.com/brayanagudelo1423-png/OZONO](https://render.com/deploy?repo=https://github.com/brayanagudelo1423-png/OZONO)
 2. Inicia sesión con GitHub y confirma el deploy.
 3. Espera 3–5 minutos hasta que el estado sea **Live**.
-4. Prueba: https://ozono-api.onrender.com/api/health  
+4. Prueba: https://ozono.onrender.com/api/health  
    Debe responder: `{"ok":true,"service":"ozono-backend",...}`
 
 ### Opción B — Manual
@@ -54,7 +54,20 @@ El backend **no se activa solo**: debes crearlo en Render una vez.
    - `JWT_SECRET` = (genera uno aleatorio)
 5. **Create Web Service**.
 
-El frontend ya apunta a `https://ozono-api.onrender.com` (`VITE_API_URL`).
+El frontend ya apunta a `https://ozono.onrender.com` (`VITE_API_URL`).
+
+### Si el servicio en Render no arranca
+
+En el dashboard de Render → servicio **ozono** → **Settings**, verifica:
+
+| Campo | Valor correcto |
+|-------|----------------|
+| Root Directory | `backend` |
+| Build Command | `npm install && npm run seed` |
+| Start Command | `npm start` |
+| Health Check Path | `/api/health` |
+
+Luego **Manual Deploy → Deploy latest commit**. Revisa **Logs** si falla el build.
 
 > En plan gratis, la API puede tardar ~30 s en responder si estuvo inactiva.
 

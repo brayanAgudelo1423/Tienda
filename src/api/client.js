@@ -28,7 +28,7 @@ async function request(path, options = {}) {
     });
   } catch {
     throw new Error(
-      'No se pudo conectar con el servidor. Activa la API en Render (ozono-api) y espera 1 minuto.'
+      'No se pudo conectar con el servidor. Verifica https://ozono.onrender.com/api/health y espera 1 minuto.'
     );
   }
 

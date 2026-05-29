@@ -3,12 +3,12 @@
 
 services:
   - type: web
-    name: ozono-api
+    name: ozono
     runtime: node
     rootDir: backend
     plan: free
-    buildCommand: npm install
-    startCommand: npm run render:start
+    buildCommand: npm install && npm run seed
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION

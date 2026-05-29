@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,7 +49,21 @@ app.use(
 );
 
 app.use(express.json({ limit: '2mb' }));
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
+app.get('/', (_req, res) => {
+  res.json({
+    ok: true,
+    service: 'ozono-backend',
+    message: 'API OZONO activa. Usa /api/health o /api/products',
+    currency: 'COP',
+  });
+});
 
 app.get('/api/health', (_req, res) => {
   res.json({
