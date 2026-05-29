@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { NAV_BRANDS } from '../data';
+import { useProducts } from '../context/ProductsContext';
 
 const BrandMarquee = () => {
-  const brandsLoop = [...NAV_BRANDS, ...NAV_BRANDS];
+  const { brands } = useProducts();
+  const brandsLoop = [...brands, ...brands];
 
   return (
     <section className="brand-marquee-section" style={styles.section}>

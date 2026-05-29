@@ -1,34 +1,36 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const HERO_IMAGES = [
   {
-    src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Zapatillas Nike',
+    src: '/images/Novedades/Polo%20Michael%20Kors%20Cafe%20Ref1.jpeg',
+    alt: 'Polo Michael Kors',
   },
   {
-    src: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Sneakers premium',
+    src: '/images/CK/Polo%20CK%20Negra%20Ref1.jpeg',
+    alt: 'Polo Calvin Klein',
   },
   {
-    src: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Chamarra de cuero',
+    src: '/images/Novedades/Chaqueta%20Jordan%20Ref1.jpeg',
+    alt: 'Chaqueta Jordan',
   },
   {
-    src: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Colección de moda',
+    src: '/images/Tomi/Polo%20Tomi%20Azul%20Ref1.jpeg',
+    alt: 'Polo Tomi',
   },
   {
-    src: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Estilo urbano',
+    src: '/images/Lacoste/Conjunto%20o%20separado%20Lacoste%20Azul.jpeg',
+    alt: 'Conjunto Lacoste Azul',
   },
   {
-    src: 'https://images.unsplash.com/photo-1483985988354-763728e3685b?w=1920&q=90&auto=format&fit=crop',
-    alt: 'Shopping premium',
+    src: '/images/hugo%20boss/Conjunto%20Boss.jpeg',
+    alt: 'Conjunto Boss',
   },
 ];
 
 const Hero = () => {
+  const navigate = useNavigate();
   const slides = [...HERO_IMAGES, ...HERO_IMAGES];
 
   return (
@@ -40,7 +42,7 @@ const Hero = () => {
               <img
                 src={image.src}
                 alt={image.alt}
-                className={`hero-living hero-living-${index % HERO_IMAGES.length}`}
+                className="hero-slide-fg"
                 loading={index < 3 ? 'eager' : 'lazy'}
               />
             </div>
@@ -58,13 +60,21 @@ const Hero = () => {
           style={styles.content}
         >
           <div style={styles.btnGroup}>
-            <button type="button" className="btn">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => navigate('/marcas/novedades')}
+            >
               Comprar Ahora
             </button>
             <button
               type="button"
               className="btn btn-outline"
               style={{ backgroundColor: '#fff', border: 'none' }}
+              onClick={() => {
+                const el = document.getElementById('novedades-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
             >
               Explorar OZONO
             </button>

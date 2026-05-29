@@ -5,6 +5,12 @@ import { cpSync } from 'node:fs'
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/OZONO/' : '/',
+  server: {
+    proxy: {
+      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+    },
+  },
   plugins: [
     react(),
     {

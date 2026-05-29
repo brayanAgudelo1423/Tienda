@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { products, getBrandBySlug } from '../data';
+import { useProducts } from '../context/ProductsContext';
+import { getBrandBySlug } from '../utils/product';
+import { formatCOP } from '../utils/currency';
+import { mediaUrl } from '../api/client';
 import { motion } from 'framer-motion';
 import ProductDetail from '../components/ProductDetail';
 import StarRating from '../components/StarRating';
@@ -8,17 +11,18 @@ import StarRating from '../components/StarRating';
 const Brands = ({ onAddToCart }) => {
   const { brandSlug } = useParams();
   const [hoveredProduct, setHoveredProduct] = useState(null);
-  const [maxPrice, setMaxPrice] = useState(500);
+  const [maxPrice, setMaxPrice] = useState(500000);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const activeBrand = getBrandBySlug(brandSlug);
+  const { products, brands } = useProducts();
+  const activeBrand = getBrandBySlug(brands, brandSlug);
 
   if (!activeBrand) {
-    return <Navigate to="/marcas/nike" replace />;
+    return <Navigate to="/marcas/lacoste" replace />;
   }
 
   const brandProducts = products.filter((p) => p.brand === activeBrand);
-  const maxProductPrice = Math.max(...brandProducts.map((p) => p.price), 500);
+  const maxProductPrice = Math.max(...brandProducts.map((p) => p.price), 500000);
   const filteredProducts = brandProducts.filter((product) => product.price <= maxPrice);
 
   return (
@@ -34,23 +38,23 @@ const Brands = ({ onAddToCart }) => {
         <div className="brands-layout" style={styles.layout}>
           <aside className="brands-sidebar" style={styles.sidebar}>
             <div style={styles.filterGroup}>
-              <h3 style={styles.filterTitle}>Precio máximo: ${maxPrice}</h3>
+              <h3 style={styles.filterTitle}>Precio máximo: {formatCOP(maxPrice)}</h3>
               <input
                 type="range"
-                min="50"
+                min="50000"
                 max={maxProductPrice}
                 value={Math.min(maxPrice, maxProductPrice)}
                 onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))}
                 style={styles.rangeInput}
               />
               <div style={styles.rangeLabels}>
-                <span>$50</span>
-                <span>${maxProductPrice}</span>
+                <span>{formatCOP(50000)}</span>
+                <span>{formatCOP(maxProductPrice)}</span>
               </div>
             </div>
           </aside>
 
-          <main style={styles.grid}>
+          <main style={styles.grid} className="product-grid">
             {filteredProducts.length === 0 ? (
               <p style={styles.emptyMessage}>
                 No hay productos de {activeBrand} en este rango de precio.
@@ -70,11 +74,22 @@ const Brands = ({ onAddToCart }) => {
                   role="button"
                   tabIndex={0}
                 >
-                  <div style={styles.imageContainer}>
+                  <div style={styles.imageContainer} className="product-card-image">
                     <img
-                      src={hoveredProduct === product.id ? product.hoverImage : product.image}
+                      src={mediaUrl(product.image)}
+                      alt=""
+                      aria-hidden="true"
+                      style={styles.bgImage}
+                      className="product-card-bg"
+                      loading="lazy"
+                    />
+                    <img
+                      src={mediaUrl(
+                        hoveredProduct === product.id ? product.hoverImage : product.image
+                      )}
                       alt={product.name}
                       style={styles.image}
+                      className="product-card-fg"
                     />
                   </div>
                   <div style={styles.info}>
@@ -82,7 +97,7 @@ const Brands = ({ onAddToCart }) => {
                     <h3 style={styles.name}>{product.name}</h3>
                     <p style={styles.productType}>{product.productType}</p>
                     <StarRating rating={product.rating} size={14} />
-                    <p style={styles.price}>${product.price}</p>
+                    <p style={styles.price}>{formatCOP(product.price)}</p>
                   </div>
                 </motion.article>
               ))
@@ -95,6 +110,7 @@ const Brands = ({ onAddToCart }) => {
             .brands-layout { flex-direction: column !important; }
             .brands-sidebar { width: 100% !important; margin-bottom: 2rem; border-right: none !important; padding-right: 0 !important; }
             .brands-page-title { font-size: 2rem !important; }
+            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 1rem !important; }
           }
         `}</style>
       </div>
@@ -169,12 +185,20 @@ const styles = {
   card: { cursor: 'pointer', display: 'flex', flexDirection: 'column' },
   imageContainer: {
     width: '100%',
-    aspectRatio: '1/1',
+    aspectRatio: '4/5',
     backgroundColor: '#f6f6f6',
     marginBottom: '1rem',
     overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
-  image: { width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.5s ease' },
+  bgImage: {
+    position: 'absolute',
+    inset: 0,
+  },
+  image: { width: '100%', height: '100%', objectFit: 'contain', transition: 'all 0.5s ease' },
   info: { padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   cardBrand: {
     fontSize: '0.7rem',

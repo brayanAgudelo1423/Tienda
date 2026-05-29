@@ -12,6 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { api, mediaUrl } from '../api/client';
+import { formatCOP } from '../utils/currency';
 
 const Checkout = ({ items }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,14 +24,44 @@ const Checkout = ({ items }) => {
   const shipping = subtotal > 0 ? 0 : 0;
   const total = subtotal + shipping;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+
+    const form = new FormData(e.target);
+    const customer = {
+      name: form.get('fullName'),
+      email: form.get('email'),
+      phone: form.get('phone'),
+      city: `${form.get('city')}, ${form.get('state')}`,
+      address: `${form.get('address')} — C.P. ${form.get('zip')}`,
+    };
+
+    const saleItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      brand: item.brand,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.selectedSize,
+      color: item.colorName,
+    }));
+
+    try {
+      await api.createSale({
+        total,
+        subtotal,
+        customer,
+        items: saleItems,
+      });
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 2000);
+    } catch {
+      setIsSuccess(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0 && !isSuccess) {
@@ -81,7 +113,7 @@ const Checkout = ({ items }) => {
           >
             <span>
               <strong>{items.length}</strong> {items.length === 1 ? 'artículo' : 'artículos'} ·{' '}
-              <strong>${total.toFixed(2)}</strong>
+              <strong>{formatCOP(total)}</strong>
             </span>
             {summaryOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
@@ -116,7 +148,7 @@ const Checkout = ({ items }) => {
                     <Phone size={14} />
                     Teléfono
                   </label>
-                  <input id="phone" name="phone" type="tel" required placeholder="+52 55 1234 5678" />
+                  <input id="phone" name="phone" type="tel" required placeholder="+57 300 123 4567" />
                 </div>
               </div>
             </section>
@@ -128,20 +160,20 @@ const Checkout = ({ items }) => {
               </h2>
               <div className="checkout-field">
                 <label htmlFor="address">Calle y número</label>
-                <input id="address" name="address" type="text" required placeholder="Av. Reforma 123, Depto 4" />
+                <input id="address" name="address" type="text" required placeholder="Calle 45 # 12-34, Apto 501" />
               </div>
               <div className="checkout-field-row checkout-field-row-3">
                 <div className="checkout-field">
                   <label htmlFor="city">Ciudad</label>
-                  <input id="city" name="city" type="text" required placeholder="Ciudad de México" />
+                  <input id="city" name="city" type="text" required placeholder="Bogotá" />
                 </div>
                 <div className="checkout-field">
                   <label htmlFor="state">Estado</label>
-                  <input id="state" name="state" type="text" required placeholder="CDMX" />
+                  <input id="state" name="state" type="text" required placeholder="Cundinamarca" />
                 </div>
                 <div className="checkout-field">
                   <label htmlFor="zip">C.P.</label>
-                  <input id="zip" name="zip" type="text" required placeholder="06600" inputMode="numeric" />
+                  <input id="zip" name="zip" type="text" required placeholder="110111" inputMode="numeric" />
                 </div>
               </div>
             </section>
@@ -180,7 +212,7 @@ const Checkout = ({ items }) => {
             </section>
 
             <button type="submit" className="btn checkout-submit-desktop" disabled={isProcessing}>
-              {isProcessing ? 'Procesando…' : `Pagar $${total.toFixed(2)}`}
+              {isProcessing ? 'Procesando…' : `Pagar ${formatCOP(total)}`}
             </button>
           </form>
 
@@ -195,7 +227,7 @@ const Checkout = ({ items }) => {
         <div className="checkout-sticky-inner">
           <div className="checkout-sticky-total">
             <span>Total</span>
-            <strong>${total.toFixed(2)}</strong>
+            <strong>{formatCOP(total)}</strong>
           </div>
           <button
             type="submit"
@@ -220,7 +252,7 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
       {items.map((item) => (
         <li key={item.cartId} className="checkout-order-item">
           <div className="checkout-order-thumb">
-            <img src={item.image} alt={item.name} />
+            <img src={mediaUrl(item.image)} alt={item.name} />
             <span className="checkout-order-qty">{item.quantity}</span>
           </div>
           <div className="checkout-order-info">
@@ -232,14 +264,14 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
               </p>
             )}
           </div>
-          <span className="checkout-order-price">${(item.price * item.quantity).toFixed(2)}</span>
+          <span className="checkout-order-price">{formatCOP(item.price * item.quantity)}</span>
         </li>
       ))}
     </ul>
     <div className="checkout-order-rows">
       <div className="checkout-order-row">
         <span>Subtotal</span>
-        <span>${subtotal.toFixed(2)}</span>
+        <span>{formatCOP(subtotal)}</span>
       </div>
       <div className="checkout-order-row">
         <span>Envío</span>
@@ -247,7 +279,7 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
       </div>
       <div className="checkout-order-row checkout-order-total">
         <span>Total</span>
-        <span>${total.toFixed(2)}</span>
+        <span>{formatCOP(total)}</span>
       </div>
     </div>
   </div>

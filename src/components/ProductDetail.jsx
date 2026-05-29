@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import StarRating from './StarRating';
+import { formatCOP } from '../utils/currency';
+import { mediaUrl } from '../api/client';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
+  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [error, setError] = useState('');
@@ -22,22 +26,36 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
   if (!product) return null;
 
-  const handleAdd = () => {
+  const buildCartItem = () => {
     if (!selectedSize) {
       setError('Selecciona una talla');
-      return;
+      return null;
     }
     if (!selectedColor) {
       setError('Selecciona un color');
-      return;
+      return null;
     }
-    onAddToCart({
+    return {
       ...product,
       selectedSize,
       selectedColor,
       colorName: product.colors.find((c) => c.hex === selectedColor)?.name ?? selectedColor,
-    });
+    };
+  };
+
+  const handleAdd = () => {
+    const item = buildCartItem();
+    if (!item) return;
+    onAddToCart(item);
     onClose();
+  };
+
+  const handleBuyNow = () => {
+    const item = buildCartItem();
+    if (!item) return;
+    onAddToCart(item);
+    onClose();
+    navigate('/checkout');
   };
 
   return (
@@ -66,7 +84,21 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
           <div className="product-detail-layout" style={styles.layout}>
             <div className="product-detail-image" style={styles.imageWrap}>
-              <img src={product.image} alt={product.name} style={styles.image} />
+              <img
+                src={mediaUrl(product.image)}
+                alt=""
+                aria-hidden="true"
+                style={styles.bgImage}
+                className="product-card-bg"
+              />
+              <img
+                src={mediaUrl(product.image)}
+                alt={product.name}
+                style={styles.image}
+                className="product-card-fg"
+                loading="eager"
+                decoding="async"
+              />
             </div>
 
             <div style={styles.content}>
@@ -79,7 +111,7 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
               <StarRating rating={product.rating} reviewCount={product.reviewCount} />
 
-              <p style={styles.price}>${product.price}</p>
+              <p style={styles.price}>{formatCOP(product.price)}</p>
               <p style={styles.description}>{product.description}</p>
 
               <div style={styles.optionGroup}>
@@ -140,9 +172,24 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
               {error && <p style={styles.error}>{error}</p>}
 
-              <button type="button" className="btn" style={styles.addBtn} onClick={handleAdd}>
-                Añadir a la bolsa
-              </button>
+              <div style={styles.actionsRow}>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ ...styles.actionBtn, ...styles.primaryAction }}
+                  onClick={handleBuyNow}
+                >
+                  Comprar ahora
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{ ...styles.actionBtn, ...styles.secondaryAction }}
+                  onClick={handleAdd}
+                >
+                  Agregar al carrito
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -150,10 +197,10 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
       <style>{`
         .product-detail-layout { display: flex; gap: 2.5rem; align-items: flex-start; }
-        .product-detail-image { flex: 0 0 42%; aspect-ratio: 1/1; }
+        .product-detail-image { flex: 0 0 42%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; }
         @media (max-width: 768px) {
           .product-detail-layout { flex-direction: column !important; }
-          .product-detail-image { flex: none !important; width: 100% !important; max-height: 300px !important; aspect-ratio: 4/3 !important; }
+          .product-detail-image { flex: none !important; width: 100% !important; max-height: 360px !important; aspect-ratio: 3/4 !important; }
         }
       `}</style>
     </AnimatePresence>
@@ -194,8 +241,19 @@ const styles = {
   imageWrap: {
     backgroundColor: 'var(--color-bg-alt)',
     overflow: 'hidden',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
   },
-  image: { width: '100%', height: '100%', objectFit: 'cover' },
+  bgImage: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+  },
+  image: { width: '100%', height: '100%', objectFit: 'contain' },
   content: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '0.5rem' },
   brand: {
     fontSize: '0.8rem',
@@ -258,7 +316,19 @@ const styles = {
   },
   colorName: { fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' },
   error: { color: '#c00', fontSize: '0.9rem', margin: '0.25rem 0' },
-  addBtn: { marginTop: '1rem', width: '100%', maxWidth: '280px' },
+  actionsRow: {
+    marginTop: '1.25rem',
+    display: 'flex',
+    gap: '0.75rem',
+    flexWrap: 'wrap',
+  },
+  actionBtn: {
+    flex: 1,
+    minWidth: '140px',
+    justifyContent: 'center',
+  },
+  primaryAction: {},
+  secondaryAction: { borderRadius: 30, border: '1px solid #ccc', backgroundColor: '#fff' },
 };
 
 export default ProductDetail;

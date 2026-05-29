@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { formatCOP } from '../utils/currency';
+import { mediaUrl } from '../api/client';
 
 const Cart = ({ items, onRemove }) => {
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -28,12 +30,12 @@ const Cart = ({ items, onRemove }) => {
             {items.map(item => (
               <motion.div key={item.cartId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={styles.item}>
                 <div className="cart-item-image" style={styles.imageContainer}>
-                  <img src={item.image} alt={item.name} style={styles.image} />
+                  <img src={mediaUrl(item.image)} alt={item.name} style={styles.image} />
                 </div>
                 <div style={styles.itemDetails}>
                   <div style={styles.itemHeader}>
                     <h3 style={styles.itemName}>{item.name}</h3>
-                    <p style={styles.itemPrice}>${item.price.toFixed(2)}</p>
+                    <p style={styles.itemPrice}>{formatCOP(item.price)}</p>
                   </div>
                   <p style={styles.itemBrand}>{item.brand}</p>
                   <p style={styles.itemMeta}>
@@ -55,7 +57,7 @@ const Cart = ({ items, onRemove }) => {
             <h2 style={styles.summaryTitle}>Resumen</h2>
             <div style={styles.summaryRow}>
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatCOP(subtotal)}</span>
             </div>
             <div style={styles.summaryRow}>
               <span>Envío y manipulación estimados</span>
@@ -63,7 +65,7 @@ const Cart = ({ items, onRemove }) => {
             </div>
             <div style={styles.summaryTotalRow}>
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatCOP(total)}</span>
             </div>
             <Link to="/checkout" style={{ width: '100%', marginTop: '2rem', display: 'block', textAlign: 'center' }} className="btn">
               Pasar por caja

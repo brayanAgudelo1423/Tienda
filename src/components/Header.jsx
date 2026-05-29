@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Heart, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NAV_BRANDS } from '../data';
+import { useProducts } from '../context/ProductsContext';
 
 const Header = ({ cartCount }) => {
+  const { brands } = useProducts();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -32,7 +33,7 @@ const Header = ({ cartCount }) => {
             <Link to="/">OZONO</Link>
           </div>
           <nav style={styles.nav} className="desktop-nav">
-            {NAV_BRANDS.map((brand) => (
+            {brands.map((brand) => (
               <Link
                 key={brand.slug}
                 to={`/marcas/${brand.slug}`}
@@ -84,7 +85,7 @@ const Header = ({ cartCount }) => {
               </button>
             </div>
             <nav style={styles.mobileNav}>
-              {NAV_BRANDS.map((brand) => (
+              {brands.map((brand) => (
                 <Link
                   key={brand.slug}
                   to={`/marcas/${brand.slug}`}
