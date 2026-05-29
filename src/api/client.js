@@ -72,14 +72,22 @@ export const api = {
 export function mediaUrl(path) {
   if (!path) return '';
   if (path.startsWith('http')) return path;
+
+  const base = import.meta.env.BASE_URL || '/';
+  if (base !== '/' && path.startsWith(base)) return path;
+
   if (path.startsWith('/uploads') || path.startsWith('uploads')) {
     const uploadsPath = path.startsWith('/') ? path : `/${path}`;
     return `${API_BASE}${uploadsPath}`;
   }
-  if (path.startsWith('/images') || path.startsWith('images')) {
-    return assetUrl(path);
+
+  const imagesIdx = path.indexOf('/images/');
+  if (path.startsWith('/images') || path.startsWith('images') || imagesIdx !== -1) {
+    const rel = imagesIdx !== -1 ? path.slice(imagesIdx + 1) : path.startsWith('/') ? path.slice(1) : path;
+    return assetUrl(rel);
   }
-  return `${API_BASE}${path}`;
+
+  return assetUrl(path.startsWith('/') ? path.slice(1) : path);
 }
 
 export function setAdminToken(token) {

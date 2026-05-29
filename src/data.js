@@ -1,5 +1,3 @@
-import { imageUrl, hugoBossImageUrl } from './utils/assets.js';
-
 export const NAV_BRANDS = [
   { name: 'Hugo Boss', slug: 'hugo-boss' },
   { name: 'Lacoste', slug: 'lacoste' },
@@ -109,6 +107,12 @@ const BUNNY_IMAGE_FILES = [
   'Camiseta Psycho Bunny Roja Ref1.jpeg',
   'Camiseta Psycho Bunny Verde Ref1.jpeg',
 ];
+
+const imageUrl = (folder, filename) =>
+  `/images/${encodeURIComponent(folder)}/${encodeURIComponent(filename)}`;
+
+const hugoBossImageUrl = (filename) =>
+  `/images/hugo%20boss/${encodeURIComponent(filename)}`;
 
 const inferFromFilename = (filename) => {
   const lower = filename.toLowerCase();
