@@ -4,6 +4,14 @@ import { products as staticProducts, NAV_BRANDS as staticBrands } from '../data'
 
 const ProductsContext = createContext(null);
 
+function isGitHubPages() {
+  return (
+    typeof window !== 'undefined' &&
+    window.location.hostname.includes('github.io') &&
+    window.location.pathname.toLowerCase().startsWith('/ozono')
+  );
+}
+
 export function ProductsProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState(staticBrands);
@@ -12,6 +20,15 @@ export function ProductsProvider({ children }) {
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
+
+    if (isGitHubPages()) {
+      setProducts(staticProducts);
+      setBrands(staticBrands);
+      setUsingApi(false);
+      setLoading(false);
+      return;
+    }
+
     try {
       const [apiProducts, apiBrands] = await Promise.all([
         api.getProducts(),

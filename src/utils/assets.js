@@ -1,8 +1,17 @@
-/** Ruta pública con prefijo de despliegue (GitHub Pages: /OZONO/) */
+/** Base pública: en GitHub Pages siempre /OZONO/ */
+export function getPublicBase() {
+  if (typeof window !== 'undefined') {
+    const { hostname, pathname } = window.location;
+    if (hostname.includes('github.io') && pathname.toLowerCase().startsWith('/ozono')) {
+      return '/OZONO/';
+    }
+  }
+  return import.meta.env.BASE_URL || '/';
+}
+
 export function assetUrl(path) {
   const clean = path.startsWith('/') ? path.slice(1) : path;
-  const base = import.meta.env.BASE_URL || '/';
-  return `${base}${clean}`;
+  return `${getPublicBase()}${clean}`;
 }
 
 export function imageUrl(folder, filename) {
@@ -11,4 +20,15 @@ export function imageUrl(folder, filename) {
 
 export function hugoBossImageUrl(filename) {
   return assetUrl(`images/hugo%20boss/${encodeURIComponent(filename)}`);
+}
+
+/** Normaliza rutas /images/... con cada segmento bien codificado */
+export function normalizeStoreImagePath(path) {
+  const imagesIdx = path.indexOf('/images/');
+  const raw =
+    imagesIdx !== -1
+      ? path.slice(imagesIdx + 8)
+      : path.replace(/^\/?images\/?/, '');
+  const parts = raw.split('/').filter(Boolean).map((p) => encodeURIComponent(decodeURIComponent(p)));
+  return assetUrl(`images/${parts.join('/')}`);
 }

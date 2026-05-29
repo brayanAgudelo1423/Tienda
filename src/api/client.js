@@ -1,4 +1,4 @@
-import { assetUrl } from '../utils/assets.js';
+import { assetUrl, getPublicBase, normalizeStoreImagePath } from '../utils/assets.js';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -71,20 +71,22 @@ export const api = {
 
 export function mediaUrl(path) {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
 
-  const base = import.meta.env.BASE_URL || '/';
+  if (path.startsWith('http')) {
+    if (path.includes('/images/')) return normalizeStoreImagePath(path);
+    return path;
+  }
+
+  const base = getPublicBase();
   if (base !== '/' && path.startsWith(base)) return path;
 
   if (path.startsWith('/uploads') || path.startsWith('uploads')) {
     const uploadsPath = path.startsWith('/') ? path : `/${path}`;
-    return `${API_BASE}${uploadsPath}`;
+    return API_BASE ? `${API_BASE}${uploadsPath}` : assetUrl(uploadsPath.replace(/^\//, ''));
   }
 
-  const imagesIdx = path.indexOf('/images/');
-  if (path.startsWith('/images') || path.startsWith('images') || imagesIdx !== -1) {
-    const rel = imagesIdx !== -1 ? path.slice(imagesIdx + 1) : path.startsWith('/') ? path.slice(1) : path;
-    return assetUrl(rel);
+  if (path.includes('/images/') || path.startsWith('/images') || path.startsWith('images')) {
+    return normalizeStoreImagePath(path);
   }
 
   return assetUrl(path.startsWith('/') ? path.slice(1) : path);

@@ -25,6 +25,8 @@ jobs:
         run: |
           npm ci
           npm run build
+          test -d dist/images
+          echo "Imagenes en dist: $(find dist/images -type f | wc -l)"
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
