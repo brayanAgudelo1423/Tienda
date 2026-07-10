@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/init-db.mjs",
+    "build": "echo OZONO: dependencias instaladas, DB se inicializa al arrancar",
     "start": "node src/server.js",
     "render:start": "node scripts/start-production.mjs",
     "init-db": "node scripts/init-db.mjs",
