@@ -7,6 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "build": "npm run seed && npm run seed:lociones",
     "start": "npm ci --omit=dev 2>/dev/null || npm install && node src/server.js",
     "render:start": "npm ci --omit=dev 2>/dev/null || npm install && node scripts/start-production.mjs",
     "dev": "node --watch src/server.js",
