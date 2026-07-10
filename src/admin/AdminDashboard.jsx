@@ -57,6 +57,13 @@ const AdminDashboard = () => {
         Gestionar productos
       </Link>
       <Link
+        to="/admin/promociones"
+        className="btn btn-outline"
+        style={{ width: '100%', marginBottom: '0.75rem', display: 'block', textAlign: 'center' }}
+      >
+        Gestionar promociones
+      </Link>
+      <Link
         to="/admin/ventas"
         className="btn btn-outline"
         style={{ width: '100%', display: 'block', textAlign: 'center' }}

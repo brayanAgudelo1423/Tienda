@@ -403,3 +403,180 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     border-bottom: 1px solid var(--color-bg-alt);
   }
 }
+
+/* Promociones — inicio */
+.promotions-section {
+  padding: 2.5rem 1.2rem 3rem;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border-top: 1px solid #efefef;
+  border-bottom: 1px solid #efefef;
+}
+
+.promotions-head {
+  margin-bottom: 1.35rem;
+  text-align: center;
+}
+
+.promotions-title {
+  font-size: 2rem;
+  margin: 0;
+  font-family: var(--font-heading);
+  letter-spacing: 0.04em;
+}
+
+.promotions-subtitle {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+.promotions-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.promo-card {
+  min-width: 0;
+}
+
+.promo-card-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.promo-card-media {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: #111;
+}
+
+.promo-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-card-banner {
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+}
+
+.promo-card-banner--0 {
+  background: linear-gradient(135deg, #111 0%, #333 100%);
+}
+
+.promo-card-banner--1 {
+  background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+}
+
+.promo-card-banner--2 {
+  background: linear-gradient(135deg, #5c4d3c 0%, #2a2218 100%);
+}
+
+.promo-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.promo-badge--large {
+  font-size: 1.35rem;
+  letter-spacing: 0.14em;
+  padding: 0.45rem 1rem;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.promo-badge--ghost {
+  opacity: 0.85;
+}
+
+.promo-badge--overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.promo-card-body {
+  padding: 1.1rem 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+  text-align: center;
+}
+
+.promo-card-body h3 {
+  font-size: 1.12rem;
+  margin: 0;
+  line-height: 1.25;
+  font-family: var(--font-heading);
+}
+
+.promo-card-body p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.promo-card--skeleton {
+  min-height: 200px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: promoShimmer 1.2s infinite;
+}
+
+@keyframes promoShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 768px) {
+  .promotions-section {
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  .promotions-title {
+    font-size: 1.55rem;
+  }
+
+  .promotions-track {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.85rem;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    max-width: none;
+  }
+
+  .promo-card {
+    flex: 0 0 82%;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+}

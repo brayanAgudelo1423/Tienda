@@ -10,8 +10,6 @@ import { getBrandNameBySlug } from '../utils/brands';
 import ProductDetail from '../components/ProductDetail';
 import StarRating from '../components/StarRating';
 
-const GENDER_LABELS = Object.fromEntries(GENDERS.map((g) => [g.id, g.label]));
-
 const Lociones = ({ onAddToCart }) => {
   const { brandSlug } = useParams();
   const { products, fragranceBrands } = useProducts();
@@ -216,9 +214,6 @@ const Lociones = ({ onAddToCart }) => {
                       alt={product.name}
                       className="product-card-fg"
                     />
-                    {product.gender && (
-                      <span className="lociones-gender-badge">{GENDER_LABELS[product.gender]}</span>
-                    )}
                   </div>
                   <div className="lociones-card-info">
                     <p className="lociones-card-brand">{product.brand}</p>
@@ -443,19 +438,6 @@ const locionesStyles = `
     margin-bottom: 0.85rem;
     overflow: hidden;
     border-radius: 10px;
-  }
-
-  .lociones-gender-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(255,255,255,0.92);
-    padding: 0.25rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 
   .lociones-card-info {

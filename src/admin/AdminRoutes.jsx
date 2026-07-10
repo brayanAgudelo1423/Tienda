@@ -6,6 +6,7 @@ import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminProductForm from './AdminProductForm';
 import AdminSales from './AdminSales';
+import AdminPromotions from './AdminPromotions';
 import { api, setAdminToken } from '../api/client';
 
 function AdminGuard({ children }) {
@@ -30,6 +31,7 @@ const AdminRoutes = () => (
       <Route path="productos/nuevo" element={<AdminProductForm />} />
       <Route path="productos/:id" element={<AdminProductForm />} />
       <Route path="ventas" element={<AdminSales />} />
+      <Route path="promociones" element={<AdminPromotions />} />
     </Route>
     <Route path="*" element={<Navigate to="/admin" replace />} />
   </Routes>

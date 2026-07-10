@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import BrandMarquee from './components/BrandMarquee';
 import ProductList from './components/ProductList';
+import PromotionsSection from './components/PromotionsSection';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Footer from './components/Footer';
@@ -50,6 +51,7 @@ function StoreApp() {
             <main>
               <Hero />
               <BrandMarquee />
+              <PromotionsSection />
               <ProductList onAddToCart={addToCart} />
             </main>
           }

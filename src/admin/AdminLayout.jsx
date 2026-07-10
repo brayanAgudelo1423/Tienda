@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Plus, LogOut, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Package, Plus, LogOut, ShoppingBag, Tag } from 'lucide-react';
 import { setAdminToken } from '../api/client';
 import './admin.css';
 
@@ -37,6 +37,10 @@ const AdminLayout = () => {
         <NavLink to="/admin/ventas">
           <ShoppingBag size={20} />
           Ventas
+        </NavLink>
+        <NavLink to="/admin/promociones">
+          <Tag size={20} />
+          Ofertas
         </NavLink>
         <NavLink to="/admin/productos/nuevo">
           <Plus size={20} />

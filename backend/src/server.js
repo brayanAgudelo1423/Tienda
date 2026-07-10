@@ -12,6 +12,7 @@ import brandsRoutes from './routes/brands.js';
 import salesRoutes from './routes/sales.js';
 import uploadRoutes from './routes/upload.js';
 import paymentsRoutes from './routes/payments.js';
+import promotionsRoutes from './routes/promotions.js';
 import { initDatabase, getProductCount } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -100,6 +101,7 @@ app.use('/api/products', productsRoutes);
 app.use('/api/brands', brandsRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/promotions', promotionsRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.use((err, _req, res, _next) => {

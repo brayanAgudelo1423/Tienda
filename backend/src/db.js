@@ -151,9 +151,24 @@ export async function initDatabase() {
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS promotions (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      subtitle TEXT NOT NULL DEFAULT '',
+      badge TEXT NOT NULL DEFAULT '',
+      cta_text TEXT NOT NULL DEFAULT 'Ver más',
+      cta_link TEXT NOT NULL DEFAULT '/',
+      image TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
 
   await ensureAdminUser();
+  await ensureDefaultPromotions();
   initialized = true;
   console.log('[OZONO] Esquema PostgreSQL listo');
 }
@@ -171,6 +186,125 @@ async function ensureAdminUser() {
     hash,
   ]);
   console.log(`Admin creado: usuario "${username}"`);
+}
+
+function rowToPromotion(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    subtitle: row.subtitle ?? '',
+    badge: row.badge ?? '',
+    ctaText: row.cta_text,
+    ctaLink: row.cta_link,
+    image: row.image ?? '',
+    sortOrder: row.sort_order,
+    active: Boolean(row.active),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+async function ensureDefaultPromotions() {
+  const db = getPool();
+  const { rows } = await db.query('SELECT COUNT(*)::int AS c FROM promotions');
+  if (rows[0].c > 0) return;
+
+  const defaults = [
+    {
+      title: 'Lociones originales',
+      subtitle: 'Selección premium con descuento especial esta semana',
+      badge: '-20%',
+      sortOrder: 0,
+    },
+    {
+      title: 'Envío gratis',
+      subtitle: 'En compras superiores a $200.000 COP',
+      badge: 'ENVÍO',
+      sortOrder: 1,
+    },
+    {
+      title: 'Novedades de temporada',
+      subtitle: 'Piezas limitadas en moda y accesorios',
+      badge: 'NUEVO',
+      sortOrder: 2,
+    },
+  ];
+
+  for (const promo of defaults) {
+    await db.query(
+      `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, sort_order, active)
+       VALUES ($1, $2, $3, '', '', $4, TRUE)`,
+      [promo.title, promo.subtitle, promo.badge, promo.sortOrder]
+    );
+  }
+  console.log(`[OZONO] ${defaults.length} promociones iniciales creadas`);
+}
+
+export async function getActivePromotions() {
+  const { rows } = await getPool().query(
+    'SELECT * FROM promotions WHERE active = TRUE ORDER BY sort_order, id'
+  );
+  return rows.map(rowToPromotion);
+}
+
+export async function getAllPromotions() {
+  const { rows } = await getPool().query(
+    'SELECT * FROM promotions ORDER BY sort_order, id'
+  );
+  return rows.map(rowToPromotion);
+}
+
+export async function getPromotionById(id) {
+  const { rows } = await getPool().query('SELECT * FROM promotions WHERE id = $1', [id]);
+  return rows[0] ? rowToPromotion(rows[0]) : null;
+}
+
+export async function createPromotion(data) {
+  const { rows } = await getPool().query(
+    `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, image, sort_order, active)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING id`,
+    [
+      data.title,
+      data.subtitle ?? '',
+      data.badge ?? '',
+      data.ctaText ?? 'Ver más',
+      data.ctaLink ?? '/',
+      data.image || null,
+      data.sortOrder ?? 0,
+      data.active !== false,
+    ]
+  );
+  return getPromotionById(rows[0].id);
+}
+
+export async function updatePromotion(id, data) {
+  const existing = await getPromotionById(id);
+  if (!existing) return null;
+
+  await getPool().query(
+    `UPDATE promotions SET
+      title = $1, subtitle = $2, badge = $3, cta_text = $4, cta_link = $5,
+      image = $6, sort_order = $7, active = $8, updated_at = NOW()
+    WHERE id = $9`,
+    [
+      data.title ?? existing.title,
+      data.subtitle !== undefined ? data.subtitle : existing.subtitle,
+      data.badge !== undefined ? data.badge : existing.badge,
+      data.ctaText ?? existing.ctaText,
+      data.ctaLink ?? existing.ctaLink,
+      data.image !== undefined ? data.image || null : existing.image || null,
+      data.sortOrder !== undefined ? data.sortOrder : existing.sortOrder,
+      data.active === undefined ? existing.active : Boolean(data.active),
+      id,
+    ]
+  );
+  return getPromotionById(id);
+}
+
+export async function deletePromotion(id) {
+  const result = await getPool().query('DELETE FROM promotions WHERE id = $1', [id]);
+  return result.rowCount > 0;
 }
 
 export async function getActiveProducts() {
@@ -385,6 +519,21 @@ export async function getSalesStats() {
     monthSales: month.c,
     monthRevenue: month.revenue,
   };
+}
+
+export async function bulkSetProductsActive(ids, active) {
+  if (!ids?.length) return 0;
+  const result = await getPool().query(
+    `UPDATE products SET active = $1, updated_at = NOW() WHERE id = ANY($2::int[])`,
+    [Boolean(active), ids]
+  );
+  return result.rowCount;
+}
+
+export async function bulkDeleteProducts(ids) {
+  if (!ids?.length) return 0;
+  const result = await getPool().query(`DELETE FROM products WHERE id = ANY($1::int[])`, [ids]);
+  return result.rowCount;
 }
 
 export async function verifyAdmin(username, password) {

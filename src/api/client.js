@@ -47,6 +47,7 @@ async function request(path, options = {}) {
 export const api = {
   getProducts: () => request('/api/products'),
   getBrands: () => request('/api/brands'),
+  getPromotions: () => request('/api/promotions'),
 
   login: (username, password) =>
     request('/api/auth/login', { method: 'POST', body: { username, password } }),
@@ -66,6 +67,23 @@ export const api = {
 
   deleteProduct: (id) =>
     request(`/api/products/admin/${id}`, { method: 'DELETE', auth: true }),
+
+  bulkProducts: (ids, action) =>
+    request('/api/products/admin/bulk', { method: 'POST', body: { ids, action }, auth: true }),
+
+  getAdminPromotions: () => request('/api/promotions/admin/all', { auth: true }),
+
+  createPromotion: (promotion) =>
+    request('/api/promotions/admin', { method: 'POST', body: promotion, auth: true }),
+
+  updatePromotion: (id, promotion) =>
+    request(`/api/promotions/admin/${id}`, { method: 'PUT', body: promotion, auth: true }),
+
+  togglePromotion: (id) =>
+    request(`/api/promotions/admin/${id}/toggle`, { method: 'PATCH', auth: true }),
+
+  deletePromotion: (id) =>
+    request(`/api/promotions/admin/${id}`, { method: 'DELETE', auth: true }),
 
   uploadImage: (file) => {
     const form = new FormData();
