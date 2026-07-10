@@ -35,6 +35,7 @@ function normalizeProductBody(body) {
     description: body.description?.trim() || '',
     image: body.image,
     hoverImage: body.hoverImage || body.image,
+    gallery: Array.isArray(body.gallery) ? body.gallery.filter(Boolean) : [],
     sizes: Array.isArray(body.sizes) ? body.sizes : [],
     colors: Array.isArray(body.colors) ? body.colors : [],
     active: body.active !== false,

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import StarRating from './StarRating';
+import ProductImageGallery from './ProductImageGallery';
 import { formatCOP } from '../utils/currency';
 import { mediaUrl } from '../api/client';
+import { getProductGalleryImages } from '../utils/productImages';
 import { LOCIONES_CATEGORY } from '../constants/catalog';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
@@ -24,6 +26,11 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
       document.body.style.overflow = '';
     };
   }, [product]);
+
+  const galleryImages = useMemo(
+    () => (product ? getProductGalleryImages(product) : []),
+    [product]
+  );
 
   if (!product) return null;
 
@@ -90,20 +97,13 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
           <div className="product-detail-layout" style={styles.layout}>
             <div className="product-detail-image" style={styles.imageWrap}>
               <img
-                src={mediaUrl(product.image)}
+                src={mediaUrl(galleryImages[0])}
                 alt=""
                 aria-hidden="true"
                 style={styles.bgImage}
                 className="product-card-bg"
               />
-              <img
-                src={mediaUrl(product.image)}
-                alt={product.name}
-                style={styles.image}
-                className="product-card-fg"
-                loading="eager"
-                decoding="async"
-              />
+              <ProductImageGallery images={galleryImages} productName={product.name} />
             </div>
 
             <div style={styles.content}>
@@ -204,10 +204,24 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
       <style>{`
         .product-detail-layout { display: flex; gap: 2.5rem; align-items: flex-start; }
-        .product-detail-image { flex: 0 0 42%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; }
+        .product-detail-image {
+          flex: 0 0 42%;
+          min-height: 420px;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: flex-start;
+        }
+        .product-detail-image .product-gallery { height: 100%; min-height: 360px; }
         @media (max-width: 768px) {
           .product-detail-layout { flex-direction: column !important; }
-          .product-detail-image { flex: none !important; width: 100% !important; max-height: 360px !important; aspect-ratio: 3/4 !important; }
+          .product-detail-image {
+            flex: none !important;
+            width: 100% !important;
+            min-height: auto !important;
+            max-height: none !important;
+          }
+          .product-detail-image .product-gallery { min-height: 280px; }
         }
       `}</style>
     </AnimatePresence>

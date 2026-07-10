@@ -85,8 +85,12 @@ function ensureSalesColumns() {
 
 function ensureProductColumns() {
   const columns = db.prepare('PRAGMA table_info(products)').all();
-  if (!columns.some((col) => col.name === 'gender')) {
+  const names = new Set(columns.map((col) => col.name));
+  if (!names.has('gender')) {
     db.exec('ALTER TABLE products ADD COLUMN gender TEXT');
+  }
+  if (!names.has('gallery')) {
+    db.exec("ALTER TABLE products ADD COLUMN gallery TEXT NOT NULL DEFAULT '[]'");
   }
 }
 
@@ -127,6 +131,7 @@ function rowToProduct(row) {
     description: row.description,
     image: row.image,
     hoverImage: row.hover_image || row.image,
+    gallery: row.gallery ? JSON.parse(row.gallery) : [],
     sizes: JSON.parse(row.sizes),
     colors: JSON.parse(row.colors),
     active: Boolean(row.active),
@@ -157,8 +162,8 @@ export function createProduct(data) {
     .prepare(
       `INSERT INTO products (
         name, brand, brand_slug, product_type, price, category, gender,
-        rating, review_count, description, image, hover_image, sizes, colors, active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        rating, review_count, description, image, hover_image, gallery, sizes, colors, active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       data.name,
@@ -173,6 +178,7 @@ export function createProduct(data) {
       data.description ?? '',
       data.image,
       data.hoverImage ?? data.image,
+      JSON.stringify(Array.isArray(data.gallery) ? data.gallery : []),
       JSON.stringify(data.sizes ?? []),
       JSON.stringify(data.colors ?? []),
       data.active === false ? 0 : 1
@@ -188,7 +194,7 @@ export function updateProduct(id, data) {
     `UPDATE products SET
       name = ?, brand = ?, brand_slug = ?, product_type = ?, price = ?, category = ?, gender = ?,
       rating = ?, review_count = ?, description = ?, image = ?, hover_image = ?,
-      sizes = ?, colors = ?, active = ?, updated_at = datetime('now')
+      gallery = ?, sizes = ?, colors = ?, active = ?, updated_at = datetime('now')
     WHERE id = ?`
   ).run(
     data.name ?? existing.name,
@@ -203,6 +209,9 @@ export function updateProduct(id, data) {
     data.description ?? existing.description,
     data.image ?? existing.image,
     data.hoverImage ?? existing.hoverImage,
+    JSON.stringify(
+      Array.isArray(data.gallery) ? data.gallery : existing.gallery ?? []
+    ),
     JSON.stringify(data.sizes ?? existing.sizes),
     JSON.stringify(data.colors ?? existing.colors),
     data.active === undefined ? (existing.active ? 1 : 0) : data.active ? 1 : 0,

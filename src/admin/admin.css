@@ -390,3 +390,65 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   z-index: 55;
 }
+
+.admin-gallery-section {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px dashed #ddd;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.admin-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 0.65rem;
+  margin: 0.75rem 0;
+}
+
+.admin-gallery-item {
+  position: relative;
+  aspect-ratio: 3/4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #111;
+  border: 1px solid #e5e5e5;
+}
+
+.admin-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-gallery-item-actions {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+}
+
+.admin-gallery-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.admin-gallery-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.admin-gallery-icon-btn.danger {
+  color: #b91c1c;
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ImagePlus, Camera } from 'lucide-react';
+import { ImagePlus, Camera, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { parseCOPInput } from '../utils/currency';
@@ -29,6 +29,7 @@ const emptyForm = {
   description: '',
   image: '',
   hoverImage: '',
+  gallery: [],
   sizes: [...CLOTHING_SIZES],
   colors: [...DEFAULT_COLORS],
   active: true,
@@ -49,6 +50,7 @@ const AdminProductForm = () => {
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const hoverGalleryInputRef = useRef(null);
+  const extraGalleryInputRef = useRef(null);
 
   const isLocion = form.category === LOCIONES_CATEGORY;
 
@@ -67,6 +69,7 @@ const AdminProductForm = () => {
         description: p.description,
         image: p.image,
         hoverImage: p.hoverImage,
+        gallery: Array.isArray(p.gallery) ? p.gallery : [],
         sizes: p.sizes,
         colors: p.colors,
         active: p.active,
@@ -106,6 +109,8 @@ const AdminProductForm = () => {
       const { url } = await api.uploadImage(file);
       if (target === 'hover') {
         update('hoverImage', url);
+      } else if (target === 'gallery') {
+        setForm((f) => ({ ...f, gallery: [...(f.gallery || []), url] }));
       } else {
         setForm((f) => ({
           ...f,
@@ -120,9 +125,26 @@ const AdminProductForm = () => {
     }
   };
 
+  const removeGalleryImage = (index) => {
+    update(
+      'gallery',
+      form.gallery.filter((_, i) => i !== index)
+    );
+  };
+
+  const moveGalleryImage = (index, direction) => {
+    const next = [...form.gallery];
+    const target = index + direction;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    update('gallery', next);
+  };
+
   const openGallery = (target = 'image') => {
     setUploadTarget(target);
-    (target === 'hover' ? hoverGalleryInputRef : galleryInputRef).current?.click();
+    if (target === 'hover') hoverGalleryInputRef.current?.click();
+    else if (target === 'gallery') extraGalleryInputRef.current?.click();
+    else galleryInputRef.current?.click();
   };
 
   const openCamera = () => {
@@ -226,6 +248,13 @@ const AdminProductForm = () => {
             className="admin-upload-input-hidden"
             onChange={(e) => handleUpload(e, 'hover')}
           />
+          <input
+            ref={extraGalleryInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+            className="admin-upload-input-hidden"
+            onChange={(e) => handleUpload(e, 'gallery')}
+          />
 
           {form.image ? (
             <div className="admin-preview product-card-image">
@@ -293,6 +322,65 @@ const AdminProductForm = () => {
           <p className="admin-upload-hint">
             En el celular, «Galería del teléfono» abre tus fotos guardadas. Máx. 12 MB.
           </p>
+        </div>
+
+        <div className="admin-gallery-section">
+          <label className="admin-field-label">Galería en ficha del producto (opcional)</label>
+          <p className="admin-upload-hint" style={{ marginTop: 0 }}>
+            La foto principal y la de hover se usan en las tarjetas. Aquí puedes agregar más fotos
+            que el cliente verá al abrir el producto. Si no agregas ninguna, solo se muestra una
+            imagen.
+          </p>
+
+          {form.gallery.length > 0 && (
+            <div className="admin-gallery-grid">
+              {form.gallery.map((url, index) => (
+                <div key={`${url}-${index}`} className="admin-gallery-item">
+                  <img src={mediaUrl(url)} alt="" />
+                  <div className="admin-gallery-item-actions">
+                    <button
+                      type="button"
+                      className="admin-gallery-icon-btn"
+                      disabled={index === 0}
+                      onClick={() => moveGalleryImage(index, -1)}
+                      aria-label="Mover arriba"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-gallery-icon-btn"
+                      disabled={index === form.gallery.length - 1}
+                      onClick={() => moveGalleryImage(index, 1)}
+                      aria-label="Mover abajo"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-gallery-icon-btn danger"
+                      onClick={() => removeGalleryImage(index)}
+                      aria-label="Eliminar foto"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="admin-upload-btn"
+            disabled={uploading || !form.image}
+            onClick={() => openGallery('gallery')}
+          >
+            <ImagePlus size={18} />
+            {uploading && uploadTarget === 'gallery'
+              ? 'Subiendo…'
+              : 'Agregar foto a la galería'}
+          </button>
         </div>
 
         <div className="admin-field">
