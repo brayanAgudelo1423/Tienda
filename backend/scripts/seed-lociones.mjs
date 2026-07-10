@@ -9,23 +9,32 @@ const catalogFile = path.join(__dirname, '..', '..', 'src', 'constants', 'catalo
 const { locionesProducts } = await import(pathToFileURL(dataFile).href);
 const { FRAGRANCE_BRANDS } = await import(pathToFileURL(catalogFile).href);
 
-const { createProduct, upsertBrand, getActiveProducts, default: db } = await import('../src/db.js');
+const {
+  initDatabase,
+  createProduct,
+  upsertBrand,
+  getActiveProducts,
+  closePool,
+} = await import('../src/db.js');
 
-const existingLociones = getActiveProducts().filter((p) => p.category === 'Lociones');
+await initDatabase();
+
+const existingLociones = (await getActiveProducts()).filter((p) => p.category === 'Lociones');
 if (existingLociones.length > 0) {
   console.log(`Ya hay ${existingLociones.length} lociones en la base. Seed omitido.`);
+  await closePool();
   process.exit(0);
 }
 
 console.log('Sembrando marcas de perfumería y lociones...');
 
-FRAGRANCE_BRANDS.forEach((brand, index) => {
-  upsertBrand({ name: brand.name, slug: brand.slug, sortOrder: 100 + index });
-});
+for (const [index, brand] of FRAGRANCE_BRANDS.entries()) {
+  await upsertBrand({ name: brand.name, slug: brand.slug, sortOrder: 100 + index });
+}
 
 let count = 0;
 for (const p of locionesProducts) {
-  createProduct({
+  await createProduct({
     name: p.name,
     brand: p.brand,
     brandSlug: p.brandSlug,
@@ -38,6 +47,7 @@ for (const p of locionesProducts) {
     description: p.description,
     image: p.image,
     hoverImage: p.hoverImage,
+    gallery: p.gallery ?? [],
     sizes: p.sizes,
     colors: p.colors,
     active: true,
@@ -46,4 +56,4 @@ for (const p of locionesProducts) {
 }
 
 console.log(`Listo: ${count} lociones agregadas.`);
-db.close();
+await closePool();

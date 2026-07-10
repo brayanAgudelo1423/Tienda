@@ -1,96 +1,45 @@
-import Database from 'better-sqlite3';
+import pg from 'pg';
 import bcrypt from 'bcryptjs';
-import path from 'node:path';
-import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', 'data');
-const dbPath = path.join(dataDir, 'ozono.db');
+const { Pool } = pg;
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+let pool;
+let initialized = false;
+
+function getPool() {
+  if (pool) return pool;
+
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error(
+      'DATABASE_URL no está configurada. En Render, vincula una base PostgreSQL al servicio.'
+    );
+  }
+
+  pool = new Pool({
+    connectionString,
+    ssl: process.env.PGSSL === 'false' ? false : { rejectUnauthorized: false },
+    max: 10,
+  });
+
+  pool.on('error', (err) => {
+    console.error('[OZONO] Error inesperado en PostgreSQL:', err.message);
+  });
+
+  if (process.env.NODE_ENV === 'production') {
+    console.log('[OZONO] PostgreSQL conectado');
+  }
+
+  return pool;
 }
 
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS brands (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
-    sort_order INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    brand TEXT NOT NULL,
-    brand_slug TEXT NOT NULL,
-    product_type TEXT NOT NULL DEFAULT 'Producto',
-    price INTEGER NOT NULL,
-    category TEXT NOT NULL DEFAULT 'Moda',
-    gender TEXT,
-    rating REAL NOT NULL DEFAULT 4.6,
-    review_count INTEGER NOT NULL DEFAULT 0,
-    description TEXT NOT NULL DEFAULT '',
-    image TEXT NOT NULL,
-    hover_image TEXT,
-    sizes TEXT NOT NULL DEFAULT '[]',
-    colors TEXT NOT NULL DEFAULT '[]',
-    active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS sales (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    total INTEGER NOT NULL,
-    subtotal INTEGER NOT NULL,
-    customer_name TEXT,
-    customer_email TEXT,
-    customer_phone TEXT,
-    customer_city TEXT,
-    customer_address TEXT,
-    items TEXT NOT NULL,
-    payment_method TEXT,
-    payu_reference TEXT,
-    payu_transaction_id TEXT,
-    status TEXT NOT NULL DEFAULT 'confirmada',
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS admin_users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL
-  );
-`);
-
-function ensureSalesColumns() {
-  const columns = db.prepare('PRAGMA table_info(sales)').all();
-  const names = new Set(columns.map((col) => col.name));
-  if (!names.has('payment_method')) {
-    db.exec('ALTER TABLE sales ADD COLUMN payment_method TEXT');
-  }
-  if (!names.has('payu_reference')) {
-    db.exec('ALTER TABLE sales ADD COLUMN payu_reference TEXT');
-  }
-  if (!names.has('payu_transaction_id')) {
-    db.exec('ALTER TABLE sales ADD COLUMN payu_transaction_id TEXT');
-  }
-}
-
-function ensureProductColumns() {
-  const columns = db.prepare('PRAGMA table_info(products)').all();
-  const names = new Set(columns.map((col) => col.name));
-  if (!names.has('gender')) {
-    db.exec('ALTER TABLE products ADD COLUMN gender TEXT');
-  }
-  if (!names.has('gallery')) {
-    db.exec("ALTER TABLE products ADD COLUMN gallery TEXT NOT NULL DEFAULT '[]'");
+function parseJson(value, fallback = []) {
+  if (value == null) return fallback;
+  if (typeof value === 'object') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
   }
 }
 
@@ -102,20 +51,6 @@ function saleStatusForPayment(paymentMethod) {
   return 'confirmada';
 }
 
-function ensureAdminUser() {
-  const count = db.prepare('SELECT COUNT(*) AS c FROM admin_users').get().c;
-  if (count > 0) return;
-
-  const username = process.env.ADMIN_USER || 'admin';
-  const password = process.env.ADMIN_PASSWORD || 'ozono2026';
-  const hash = bcrypt.hashSync(password, 10);
-  db.prepare('INSERT INTO admin_users (username, password_hash) VALUES (?, ?)').run(
-    username,
-    hash
-  );
-  console.log(`Admin creado: usuario "${username}"`);
-}
-
 function rowToProduct(row) {
   return {
     id: row.id,
@@ -123,49 +58,150 @@ function rowToProduct(row) {
     brand: row.brand,
     brandSlug: row.brand_slug,
     productType: row.product_type,
-    price: row.price,
+    price: Number(row.price),
     category: row.category,
     gender: row.gender ?? null,
-    rating: row.rating,
-    reviewCount: row.review_count,
+    rating: Number(row.rating),
+    reviewCount: Number(row.review_count),
     description: row.description,
     image: row.image,
     hoverImage: row.hover_image || row.image,
-    gallery: row.gallery ? JSON.parse(row.gallery) : [],
-    sizes: JSON.parse(row.sizes),
-    colors: JSON.parse(row.colors),
+    gallery: parseJson(row.gallery, []),
+    sizes: parseJson(row.sizes, []),
+    colors: parseJson(row.colors, []),
     active: Boolean(row.active),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-export function getActiveProducts() {
-  const rows = db
-    .prepare('SELECT * FROM products WHERE active = 1 ORDER BY id DESC')
-    .all();
+function saleRowToObject(row) {
+  return {
+    id: row.id,
+    total: Number(row.total),
+    subtotal: Number(row.subtotal),
+    customerName: row.customer_name,
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
+    customerCity: row.customer_city,
+    customerAddress: row.customer_address,
+    items: parseJson(row.items, []),
+    paymentMethod: row.payment_method ?? null,
+    payuReference: row.payu_reference ?? null,
+    payuTransactionId: row.payu_transaction_id ?? null,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+export async function initDatabase() {
+  if (initialized) return;
+
+  const db = getPool();
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS brands (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      brand TEXT NOT NULL,
+      brand_slug TEXT NOT NULL,
+      product_type TEXT NOT NULL DEFAULT 'Producto',
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL DEFAULT 'Moda',
+      gender TEXT,
+      rating REAL NOT NULL DEFAULT 4.6,
+      review_count INTEGER NOT NULL DEFAULT 0,
+      description TEXT NOT NULL DEFAULT '',
+      image TEXT NOT NULL,
+      hover_image TEXT,
+      gallery JSONB NOT NULL DEFAULT '[]'::jsonb,
+      sizes JSONB NOT NULL DEFAULT '[]'::jsonb,
+      colors JSONB NOT NULL DEFAULT '[]'::jsonb,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS sales (
+      id SERIAL PRIMARY KEY,
+      total INTEGER NOT NULL,
+      subtotal INTEGER NOT NULL,
+      customer_name TEXT,
+      customer_email TEXT,
+      customer_phone TEXT,
+      customer_city TEXT,
+      customer_address TEXT,
+      items JSONB NOT NULL,
+      payment_method TEXT,
+      payu_reference TEXT,
+      payu_transaction_id TEXT,
+      status TEXT NOT NULL DEFAULT 'confirmada',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL
+    );
+  `);
+
+  await ensureAdminUser();
+  initialized = true;
+  console.log('[OZONO] Esquema PostgreSQL listo');
+}
+
+async function ensureAdminUser() {
+  const db = getPool();
+  const { rows } = await db.query('SELECT COUNT(*)::int AS c FROM admin_users');
+  if (rows[0].c > 0) return;
+
+  const username = process.env.ADMIN_USER || 'admin';
+  const password = process.env.ADMIN_PASSWORD || 'ozono2026';
+  const hash = bcrypt.hashSync(password, 10);
+  await db.query('INSERT INTO admin_users (username, password_hash) VALUES ($1, $2)', [
+    username,
+    hash,
+  ]);
+  console.log(`Admin creado: usuario "${username}"`);
+}
+
+export async function getActiveProducts() {
+  const { rows } = await getPool().query(
+    'SELECT * FROM products WHERE active = TRUE ORDER BY id DESC'
+  );
   return rows.map(rowToProduct);
 }
 
-export function getAllProducts() {
-  const rows = db.prepare('SELECT * FROM products ORDER BY id DESC').all();
+export async function getAllProducts() {
+  const { rows } = await getPool().query('SELECT * FROM products ORDER BY id DESC');
   return rows.map(rowToProduct);
 }
 
-export function getProductById(id) {
-  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
-  return row ? rowToProduct(row) : null;
+export async function getProductById(id) {
+  const { rows } = await getPool().query('SELECT * FROM products WHERE id = $1', [id]);
+  return rows[0] ? rowToProduct(rows[0]) : null;
 }
 
-export function createProduct(data) {
-  const result = db
-    .prepare(
-      `INSERT INTO products (
-        name, brand, brand_slug, product_type, price, category, gender,
-        rating, review_count, description, image, hover_image, gallery, sizes, colors, active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(
+export async function createProduct(data) {
+  const gallery = Array.isArray(data.gallery) ? data.gallery : [];
+  const sizes = data.sizes ?? [];
+  const colors = data.colors ?? [];
+
+  const { rows } = await getPool().query(
+    `INSERT INTO products (
+      name, brand, brand_slug, product_type, price, category, gender,
+      rating, review_count, description, image, hover_image, gallery, sizes, colors, active
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14::jsonb, $15::jsonb, $16)
+    RETURNING id`,
+    [
       data.name,
       data.brand,
       data.brandSlug,
@@ -178,95 +214,83 @@ export function createProduct(data) {
       data.description ?? '',
       data.image,
       data.hoverImage ?? data.image,
-      JSON.stringify(Array.isArray(data.gallery) ? data.gallery : []),
-      JSON.stringify(data.sizes ?? []),
-      JSON.stringify(data.colors ?? []),
-      data.active === false ? 0 : 1
-    );
-  return getProductById(result.lastInsertRowid);
+      JSON.stringify(gallery),
+      JSON.stringify(sizes),
+      JSON.stringify(colors),
+      data.active !== false,
+    ]
+  );
+
+  return getProductById(rows[0].id);
 }
 
-export function updateProduct(id, data) {
-  const existing = getProductById(id);
+export async function updateProduct(id, data) {
+  const existing = await getProductById(id);
   if (!existing) return null;
 
-  db.prepare(
+  const gallery = Array.isArray(data.gallery) ? data.gallery : existing.gallery ?? [];
+  const sizes = data.sizes ?? existing.sizes;
+  const colors = data.colors ?? existing.colors;
+
+  await getPool().query(
     `UPDATE products SET
-      name = ?, brand = ?, brand_slug = ?, product_type = ?, price = ?, category = ?, gender = ?,
-      rating = ?, review_count = ?, description = ?, image = ?, hover_image = ?,
-      gallery = ?, sizes = ?, colors = ?, active = ?, updated_at = datetime('now')
-    WHERE id = ?`
-  ).run(
-    data.name ?? existing.name,
-    data.brand ?? existing.brand,
-    data.brandSlug ?? existing.brandSlug,
-    data.productType ?? existing.productType,
-    data.price ?? existing.price,
-    data.category ?? existing.category,
-    data.gender !== undefined ? data.gender : existing.gender,
-    data.rating ?? existing.rating,
-    data.reviewCount ?? existing.reviewCount,
-    data.description ?? existing.description,
-    data.image ?? existing.image,
-    data.hoverImage ?? existing.hoverImage,
-    JSON.stringify(
-      Array.isArray(data.gallery) ? data.gallery : existing.gallery ?? []
-    ),
-    JSON.stringify(data.sizes ?? existing.sizes),
-    JSON.stringify(data.colors ?? existing.colors),
-    data.active === undefined ? (existing.active ? 1 : 0) : data.active ? 1 : 0,
-    id
+      name = $1, brand = $2, brand_slug = $3, product_type = $4, price = $5, category = $6, gender = $7,
+      rating = $8, review_count = $9, description = $10, image = $11, hover_image = $12,
+      gallery = $13::jsonb, sizes = $14::jsonb, colors = $15::jsonb, active = $16, updated_at = NOW()
+    WHERE id = $17`,
+    [
+      data.name ?? existing.name,
+      data.brand ?? existing.brand,
+      data.brandSlug ?? existing.brandSlug,
+      data.productType ?? existing.productType,
+      data.price ?? existing.price,
+      data.category ?? existing.category,
+      data.gender !== undefined ? data.gender : existing.gender,
+      data.rating ?? existing.rating,
+      data.reviewCount ?? existing.reviewCount,
+      data.description ?? existing.description,
+      data.image ?? existing.image,
+      data.hoverImage ?? existing.hoverImage,
+      JSON.stringify(gallery),
+      JSON.stringify(sizes),
+      JSON.stringify(colors),
+      data.active === undefined ? existing.active : Boolean(data.active),
+      id,
+    ]
   );
+
   return getProductById(id);
 }
 
-export function deleteProduct(id) {
-  const result = db.prepare('DELETE FROM products WHERE id = ?').run(id);
-  return result.changes > 0;
+export async function deleteProduct(id) {
+  const result = await getPool().query('DELETE FROM products WHERE id = $1', [id]);
+  return result.rowCount > 0;
 }
 
-export function getBrands() {
-  return db.prepare('SELECT * FROM brands ORDER BY sort_order, name').all();
+export async function getBrands() {
+  const { rows } = await getPool().query('SELECT * FROM brands ORDER BY sort_order, name');
+  return rows;
 }
 
-export function upsertBrand({ name, slug, sortOrder = 0 }) {
-  db.prepare(
-    `INSERT INTO brands (name, slug, sort_order) VALUES (?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, sort_order = excluded.sort_order`
-  ).run(name, slug, sortOrder);
+export async function upsertBrand({ name, slug, sortOrder = 0 }) {
+  await getPool().query(
+    `INSERT INTO brands (name, slug, sort_order) VALUES ($1, $2, $3)
+     ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order`,
+    [name, slug, sortOrder]
+  );
 }
 
-function saleRowToObject(row) {
-  return {
-    id: row.id,
-    total: row.total,
-    subtotal: row.subtotal,
-    customerName: row.customer_name,
-    customerEmail: row.customer_email,
-    customerPhone: row.customer_phone,
-    customerCity: row.customer_city,
-    customerAddress: row.customer_address,
-    items: JSON.parse(row.items),
-    paymentMethod: row.payment_method ?? null,
-    payuReference: row.payu_reference ?? null,
-    payuTransactionId: row.payu_transaction_id ?? null,
-    status: row.status,
-    createdAt: row.created_at,
-  };
-}
-
-export function createSale(sale) {
+export async function createSale(sale) {
   const paymentMethod = sale.paymentMethod ?? null;
   const status = sale.status ?? saleStatusForPayment(paymentMethod);
 
-  const result = db
-    .prepare(
-      `INSERT INTO sales (
-        total, subtotal, customer_name, customer_email, customer_phone,
-        customer_city, customer_address, items, payment_method, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(
+  const { rows } = await getPool().query(
+    `INSERT INTO sales (
+      total, subtotal, customer_name, customer_email, customer_phone,
+      customer_city, customer_address, items, payment_method, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10)
+    RETURNING id`,
+    [
       sale.total,
       sale.subtotal,
       sale.customerName ?? null,
@@ -276,82 +300,81 @@ export function createSale(sale) {
       sale.customerAddress ?? null,
       JSON.stringify(sale.items),
       paymentMethod,
-      status
-    );
-  return getSaleById(result.lastInsertRowid);
+      status,
+    ]
+  );
+
+  return getSaleById(rows[0].id);
 }
 
-export function getSaleById(id) {
-  const row = db.prepare('SELECT * FROM sales WHERE id = ?').get(id);
-  if (!row) return null;
-  return saleRowToObject(row);
+export async function getSaleById(id) {
+  const { rows } = await getPool().query('SELECT * FROM sales WHERE id = $1', [id]);
+  return rows[0] ? saleRowToObject(rows[0]) : null;
 }
 
-export function getSaleByPayUReference(reference) {
+export async function getSaleByPayUReference(reference) {
   if (!reference) return null;
-  const row = db.prepare('SELECT * FROM sales WHERE payu_reference = ?').get(reference);
-  if (!row) return null;
-  return saleRowToObject(row);
+  const { rows } = await getPool().query('SELECT * FROM sales WHERE payu_reference = $1', [
+    reference,
+  ]);
+  return rows[0] ? saleRowToObject(rows[0]) : null;
 }
 
-export function updateSalePayment(id, { status, payuReference, payuTransactionId }) {
-  const existing = getSaleById(id);
+export async function updateSalePayment(id, { status, payuReference, payuTransactionId }) {
+  const existing = await getSaleById(id);
   if (!existing) return null;
 
-  db.prepare(
+  await getPool().query(
     `UPDATE sales SET
-      status = COALESCE(?, status),
-      payu_reference = COALESCE(?, payu_reference),
-      payu_transaction_id = COALESCE(?, payu_transaction_id)
-    WHERE id = ?`
-  ).run(
-    status ?? null,
-    payuReference ?? null,
-    payuTransactionId ?? null,
-    id
+      status = COALESCE($1, status),
+      payu_reference = COALESCE($2, payu_reference),
+      payu_transaction_id = COALESCE($3, payu_transaction_id)
+    WHERE id = $4`,
+    [status ?? null, payuReference ?? null, payuTransactionId ?? null, id]
   );
 
   return getSaleById(id);
 }
 
-export function getSales(limit = 100) {
-  const rows = db
-    .prepare('SELECT * FROM sales ORDER BY created_at DESC LIMIT ?')
-    .all(limit);
-  return rows.map((row) => saleRowToObject(row));
+export async function getSales(limit = 100) {
+  const { rows } = await getPool().query(
+    'SELECT * FROM sales ORDER BY created_at DESC LIMIT $1',
+    [limit]
+  );
+  return rows.map(saleRowToObject);
 }
 
-export function getSalesStats() {
-  const totals = db
-    .prepare(
-      `SELECT
-        COUNT(*) AS totalSales,
-        COALESCE(SUM(total), 0) AS revenue
-      FROM sales`
-    )
-    .get();
+export async function getSalesStats() {
+  const db = getPool();
 
-  const salesRows = db.prepare('SELECT items FROM sales').all();
+  const totalsResult = await db.query(`
+    SELECT
+      COUNT(*)::int AS "totalSales",
+      COALESCE(SUM(total), 0)::int AS revenue
+    FROM sales
+  `);
+  const totals = totalsResult.rows[0];
+
+  const salesRows = await db.query('SELECT items FROM sales');
   let itemsSold = 0;
-  for (const row of salesRows) {
-    const items = JSON.parse(row.items);
+  for (const row of salesRows.rows) {
+    const items = parseJson(row.items, []);
     itemsSold += items.reduce((acc, item) => acc + (item.quantity || 1), 0);
   }
 
-  const today = db
-    .prepare(
-      `SELECT COUNT(*) AS c, COALESCE(SUM(total), 0) AS revenue
-       FROM sales WHERE date(created_at) = date('now', 'localtime')`
-    )
-    .get();
+  const todayResult = await db.query(`
+    SELECT COUNT(*)::int AS c, COALESCE(SUM(total), 0)::int AS revenue
+    FROM sales
+    WHERE created_at::date = CURRENT_DATE
+  `);
+  const today = todayResult.rows[0];
 
-  const month = db
-    .prepare(
-      `SELECT COUNT(*) AS c, COALESCE(SUM(total), 0) AS revenue
-       FROM sales
-       WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now', 'localtime')`
-    )
-    .get();
+  const monthResult = await db.query(`
+    SELECT COUNT(*)::int AS c, COALESCE(SUM(total), 0)::int AS revenue
+    FROM sales
+    WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+  `);
+  const month = monthResult.rows[0];
 
   return {
     totalSales: totals.totalSales,
@@ -364,19 +387,27 @@ export function getSalesStats() {
   };
 }
 
-export function verifyAdmin(username, password) {
-  const user = db.prepare('SELECT * FROM admin_users WHERE username = ?').get(username);
+export async function verifyAdmin(username, password) {
+  const { rows } = await getPool().query('SELECT * FROM admin_users WHERE username = $1', [
+    username,
+  ]);
+  const user = rows[0];
   if (!user) return null;
   const ok = bcrypt.compareSync(password, user.password_hash);
   return ok ? { id: user.id, username: user.username } : null;
 }
 
-export function getProductCount() {
-  return db.prepare('SELECT COUNT(*) AS c FROM products').get().c;
+export async function getProductCount() {
+  const { rows } = await getPool().query('SELECT COUNT(*)::int AS c FROM products');
+  return rows[0].c;
 }
 
-ensureProductColumns();
-ensureSalesColumns();
-ensureAdminUser();
+export async function closePool() {
+  if (pool) {
+    await pool.end();
+    pool = null;
+    initialized = false;
+  }
+}
 
-export default db;
+export default { initDatabase, closePool, getPool };

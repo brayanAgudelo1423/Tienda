@@ -42,52 +42,78 @@ function normalizeProductBody(body) {
   };
 }
 
-// Admin (antes de /:id)
-router.get('/admin/all', requireAuth, (_req, res) => {
-  res.json(getAllProducts());
-});
-
-// Público — tienda
-router.get('/', (_req, res) => {
-  res.json(getActiveProducts());
-});
-
-router.get('/:id', (req, res) => {
-  const product = getProductById(Number(req.params.id));
-  if (!product || !product.active) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
+router.get('/admin/all', requireAuth, async (_req, res, next) => {
+  try {
+    res.json(await getAllProducts());
+  } catch (err) {
+    next(err);
   }
-  res.json(product);
 });
 
-router.post('/admin', requireAuth, (req, res) => {
-  const data = normalizeProductBody(req.body);
-  if (!data.name || !data.brand || !data.image || !Number.isFinite(data.price)) {
-    return res.status(400).json({ error: 'Nombre, marca, imagen y precio son obligatorios' });
+router.get('/', async (_req, res, next) => {
+  try {
+    res.json(await getActiveProducts());
+  } catch (err) {
+    next(err);
   }
-  const product = createProduct(data);
-  res.status(201).json(product);
 });
 
-router.put('/admin/:id', requireAuth, (req, res) => {
-  const id = Number(req.params.id);
-  const data = normalizeProductBody(req.body);
-  const product = updateProduct(id, data);
-  if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
-  res.json(product);
+router.get('/:id', async (req, res, next) => {
+  try {
+    const product = await getProductById(Number(req.params.id));
+    if (!product || !product.active) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    res.json(product);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.patch('/admin/:id/toggle', requireAuth, (req, res) => {
-  const existing = getProductById(Number(req.params.id));
-  if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
-  const product = updateProduct(existing.id, { active: !existing.active });
-  res.json(product);
+router.post('/admin', requireAuth, async (req, res, next) => {
+  try {
+    const data = normalizeProductBody(req.body);
+    if (!data.name || !data.brand || !data.image || !Number.isFinite(data.price)) {
+      return res.status(400).json({ error: 'Nombre, marca, imagen y precio son obligatorios' });
+    }
+    const product = await createProduct(data);
+    res.status(201).json(product);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.delete('/admin/:id', requireAuth, (req, res) => {
-  const ok = deleteProduct(Number(req.params.id));
-  if (!ok) return res.status(404).json({ error: 'Producto no encontrado' });
-  res.json({ success: true });
+router.put('/admin/:id', requireAuth, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const data = normalizeProductBody(req.body);
+    const product = await updateProduct(id, data);
+    if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
+    res.json(product);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/admin/:id/toggle', requireAuth, async (req, res, next) => {
+  try {
+    const existing = await getProductById(Number(req.params.id));
+    if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
+    const product = await updateProduct(existing.id, { active: !existing.active });
+    res.json(product);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/admin/:id', requireAuth, async (req, res, next) => {
+  try {
+    const ok = await deleteProduct(Number(req.params.id));
+    if (!ok) return res.status(404).json({ error: 'Producto no encontrado' });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

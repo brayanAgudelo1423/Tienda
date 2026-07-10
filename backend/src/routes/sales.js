@@ -12,50 +12,62 @@ function normalizePaymentMethod(paymentMethod) {
   return 'contraentrega';
 }
 
-router.post('/', (req, res) => {
-  const { total, subtotal, customer, items, paymentMethod } = req.body;
+router.post('/', async (req, res, next) => {
+  try {
+    const { total, subtotal, customer, items, paymentMethod } = req.body;
 
-  if (!Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: 'La venta debe incluir productos' });
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'La venta debe incluir productos' });
+    }
+
+    if (!customer?.name?.trim() || !customer?.email?.trim() || !customer?.phone?.trim()) {
+      return res.status(400).json({ error: 'Completa nombre, correo y teléfono' });
+    }
+
+    if (!customer?.address?.trim() || !customer?.city?.trim()) {
+      return res.status(400).json({ error: 'Completa la dirección de envío' });
+    }
+
+    const normalizedTotal = Number(total);
+    if (!Number.isFinite(normalizedTotal) || normalizedTotal <= 0) {
+      return res.status(400).json({ error: 'Total de venta inválido' });
+    }
+
+    const normalizedPayment = normalizePaymentMethod(paymentMethod);
+
+    const sale = await createSale({
+      total: normalizedTotal,
+      subtotal: Number(subtotal ?? total),
+      customerName: customer.name.trim(),
+      customerEmail: customer.email.trim(),
+      customerPhone: customer.phone.trim(),
+      customerCity: customer.city.trim(),
+      customerAddress: customer.address.trim(),
+      items,
+      paymentMethod: normalizedPayment,
+    });
+
+    res.status(201).json(sale);
+  } catch (err) {
+    next(err);
   }
-
-  if (!customer?.name?.trim() || !customer?.email?.trim() || !customer?.phone?.trim()) {
-    return res.status(400).json({ error: 'Completa nombre, correo y teléfono' });
-  }
-
-  if (!customer?.address?.trim() || !customer?.city?.trim()) {
-    return res.status(400).json({ error: 'Completa la dirección de envío' });
-  }
-
-  const normalizedTotal = Number(total);
-  if (!Number.isFinite(normalizedTotal) || normalizedTotal <= 0) {
-    return res.status(400).json({ error: 'Total de venta inválido' });
-  }
-
-  const normalizedPayment = normalizePaymentMethod(paymentMethod);
-
-  const sale = createSale({
-    total: normalizedTotal,
-    subtotal: Number(subtotal ?? total),
-    customerName: customer.name.trim(),
-    customerEmail: customer.email.trim(),
-    customerPhone: customer.phone.trim(),
-    customerCity: customer.city.trim(),
-    customerAddress: customer.address.trim(),
-    items,
-    paymentMethod: normalizedPayment,
-  });
-
-  res.status(201).json(sale);
 });
 
-router.get('/admin', requireAuth, (req, res) => {
-  const limit = Number(req.query.limit) || 100;
-  res.json(getSales(limit));
+router.get('/admin', requireAuth, async (req, res, next) => {
+  try {
+    const limit = Number(req.query.limit) || 100;
+    res.json(await getSales(limit));
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.get('/admin/stats', requireAuth, (_req, res) => {
-  res.json(getSalesStats());
+router.get('/admin/stats', requireAuth, async (_req, res, next) => {
+  try {
+    res.json(await getSalesStats());
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

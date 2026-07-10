@@ -16,22 +16,26 @@ const dataPath = pathToFileURL(dataFile).href;
 const { products, NAV_BRANDS } = await import(dataPath);
 
 const {
+  initDatabase,
   getProductCount,
   createProduct,
   upsertBrand,
-  default: db,
+  closePool,
 } = await import('../src/db.js');
 
-if (getProductCount() > 0) {
+await initDatabase();
+
+if ((await getProductCount()) > 0) {
   console.log('La base de datos ya tiene productos. Seed omitido.');
+  await closePool();
   process.exit(0);
 }
 
 console.log('Sembrando marcas y productos...');
 
-NAV_BRANDS.forEach((brand, index) => {
-  upsertBrand({ name: brand.name, slug: brand.slug, sortOrder: index });
-});
+for (const [index, brand] of NAV_BRANDS.entries()) {
+  await upsertBrand({ name: brand.name, slug: brand.slug, sortOrder: index });
+}
 
 let count = 0;
 for (const p of products) {
@@ -39,7 +43,7 @@ for (const p of products) {
     NAV_BRANDS.find((b) => b.name === p.brand)?.slug ||
     p.brand.toLowerCase().replace(/\s+/g, '-');
 
-  createProduct({
+  await createProduct({
     name: p.name,
     brand: p.brand,
     brandSlug,
@@ -51,6 +55,7 @@ for (const p of products) {
     description: p.description,
     image: p.image,
     hoverImage: p.hoverImage,
+    gallery: p.gallery ?? [],
     sizes: p.sizes,
     colors: p.colors,
     active: true,
@@ -59,4 +64,4 @@ for (const p of products) {
 }
 
 console.log(`Listo: ${count} productos en pesos colombianos (COP).`);
-db.close();
+await closePool();

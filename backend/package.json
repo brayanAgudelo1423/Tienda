@@ -7,9 +7,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "npm run seed && npm run seed:lociones",
-    "start": "npm ci --omit=dev 2>/dev/null || npm install && node src/server.js",
-    "render:start": "npm ci --omit=dev 2>/dev/null || npm install && node scripts/start-production.mjs",
+    "build": "node scripts/init-db.mjs",
+    "start": "node src/server.js",
+    "render:start": "node scripts/start-production.mjs",
+    "init-db": "node scripts/init-db.mjs",
     "dev": "node --watch src/server.js",
     "seed": "node scripts/seed.mjs",
     "seed:lociones": "node scripts/seed-lociones.mjs",
@@ -17,11 +18,11 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "better-sqlite3": "^11.10.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2"
+    "multer": "^1.4.5-lts.2",
+    "pg": "^8.16.0"
   }
 }

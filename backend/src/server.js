@@ -11,6 +11,7 @@ import brandsRoutes from './routes/brands.js';
 import salesRoutes from './routes/sales.js';
 import uploadRoutes from './routes/upload.js';
 import paymentsRoutes from './routes/payments.js';
+import { initDatabase, getProductCount } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -53,9 +54,14 @@ app.use(
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.json({ limit: '2mb' }));
 
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+const uploadsDir = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (process.env.NODE_ENV === 'production') {
+  console.log(`[OZONO] Uploads: ${uploadsDir}`);
 }
 app.use('/uploads', express.static(uploadsDir));
 
@@ -68,13 +74,24 @@ app.get('/', (_req, res) => {
   });
 });
 
-app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    service: 'ozono-backend',
-    currency: 'COP',
-    frontend: process.env.FRONTEND_URL || null,
-  });
+app.get('/api/health', async (_req, res) => {
+  try {
+    const productCount = await getProductCount();
+    res.json({
+      ok: true,
+      service: 'ozono-backend',
+      currency: 'COP',
+      database: 'postgresql',
+      products: productCount,
+      frontend: process.env.FRONTEND_URL || null,
+    });
+  } catch (err) {
+    res.status(503).json({
+      ok: false,
+      service: 'ozono-backend',
+      error: err.message,
+    });
+  }
 });
 
 app.use('/api/auth', authRoutes);
@@ -89,6 +106,8 @@ app.use((err, _req, res, _next) => {
   const status = err.message?.includes('CORS') ? 403 : 500;
   res.status(status).json({ error: err.message || 'Error interno del servidor' });
 });
+
+await initDatabase();
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`OZONO API escuchando en puerto ${PORT} (COP)`);
