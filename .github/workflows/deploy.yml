@@ -25,7 +25,7 @@ jobs:
         env:
           # En GitHub Pages necesitamos la URL pública de la API (Render)
           # Puedes sobrescribirla con un secret del repo: VITE_API_URL
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://ozono.onrender.com' }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://tienda-ur10.onrender.com' }}
         run: |
           npm ci
           npm run build
