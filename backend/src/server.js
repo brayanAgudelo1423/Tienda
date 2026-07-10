@@ -4,6 +4,7 @@ import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 
 import authRoutes from './routes/auth.js';
 import productsRoutes from './routes/products.js';
@@ -108,6 +109,29 @@ app.use((err, _req, res, _next) => {
 });
 
 await initDatabase();
+
+async function runSeedScript(relativePath) {
+  const scriptPath = path.join(__dirname, '..', relativePath);
+  await new Promise((resolve) => {
+    const child = spawn(process.execPath, [scriptPath], {
+      stdio: 'inherit',
+      env: process.env,
+    });
+    child.on('exit', () => resolve());
+    child.on('error', (err) => {
+      console.warn(`[OZONO] Seed falló (${relativePath}):`, err.message);
+      resolve();
+    });
+  });
+}
+
+const productCount = await getProductCount();
+if (productCount === 0) {
+  console.log('[OZONO] Catálogo vacío, sembrando productos...');
+  await runSeedScript('scripts/seed.mjs');
+  await runSeedScript('scripts/seed-lociones.mjs');
+  console.log(`[OZONO] Productos en catálogo: ${await getProductCount()}`);
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`OZONO API escuchando en puerto ${PORT} (COP)`);
