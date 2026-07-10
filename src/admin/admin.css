@@ -190,6 +190,124 @@
   display: none;
 }
 
+.admin-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+}
+
+.admin-upload-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.admin-upload-placeholder {
+  aspect-ratio: 4/5;
+  max-height: 220px;
+  border-radius: 14px;
+  background: var(--color-bg-alt);
+  border: 2px dashed #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--color-text-light);
+}
+
+.admin-upload-placeholder p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.admin-upload-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.admin-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.admin-upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-upload-btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.admin-upload-change {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-secondary);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.admin-upload-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--color-text-light);
+  line-height: 1.4;
+}
+
+.admin-preview-sm {
+  max-height: 140px;
+  margin-top: 0.25rem;
+}
+
+.admin-preview-caption {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 0.65rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+@media (max-width: 380px) {
+  .admin-upload-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-preview {
   width: 100%;
   max-height: 280px;

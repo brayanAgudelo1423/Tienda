@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ImagePlus, Camera } from 'lucide-react';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { parseCOPInput } from '../utils/currency';
@@ -42,8 +43,12 @@ const AdminProductForm = () => {
   const [sizePreset, setSizePreset] = useState('ropa');
   const [customSize, setCustomSize] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState('image');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const galleryInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const hoverGalleryInputRef = useRef(null);
 
   const isLocion = form.category === LOCIONES_CATEGORY;
 
@@ -85,20 +90,44 @@ const AdminProductForm = () => {
     }
   };
 
-  const handleUpload = async (e) => {
+  const handleUpload = async (e, target = 'image') => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Selecciona un archivo de imagen (JPG, PNG, WEBP…)');
+      return;
+    }
+
     setUploading(true);
     setError('');
     try {
       const { url } = await api.uploadImage(file);
-      update('image', url);
-      update('hoverImage', url);
+      if (target === 'hover') {
+        update('hoverImage', url);
+      } else {
+        setForm((f) => ({
+          ...f,
+          image: url,
+          hoverImage: !f.hoverImage || f.hoverImage === f.image ? url : f.hoverImage,
+        }));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setUploading(false);
     }
+  };
+
+  const openGallery = (target = 'image') => {
+    setUploadTarget(target);
+    (target === 'hover' ? hoverGalleryInputRef : galleryInputRef).current?.click();
+  };
+
+  const openCamera = () => {
+    setUploadTarget('image');
+    cameraInputRef.current?.click();
   };
 
   const applySizePreset = (preset) => {
@@ -172,16 +201,99 @@ const AdminProductForm = () => {
       </h2>
 
       <form className="admin-form" onSubmit={handleSubmit}>
-        <label className="admin-upload-zone">
-          <input type="file" accept="image/*" capture="environment" onChange={handleUpload} />
-          {uploading ? 'Subiendo foto…' : 'Toca para tomar o elegir foto'}
-        </label>
+        <div className="admin-upload-section">
+          <label className="admin-field-label">Foto del producto</label>
 
-        {form.image && (
-          <div className="admin-preview product-card-image">
-            <img src={mediaUrl(form.image)} alt="" className="product-card-fg" />
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+            className="admin-upload-input-hidden"
+            onChange={(e) => handleUpload(e, uploadTarget)}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="admin-upload-input-hidden"
+            onChange={(e) => handleUpload(e, 'image')}
+          />
+          <input
+            ref={hoverGalleryInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
+            className="admin-upload-input-hidden"
+            onChange={(e) => handleUpload(e, 'hover')}
+          />
+
+          {form.image ? (
+            <div className="admin-preview product-card-image">
+              <img src={mediaUrl(form.image)} alt="" className="product-card-fg" />
+            </div>
+          ) : (
+            <div className="admin-upload-placeholder">
+              <ImagePlus size={32} strokeWidth={1.5} />
+              <p>Sin foto aún</p>
+            </div>
+          )}
+
+          <div className="admin-upload-actions">
+            <button
+              type="button"
+              className="admin-upload-btn admin-upload-btn-primary"
+              disabled={uploading}
+              onClick={() => openGallery('image')}
+            >
+              <ImagePlus size={18} />
+              {uploading && uploadTarget === 'image' ? 'Subiendo…' : 'Galería del teléfono'}
+            </button>
+            <button
+              type="button"
+              className="admin-upload-btn"
+              disabled={uploading}
+              onClick={openCamera}
+            >
+              <Camera size={18} />
+              Tomar foto
+            </button>
           </div>
-        )}
+
+          {form.image && (
+            <button
+              type="button"
+              className="admin-upload-change"
+              disabled={uploading}
+              onClick={() => openGallery('image')}
+            >
+              Cambiar foto principal
+            </button>
+          )}
+
+          {form.image && form.hoverImage && form.hoverImage !== form.image && (
+            <div className="admin-preview admin-preview-sm product-card-image">
+              <img src={mediaUrl(form.hoverImage)} alt="" className="product-card-fg" />
+              <span className="admin-preview-caption">Hover / 2ª foto</span>
+            </div>
+          )}
+
+          {form.image && (
+            <button
+              type="button"
+              className="admin-upload-change"
+              disabled={uploading}
+              onClick={() => openGallery('hover')}
+            >
+              {uploading && uploadTarget === 'hover'
+                ? 'Subiendo…'
+                : 'Subir 2ª foto (hover, opcional)'}
+            </button>
+          )}
+
+          <p className="admin-upload-hint">
+            En el celular, «Galería del teléfono» abre tus fotos guardadas. Máx. 12 MB.
+          </p>
+        </div>
 
         <div className="admin-field">
           <label>Nombre</label>
