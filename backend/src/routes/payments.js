@@ -11,7 +11,6 @@ import {
   getPayUConfig,
   isPayUConfigured,
   mapPayUState,
-  paymentMethodsForType,
 } from '../payu.js';
 
 const router = Router();
@@ -52,12 +51,12 @@ router.post('/checkout', (req, res) => {
   const config = getPayUConfig();
   const referenceCode = `OZONO${sale.id}${Date.now()}`;
   const amount = Math.round(sale.total);
-  const payMethods = paymentMethodsForType(paymentMethod);
+  // Sin paymentMethods: PayU muestra todos los medios habilitados en tu cuenta
+  // (PSE, Nequi, Daviplata, tarjetas, Efecty, Addi, Sistecredito, etc.)
   const signature = buildPaymentSignature({
     referenceCode,
     amount,
     currency: 'COP',
-    paymentMethods: payMethods || undefined,
   });
 
   const responseUrl = `${frontendBaseUrl()}/checkout/resulto`;
@@ -97,10 +96,6 @@ router.post('/checkout', (req, res) => {
     extra1: String(sale.id),
     lng: 'es',
   };
-
-  if (payMethods) {
-    fields.paymentMethods = payMethods;
-  }
 
   res.json({
     action: getCheckoutAction(config.test),

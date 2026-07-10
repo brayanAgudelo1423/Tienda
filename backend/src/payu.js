@@ -36,10 +36,8 @@ export function buildResponseSignature({ referenceCode, amount, currency, transa
   return crypto.createHash('md5').update(chain).digest('hex');
 }
 
-export function paymentMethodsForType(paymentMethod) {
-  if (paymentMethod === 'pse') return 'PSE';
-  if (paymentMethod === 'payu-card') return 'VISA,MASTERCARD,AMEX,DINERS';
-  return '';
+export function isPayUOnlinePayment(paymentMethod) {
+  return paymentMethod === 'payu-online' || paymentMethod === 'payu-card' || paymentMethod === 'pse';
 }
 
 export function mapPayUState(state) {

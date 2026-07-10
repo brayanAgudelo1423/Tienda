@@ -92,7 +92,9 @@ function ensureProductColumns() {
 
 function saleStatusForPayment(paymentMethod) {
   if (paymentMethod === 'contraentrega') return 'confirmada';
-  if (paymentMethod === 'payu-card' || paymentMethod === 'pse') return 'pendiente_pago';
+  if (paymentMethod === 'payu-online' || paymentMethod === 'payu-card' || paymentMethod === 'pse') {
+    return 'pendiente_pago';
+  }
   return 'confirmada';
 }
 

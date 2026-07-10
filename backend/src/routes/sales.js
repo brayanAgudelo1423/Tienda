@@ -4,7 +4,13 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-const VALID_PAYMENT_METHODS = new Set(['payu-card', 'pse', 'contraentrega']);
+const VALID_PAYMENT_METHODS = new Set(['payu-online', 'payu-card', 'pse', 'contraentrega']);
+
+function normalizePaymentMethod(paymentMethod) {
+  if (paymentMethod === 'payu-card' || paymentMethod === 'pse') return 'payu-online';
+  if (VALID_PAYMENT_METHODS.has(paymentMethod)) return paymentMethod;
+  return 'contraentrega';
+}
 
 router.post('/', (req, res) => {
   const { total, subtotal, customer, items, paymentMethod } = req.body;
@@ -26,9 +32,7 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Total de venta inválido' });
   }
 
-  const normalizedPayment = VALID_PAYMENT_METHODS.has(paymentMethod)
-    ? paymentMethod
-    : 'contraentrega';
+  const normalizedPayment = normalizePaymentMethod(paymentMethod);
 
   const sale = createSale({
     total: normalizedTotal,

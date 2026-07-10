@@ -16,19 +16,39 @@ import { api, mediaUrl, submitPayUForm } from '../api/client';
 import { formatCOP } from '../utils/currency';
 
 const PAYMENT_METHODS = [
-  { id: 'payu-card', label: 'Tarjeta de crédito/débito (PayU)', desc: 'Visa, Mastercard, Amex vía PayU' },
-  { id: 'pse', label: 'PSE — Débito desde tu banco', desc: 'Pago inmediato con tu cuenta bancaria' },
+  {
+    id: 'payu-online',
+    label: 'Pago en línea — PayU',
+    desc: 'Elige en la pasarela segura: tarjetas, PSE (todos los bancos), Nequi, Daviplata, Addi, Sistecredito y más.',
+  },
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
 ];
 
+const PAYU_AVAILABLE_METHODS = [
+  'Tarjetas crédito/débito',
+  'PSE — todos los bancos',
+  'Nequi',
+  'Daviplata',
+  'Bancolombia',
+  'Efecty',
+  'Addi',
+  'Sistecredito',
+  'Baloto',
+  'Pago en efectivo',
+];
+
 const SUCCESS_COPY = {
+  'payu-online': {
+    title: 'Redirigiendo a PayU…',
+    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
+  },
   'payu-card': {
     title: 'Redirigiendo a PayU…',
-    body: 'Completa el pago seguro en la pasarela PayU.',
+    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
   },
   pse: {
     title: 'Redirigiendo a PayU…',
-    body: 'Serás llevado a PayU para pagar con PSE desde tu banco.',
+    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
   },
   contraentrega: {
     title: '¡Pedido confirmado!',
@@ -43,7 +63,9 @@ const Checkout = ({ items, onOrderComplete }) => {
   const [completedPayment, setCompletedPayment] = useState('contraentrega');
   const [error, setError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [payment, setPayment] = useState('payu-card');
+  const [payment, setPayment] = useState('payu-online');
+
+  const isPayU = payment === 'payu-online' || payment === 'payu-card' || payment === 'pse';
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shipping = subtotal > 0 ? 0 : 0;
@@ -82,7 +104,7 @@ const Checkout = ({ items, onOrderComplete }) => {
         paymentMethod: payment,
       });
 
-      if (payment === 'payu-card' || payment === 'pse') {
+      if (isPayU) {
         const documentNumber = String(form.get('documentNumber') || '').trim();
         const documentType = form.get('documentType') || 'CC';
         if (!documentNumber) {
@@ -238,10 +260,11 @@ const Checkout = ({ items, onOrderComplete }) => {
               </div>
             </section>
 
+            {isPayU && (
             <section className="checkout-card">
               <h2>
                 <Lock size={18} />
-                Identificación (requerida para pago online)
+                Identificación (requerida para pago en línea)
               </h2>
               <div className="checkout-field-row">
                 <div className="checkout-field">
@@ -265,6 +288,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                 </div>
               </div>
             </section>
+            )}
 
             <section className="checkout-section">
               <h2>
@@ -290,9 +314,21 @@ const Checkout = ({ items, onOrderComplete }) => {
                 ))}
               </div>
 
+              {payment === 'payu-online' && (
+                <div className="checkout-payu-methods">
+                  <p className="checkout-payu-methods-title">Medios disponibles en PayU:</p>
+                  <ul className="checkout-payu-methods-list">
+                    {PAYU_AVAILABLE_METHODS.map((name) => (
+                      <li key={name}>{name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <p className="checkout__payu-note">
-                Los pagos con tarjeta y PSE se procesan de forma segura a través de PayU.
-                ORÍGEN nunca almacena los datos de tu tarjeta.
+                Al pagar en línea serás redirigido a PayU, donde podrás elegir cualquier método
+                activo en tu cuenta (PSE con cualquier banco, Nequi, Daviplata, tarjetas, Addi,
+                Sistecredito, efectivo y más). ORÍGEN nunca almacena los datos de tu tarjeta.
               </p>
             </section>
 
@@ -539,6 +575,38 @@ const checkoutStyles = `
     font-size: 0.76rem;
     color: #6b6a66;
     margin-bottom: 0;
+  }
+
+  .checkout-payu-methods {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--color-bg-alt);
+    border-radius: 10px;
+  }
+
+  .checkout-payu-methods-title {
+    margin: 0 0 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  .checkout-payu-methods-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .checkout-payu-methods-list li {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.55rem;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 999px;
+    color: var(--color-text-light);
   }
 
   .checkout-badge {
