@@ -29,6 +29,7 @@ function normalizeProductBody(body) {
     productType: body.productType?.trim() || 'Producto',
     price: Number(body.price),
     category: body.category?.trim() || 'Moda',
+    gender: body.gender?.trim() || null,
     rating: body.rating !== undefined ? Number(body.rating) : 4.6,
     reviewCount: body.reviewCount !== undefined ? Number(body.reviewCount) : 0,
     description: body.description?.trim() || '',

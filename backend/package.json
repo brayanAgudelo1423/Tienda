@@ -11,6 +11,7 @@
     "render:start": "npm ci --omit=dev 2>/dev/null || npm install && node scripts/start-production.mjs",
     "dev": "node --watch src/server.js",
     "seed": "node scripts/seed.mjs",
+    "seed:lociones": "node scripts/seed-lociones.mjs",
     "postinstall": "node -e \"console.log('OZONO backend listo')\""
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2"
+    "multer": "^1.4.5-lts.2",
+    "premium-clothing-store": "file:.."
   }
 }

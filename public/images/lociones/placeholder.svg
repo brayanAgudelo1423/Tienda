@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" fill="none">
+  <rect width="400" height="500" fill="#f4f1ec"/>
+  <rect x="155" y="80" width="90" height="280" rx="12" fill="#d4c4a8" opacity="0.35"/>
+  <rect x="170" y="95" width="60" height="220" rx="8" fill="#1a1a1a" opacity="0.08"/>
+  <text x="200" y="420" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#8a7f6e">Loción Original</text>
+  <text x="200" y="448" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#b0a898">OZONO</text>
+</svg>

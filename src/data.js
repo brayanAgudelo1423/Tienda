@@ -1,4 +1,8 @@
 import { toCopPrice } from './utils/currency.js';
+import { locionesProducts } from './data-lociones.js';
+import { FRAGRANCE_BRANDS } from './constants/catalog.js';
+
+export { FRAGRANCE_BRANDS };
 
 export const NAV_BRANDS = [
   { name: 'Hugo Boss', slug: 'hugo-boss' },
@@ -8,6 +12,8 @@ export const NAV_BRANDS = [
   { name: 'Tomi', slug: 'tomi' },
   { name: 'Novedades', slug: 'novedades' },
 ];
+
+export const ALL_BRANDS = [...NAV_BRANDS, ...FRAGRANCE_BRANDS];
 
 const SHOE_SIZES = ['38', '39', '40', '41', '42', '43'];
 const CLOTHING_SIZES = ['S', 'M', 'L', 'XL'];
@@ -425,6 +431,7 @@ const catalogProducts = [
     };
   }),
   ...hugoBossProducts,
+  ...locionesProducts,
 ];
 
 /** Catálogo con precios en COP (pesos colombianos) */

@@ -10,6 +10,7 @@ import productsRoutes from './routes/products.js';
 import brandsRoutes from './routes/brands.js';
 import salesRoutes from './routes/sales.js';
 import uploadRoutes from './routes/upload.js';
+import paymentsRoutes from './routes/payments.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = new Set(
   [
     process.env.FRONTEND_URL,
+    'https://brayanagudelo1423.github.io',
     'https://brayanagudelo1423-png.github.io',
     'http://localhost:5173',
     'http://localhost:5174',
@@ -48,6 +50,7 @@ app.use(
   })
 );
 
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.json({ limit: '2mb' }));
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -78,6 +81,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/brands', brandsRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/payments', paymentsRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.use((err, _req, res, _next) => {

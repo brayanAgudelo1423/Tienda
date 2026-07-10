@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, X } from 'lucide-react';
 import { api, setAdminToken } from '../api/client';
 
@@ -63,6 +63,7 @@ const Footer = () => {
             <li style={{ cursor: 'pointer' }}>Envío y entrega</li>
             <li style={{ cursor: 'pointer' }}>Devoluciones</li>
             <li style={{ cursor: 'pointer' }}>Opciones de pago</li>
+            <li><Link to="/contacto" style={{ color: 'var(--color-secondary)', fontWeight: 600, textDecoration: 'none' }}>📞 Contacto & Ayuda</Link></li>
           </ul>
         </div>
         <div style={styles.col}>
@@ -75,14 +76,24 @@ const Footer = () => {
         </div>
         <div style={styles.col}>
           <div style={styles.social}>
-            <Mail size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
-            <Phone size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
+            <a href="https://wa.me/573009902243" target="_blank" rel="noopener noreferrer" title="WhatsApp 300 990 2243">
+              <Phone size={24} style={{ cursor: 'pointer', color: '#25D366' }} />
+            </a>
+            <a href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==" target="_blank" rel="noopener noreferrer" title="Instagram @_ozono_3">
+              <Mail size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
+            </a>
             <MapPin size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
           </div>
+          <Link to="/politica-de-privacidad" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', textDecoration: 'underline', marginTop: '0.5rem' }}>
+            Política de Privacidad
+          </Link>
         </div>
       </div>
       <div style={styles.copy}>
-        &copy; {new Date().getFullYear()} OZONO, Inc. Todos los derechos reservados.
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+          <span>&copy; {new Date().getFullYear()} OZONO, Inc. Todos los derechos reservados.</span>
+          <span>Pagos seguros procesados por <strong>PayU</strong> · <Link to="/politica-de-privacidad" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Política de Privacidad</Link></span>
+        </div>
       </div>
 
       {showLogin && (

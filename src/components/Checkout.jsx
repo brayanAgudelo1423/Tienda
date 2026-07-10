@@ -12,13 +12,38 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { api, mediaUrl } from '../api/client';
+import { api, mediaUrl, submitPayUForm } from '../api/client';
 import { formatCOP } from '../utils/currency';
 
-const Checkout = ({ items }) => {
+const PAYMENT_METHODS = [
+  { id: 'payu-card', label: 'Tarjeta de crédito/débito (PayU)', desc: 'Visa, Mastercard, Amex vía PayU' },
+  { id: 'pse', label: 'PSE — Débito desde tu banco', desc: 'Pago inmediato con tu cuenta bancaria' },
+  { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
+];
+
+const SUCCESS_COPY = {
+  'payu-card': {
+    title: 'Redirigiendo a PayU…',
+    body: 'Completa el pago seguro en la pasarela PayU.',
+  },
+  pse: {
+    title: 'Redirigiendo a PayU…',
+    body: 'Serás llevado a PayU para pagar con PSE desde tu banco.',
+  },
+  contraentrega: {
+    title: '¡Pedido confirmado!',
+    body: 'Tu pedido quedó agendado. Pagas en efectivo o datáfono cuando lo recibas.',
+  },
+};
+
+const Checkout = ({ items, onOrderComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  const [completedPayment, setCompletedPayment] = useState('contraentrega');
+  const [error, setError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [payment, setPayment] = useState('payu-card');
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shipping = subtotal > 0 ? 0 : 0;
@@ -27,6 +52,7 @@ const Checkout = ({ items }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    setError('');
 
     const form = new FormData(e.target);
     const customer = {
@@ -48,16 +74,41 @@ const Checkout = ({ items }) => {
     }));
 
     try {
-      await api.createSale({
+      const sale = await api.createSale({
         total,
         subtotal,
         customer,
         items: saleItems,
+        paymentMethod: payment,
       });
+
+      if (payment === 'payu-card' || payment === 'pse') {
+        const documentNumber = String(form.get('documentNumber') || '').trim();
+        const documentType = form.get('documentType') || 'CC';
+        if (!documentNumber) {
+          throw new Error('Ingresa tu número de documento para pagar con PayU');
+        }
+
+        const payu = await api.createPayUCheckout({
+          saleId: sale.id,
+          customer,
+          paymentMethod: payment,
+          documentType,
+          documentNumber,
+        });
+
+        onOrderComplete?.();
+        submitPayUForm(payu);
+        return;
+      }
+
+      setOrderId(sale.id);
+      setCompletedPayment(payment);
       setIsSuccess(true);
+      onOrderComplete?.();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      setIsSuccess(true);
+    } catch (err) {
+      setError(err.message || 'No se pudo registrar el pedido. Intenta de nuevo.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsProcessing(false);
@@ -76,6 +127,8 @@ const Checkout = ({ items }) => {
   }
 
   if (isSuccess) {
+    const copy = SUCCESS_COPY[completedPayment] ?? SUCCESS_COPY.contraentrega;
+
     return (
       <motion.div
         className="checkout-page checkout-success"
@@ -85,8 +138,9 @@ const Checkout = ({ items }) => {
         <div className="checkout-success-icon">
           <CheckCircle size={64} strokeWidth={1.5} />
         </div>
-        <h1>¡Pago exitoso!</h1>
-        <p>Gracias por tu compra. Recibirás un correo con el estado de tu pedido.</p>
+        <h1>{copy.title}</h1>
+        {orderId && <p className="checkout-order-id">Pedido #{orderId}</p>}
+        <p>{copy.body}</p>
         <Link to="/" className="btn">
           Volver a la tienda
         </Link>
@@ -102,6 +156,12 @@ const Checkout = ({ items }) => {
           <h1>Finalizar compra</h1>
           <p className="checkout-subtitle">Completa tus datos para recibir tu pedido</p>
         </header>
+
+        {error && (
+          <div className="checkout-error" role="alert">
+            {error}
+          </div>
+        )}
 
         {/* Resumen colapsable en móvil */}
         <div className="checkout-summary-mobile">
@@ -180,35 +240,60 @@ const Checkout = ({ items }) => {
 
             <section className="checkout-card">
               <h2>
-                <CreditCard size={18} />
-                Método de pago
-                <span className="checkout-badge">
-                  <Lock size={12} />
-                  Simulado
-                </span>
+                <Lock size={18} />
+                Identificación (requerida para pago online)
               </h2>
-              <div className="checkout-field">
-                <label htmlFor="cardNumber">Número de tarjeta</label>
-                <input
-                  id="cardNumber"
-                  name="cardNumber"
-                  type="text"
-                  required
-                  placeholder="1234 5678 9012 3456"
-                  inputMode="numeric"
-                  autoComplete="cc-number"
-                />
-              </div>
               <div className="checkout-field-row">
                 <div className="checkout-field">
-                  <label htmlFor="expiry">Vencimiento</label>
-                  <input id="expiry" name="expiry" type="text" required placeholder="MM/AA" />
+                  <label htmlFor="documentType">Tipo de documento</label>
+                  <select id="documentType" name="documentType" defaultValue="CC">
+                    <option value="CC">Cédula de ciudadanía</option>
+                    <option value="CE">Cédula de extranjería</option>
+                    <option value="NIT">NIT</option>
+                    <option value="PP">Pasaporte</option>
+                  </select>
                 </div>
                 <div className="checkout-field">
-                  <label htmlFor="cvc">CVC</label>
-                  <input id="cvc" name="cvc" type="text" required placeholder="123" inputMode="numeric" />
+                  <label htmlFor="documentNumber">Número de documento</label>
+                  <input
+                    id="documentNumber"
+                    name="documentNumber"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Ej. 1020304050"
+                  />
                 </div>
               </div>
+            </section>
+
+            <section className="checkout-section">
+              <h2>
+                <CreditCard size={18} />
+                Método de pago
+              </h2>
+
+              <div className="payment-options">
+                {PAYMENT_METHODS.map((m) => (
+                  <label key={m.id} className={`payment-option ${payment === m.id ? 'is-active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={m.id}
+                      checked={payment === m.id}
+                      onChange={() => setPayment(m.id)}
+                    />
+                    <span className="payment-option__text">
+                      <strong>{m.label}</strong>
+                      <small>{m.desc}</small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <p className="checkout__payu-note">
+                Los pagos con tarjeta y PSE se procesan de forma segura a través de PayU.
+                ORÍGEN nunca almacena los datos de tu tarjeta.
+              </p>
             </section>
 
             <button type="submit" className="btn checkout-submit-desktop" disabled={isProcessing}>
@@ -376,7 +461,8 @@ const checkoutStyles = `
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   }
 
-  .checkout-card h2 {
+  .checkout-card h2,
+  .checkout-section h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -387,6 +473,72 @@ const checkoutStyles = `
     text-transform: none;
     letter-spacing: 0;
     color: var(--color-primary);
+  }
+
+  .checkout-section {
+    background: #fff;
+    border: 1px solid var(--color-bg-alt);
+    border-radius: 14px;
+    padding: 1.25rem 1.15rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .payment-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--line-light, #e5e5e5);
+    border-radius: var(--radius-sm, 10px);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color var(--t-fast, 0.2s) var(--ease, ease), background var(--t-fast, 0.2s) var(--ease, ease);
+  }
+
+  .payment-option:hover {
+    border-color: var(--c-gold, #d4af37);
+  }
+
+  .payment-option.is-active {
+    border-color: var(--color-primary);
+    background: var(--c-ivory-dim, #f9f9f7);
+  }
+
+  .payment-option input {
+    accent-color: var(--c-gold-dim, #e8d5b7);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .payment-option__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .payment-option__text strong {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-primary);
+  }
+
+  .payment-option__text small {
+    color: #6b6a66;
+    font-size: 0.76rem;
+  }
+
+  .checkout__payu-note {
+    margin-top: 16px;
+    font-size: 0.76rem;
+    color: #6b6a66;
+    margin-bottom: 0;
   }
 
   .checkout-badge {
@@ -441,6 +593,17 @@ const checkoutStyles = `
     border-color: var(--color-primary);
     background: #fff;
     box-shadow: 0 0 0 3px rgba(17,17,17,0.08);
+  }
+
+  .checkout-field select {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    background: #fafafa;
+    color: var(--color-primary);
   }
 
   .checkout-field-row {
@@ -653,6 +816,24 @@ const checkoutStyles = `
     max-width: 320px;
     margin: 0 auto 2rem;
     line-height: 1.5;
+  }
+
+  .checkout-order-id {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: -0.5rem auto 1rem !important;
+  }
+
+  .checkout-error {
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    background: #fff5f5;
+    border: 1px solid #f5c2c2;
+    color: #9b1c1c;
+    font-size: 0.9rem;
+    line-height: 1.45;
   }
 
   .checkout-empty p {

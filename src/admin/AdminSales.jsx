@@ -2,6 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { formatCOP } from '../utils/currency';
 
+const PAYMENT_LABELS = {
+  'payu-card': 'Tarjeta (PayU)',
+  pse: 'PSE',
+  contraentrega: 'Contraentrega',
+};
+
+const STATUS_LABELS = {
+  confirmada: 'Confirmada',
+  pendiente_pago: 'Pendiente de pago',
+  pagada: 'Pagada',
+  rechazada: 'Rechazada',
+  completada: 'Completada',
+};
+
 const AdminSales = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +54,8 @@ const AdminSales = () => {
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: '0 0 0.5rem' }}>
             {new Date(sale.createdAt).toLocaleString('es-CO')}
+            {sale.paymentMethod ? ` · ${PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod}` : ''}
+            {sale.status ? ` · ${STATUS_LABELS[sale.status] ?? sale.status}` : ''}
           </p>
           {sale.customerName && (
             <p style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>

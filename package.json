@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader native",
+    "dev:all": "concurrently -n front,back -c blue,green \"npm run dev\" \"npm --prefix backend run dev\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -13,7 +14,7 @@
     "start": "npm --prefix backend start",
     "render:build": "npm --prefix backend install && npm --prefix backend run seed"
   },
-  "homepage": "https://brayanagudelo1423-png.github.io/OZONO",
+  "homepage": "https://brayanagudelo1423.github.io/Tienda",
   "dependencies": {
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "gh-pages": "^6.3.0",
     "globals": "^17.6.0",
+    "concurrently": "^9.2.0",
     "vite": "^8.0.12"
   }
 }

@@ -3,7 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { parseCOPInput } from '../utils/currency';
-import { NAV_BRANDS } from '../data';
+import { ALL_BRANDS } from '../data';
+import {
+  PRODUCT_CATEGORIES,
+  GENDERS,
+  LOCIONES_CATEGORY,
+  LOCION_SIZES,
+} from '../constants/catalog';
 
 const CLOTHING_SIZES = ['S', 'M', 'L', 'XL'];
 const SHOE_SIZES = ['38', '39', '40', '41', '42', '43'];
@@ -14,10 +20,11 @@ const DEFAULT_COLORS = [
 
 const emptyForm = {
   name: '',
-  brand: NAV_BRANDS[0]?.name || 'Lacoste',
+  brand: ALL_BRANDS[0]?.name || 'Lacoste',
   productType: 'Polo',
   price: '',
   category: 'Polos',
+  gender: '',
   description: '',
   image: '',
   hoverImage: '',
@@ -38,6 +45,8 @@ const AdminProductForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const isLocion = form.category === LOCIONES_CATEGORY;
+
   useEffect(() => {
     if (!isEdit) return;
     api.getAdminProducts().then((list) => {
@@ -49,6 +58,7 @@ const AdminProductForm = () => {
         productType: p.productType,
         price: String(p.price),
         category: p.category,
+        gender: p.gender || '',
         description: p.description,
         image: p.image,
         hoverImage: p.hoverImage,
@@ -56,11 +66,24 @@ const AdminProductForm = () => {
         colors: p.colors,
         active: p.active,
       });
-      setSizePreset(p.sizes.some((s) => SHOE_SIZES.includes(s)) ? 'calzado' : 'ropa');
+      if (p.category === LOCIONES_CATEGORY) setSizePreset('locion');
+      else if (p.sizes.some((s) => SHOE_SIZES.includes(s))) setSizePreset('calzado');
+      else setSizePreset('ropa');
     });
   }, [id, isEdit]);
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const handleCategoryChange = (category) => {
+    update('category', category);
+    if (category === LOCIONES_CATEGORY) {
+      setSizePreset('locion');
+      update('productType', 'Eau de Parfum');
+      update('sizes', [...LOCION_SIZES.slice(0, 3)]);
+      update('colors', [{ name: 'Original', hex: '#d4c4a8' }]);
+      if (!form.gender) update('gender', 'unisex');
+    }
+  };
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -80,7 +103,9 @@ const AdminProductForm = () => {
 
   const applySizePreset = (preset) => {
     setSizePreset(preset);
-    update('sizes', preset === 'calzado' ? [...SHOE_SIZES] : [...CLOTHING_SIZES]);
+    if (preset === 'calzado') update('sizes', [...SHOE_SIZES]);
+    else if (preset === 'locion') update('sizes', [...LOCION_SIZES]);
+    else update('sizes', [...CLOTHING_SIZES]);
   };
 
   const addSize = () => {
@@ -108,13 +133,21 @@ const AdminProductForm = () => {
     e.preventDefault();
     setSaving(true);
     setError('');
+
+    if (isLocion && !form.gender) {
+      setError('Selecciona género para la loción');
+      setSaving(false);
+      return;
+    }
+
     const brandSlug =
-      NAV_BRANDS.find((b) => b.name === form.brand)?.slug ||
+      ALL_BRANDS.find((b) => b.name === form.brand)?.slug ||
       form.brand.toLowerCase().replace(/\s+/g, '-');
 
     const payload = {
       ...form,
       brandSlug,
+      gender: isLocion ? form.gender : null,
       price: parseCOPInput(form.price),
       rating: 4.6,
       reviewCount: 0,
@@ -156,10 +189,35 @@ const AdminProductForm = () => {
         </div>
 
         <div className="admin-field">
+          <label>Categoría</label>
+          <select value={form.category} onChange={(e) => handleCategoryChange(e.target.value)}>
+            {PRODUCT_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isLocion && (
+          <div className="admin-field">
+            <label>Género</label>
+            <select value={form.gender} onChange={(e) => update('gender', e.target.value)} required>
+              <option value="">Seleccionar…</option>
+              {GENDERS.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="admin-field">
           <label>Marca</label>
           <select value={form.brand} onChange={(e) => update('brand', e.target.value)}>
-            {NAV_BRANDS.map((b) => (
-              <option key={b.slug} value={b.name}>
+            {ALL_BRANDS.map((b) => (
+              <option key={`${b.slug}-${b.name}`} value={b.name}>
                 {b.name}
               </option>
             ))}
@@ -171,7 +229,7 @@ const AdminProductForm = () => {
           <input
             value={form.productType}
             onChange={(e) => update('productType', e.target.value)}
-            placeholder="Polo, Chaqueta, Tennis…"
+            placeholder={isLocion ? 'Eau de Parfum, Eau de Toilette…' : 'Polo, Chaqueta, Tennis…'}
           />
         </div>
 
@@ -187,11 +245,6 @@ const AdminProductForm = () => {
         </div>
 
         <div className="admin-field">
-          <label>Categoría</label>
-          <input value={form.category} onChange={(e) => update('category', e.target.value)} />
-        </div>
-
-        <div className="admin-field">
           <label>Descripción</label>
           <textarea
             value={form.description}
@@ -200,22 +253,35 @@ const AdminProductForm = () => {
         </div>
 
         <div className="admin-field">
-          <label>Tallas</label>
+          <label>{isLocion ? 'Presentaciones (ml)' : 'Tallas'}</label>
           <div className="admin-chip-row" style={{ marginBottom: '0.5rem' }}>
-            <button
-              type="button"
-              className={`admin-chip ${sizePreset === 'ropa' ? 'selected' : ''}`}
-              onClick={() => applySizePreset('ropa')}
-            >
-              Ropa S–XL
-            </button>
-            <button
-              type="button"
-              className={`admin-chip ${sizePreset === 'calzado' ? 'selected' : ''}`}
-              onClick={() => applySizePreset('calzado')}
-            >
-              Calzado 38–43
-            </button>
+            {!isLocion && (
+              <>
+                <button
+                  type="button"
+                  className={`admin-chip ${sizePreset === 'ropa' ? 'selected' : ''}`}
+                  onClick={() => applySizePreset('ropa')}
+                >
+                  Ropa S–XL
+                </button>
+                <button
+                  type="button"
+                  className={`admin-chip ${sizePreset === 'calzado' ? 'selected' : ''}`}
+                  onClick={() => applySizePreset('calzado')}
+                >
+                  Calzado 38–43
+                </button>
+              </>
+            )}
+            {isLocion && (
+              <button
+                type="button"
+                className={`admin-chip ${sizePreset === 'locion' ? 'selected' : ''}`}
+                onClick={() => applySizePreset('locion')}
+              >
+                Lociones 30–200ml
+              </button>
+            )}
           </div>
           <div className="admin-chip-row">
             {form.sizes.map((s) => (
@@ -228,7 +294,7 @@ const AdminProductForm = () => {
             <input
               value={customSize}
               onChange={(e) => setCustomSize(e.target.value)}
-              placeholder="Talla extra"
+              placeholder={isLocion ? 'Ej. 150ml' : 'Talla extra'}
             />
             <button type="button" className="admin-btn-sm" onClick={addSize}>
               +
@@ -237,7 +303,7 @@ const AdminProductForm = () => {
         </div>
 
         <div className="admin-field">
-          <label>Colores</label>
+          <label>Colores / variantes</label>
           {form.colors.map((c, i) => (
             <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <input

@@ -1,11 +1,5 @@
-/** Base pública: en GitHub Pages siempre /OZONO/ */
+/** Base pública según Vite (GitHub Pages: /Tienda/) */
 export function getPublicBase() {
-  if (typeof window !== 'undefined') {
-    const { hostname, pathname } = window.location;
-    if (hostname.includes('github.io') && pathname.toLowerCase().startsWith('/ozono')) {
-      return '/OZONO/';
-    }
-  }
   return import.meta.env.BASE_URL || '/';
 }
 

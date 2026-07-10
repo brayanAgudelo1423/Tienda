@@ -20,22 +20,22 @@ const FloatingSocials = () => {
       <motion.a 
         whileHover={{ scale: 1.15, boxShadow: '0 8px 25px rgba(37, 211, 102, 0.5)' }} 
         whileTap={{ scale: 0.95 }}
-        href="https://wa.me/" 
+        href="https://wa.me/573009902243?text=Hola%20OZONO%2C%20necesito%20ayuda%20con%20mi%20pedido." 
         target="_blank"
         rel="noopener noreferrer"
         style={styles.whatsapp} 
-        title="WhatsApp"
+        title="WhatsApp – 300 990 2243"
       >
         <WhatsAppIcon />
       </motion.a>
       <motion.a 
         whileHover={{ scale: 1.15, boxShadow: '0 8px 25px rgba(225, 48, 108, 0.5)' }} 
         whileTap={{ scale: 0.95 }}
-        href="https://instagram.com/" 
+        href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==" 
         target="_blank"
         rel="noopener noreferrer"
         style={styles.instagram} 
-        title="Instagram"
+        title="Instagram @_ozono_3"
       >
         <InstagramIcon />
       </motion.a>

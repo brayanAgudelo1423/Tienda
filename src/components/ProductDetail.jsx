@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import StarRating from './StarRating';
 import { formatCOP } from '../utils/currency';
 import { mediaUrl } from '../api/client';
+import { LOCIONES_CATEGORY } from '../constants/catalog';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const navigate = useNavigate();
@@ -26,20 +27,24 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
 
   if (!product) return null;
 
+  const isLocion = product.category === LOCIONES_CATEGORY;
+  const defaultColor = product.colors?.[0]?.hex || '#d4c4a8';
+
   const buildCartItem = () => {
     if (!selectedSize) {
-      setError('Selecciona una talla');
+      setError(isLocion ? 'Selecciona una presentación' : 'Selecciona una talla');
       return null;
     }
-    if (!selectedColor) {
+    const colorHex = selectedColor || defaultColor;
+    if (!isLocion && !selectedColor) {
       setError('Selecciona un color');
       return null;
     }
     return {
       ...product,
       selectedSize,
-      selectedColor,
-      colorName: product.colors.find((c) => c.hex === selectedColor)?.name ?? selectedColor,
+      selectedColor: colorHex,
+      colorName: product.colors.find((c) => c.hex === colorHex)?.name ?? colorHex,
     };
   };
 
@@ -115,7 +120,7 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
               <p style={styles.description}>{product.description}</p>
 
               <div style={styles.optionGroup}>
-                <h4 style={styles.optionLabel}>Talla</h4>
+                <h4 style={styles.optionLabel}>{isLocion ? 'Presentación' : 'Talla'}</h4>
                 <div style={styles.sizeGrid}>
                   {product.sizes.map((size) => (
                     <button
@@ -136,8 +141,9 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
                 </div>
               </div>
 
+              {(!isLocion || product.colors.length > 1) && (
               <div style={styles.optionGroup}>
-                <h4 style={styles.optionLabel}>Color</h4>
+                <h4 style={styles.optionLabel}>{isLocion ? 'Variante' : 'Color'}</h4>
                 <div style={styles.colorGrid}>
                   {product.colors.map((color) => (
                     <button
@@ -169,6 +175,7 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
                   </p>
                 )}
               </div>
+              )}
 
               {error && <p style={styles.error}>{error}</p>}
 

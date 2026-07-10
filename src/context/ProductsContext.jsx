@@ -1,14 +1,18 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { api } from '../api/client';
 import { products as staticProducts, NAV_BRANDS as staticBrands } from '../data';
+import { getFashionBrands, getFragranceBrands } from '../utils/brands';
 
 const ProductsContext = createContext(null);
 
 export function ProductsProvider({ children }) {
   const [products, setProducts] = useState([]);
-  const [brands, setBrands] = useState(staticBrands);
+  const [allBrands, setAllBrands] = useState(staticBrands);
   const [loading, setLoading] = useState(true);
   const [usingApi, setUsingApi] = useState(false);
+
+  const fashionBrands = useMemo(() => getFashionBrands(allBrands), [allBrands]);
+  const fragranceBrands = useMemo(() => getFragranceBrands(products), [products]);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -20,12 +24,12 @@ export function ProductsProvider({ children }) {
       ]);
       setProducts(apiProducts);
       if (apiBrands?.length) {
-        setBrands(apiBrands.map((b) => ({ name: b.name, slug: b.slug })));
+        setAllBrands(apiBrands.map((b) => ({ name: b.name, slug: b.slug })));
       }
       setUsingApi(true);
     } catch {
       setProducts(staticProducts);
-      setBrands(staticBrands);
+      setAllBrands(staticBrands);
       setUsingApi(false);
     } finally {
       setLoading(false);
@@ -53,7 +57,15 @@ export function ProductsProvider({ children }) {
 
   return (
     <ProductsContext.Provider
-      value={{ products, brands, loading, usingApi, reloadProducts: loadProducts }}
+      value={{
+        products,
+        brands: fashionBrands,
+        fashionBrands,
+        fragranceBrands,
+        loading,
+        usingApi,
+        reloadProducts: loadProducts,
+      }}
     >
       {children}
     </ProductsContext.Provider>

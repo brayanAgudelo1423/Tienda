@@ -9,6 +9,10 @@ import Checkout from './components/Checkout';
 import Footer from './components/Footer';
 import FloatingSocials from './components/FloatingSocials';
 import Brands from './pages/Brands';
+import Lociones from './pages/Lociones';
+import Contacto from './pages/Contacto';
+import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
+import CheckoutResult from './pages/CheckoutResult';
 import { getCartItemId } from './utils/product';
 
 function StoreApp() {
@@ -31,6 +35,10 @@ function StoreApp() {
     setCartItems((prev) => prev.filter((item) => item.cartId !== cartId));
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
     <div className="app">
       <Header cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
@@ -47,8 +55,13 @@ function StoreApp() {
           }
         />
         <Route path="/marcas/:brandSlug" element={<Brands onAddToCart={addToCart} />} />
+        <Route path="/lociones" element={<Lociones onAddToCart={addToCart} />} />
+        <Route path="/lociones/marca/:brandSlug" element={<Lociones onAddToCart={addToCart} />} />
         <Route path="/cart" element={<Cart items={cartItems} onRemove={removeFromCart} />} />
-        <Route path="/checkout" element={<Checkout items={cartItems} />} />
+        <Route path="/checkout" element={<Checkout items={cartItems} onOrderComplete={clearCart} />} />
+        <Route path="/checkout/resulto" element={<CheckoutResult />} />
+        <Route path="/contacto" element={<Contacto />} />
+        <Route path="/politica-de-privacidad" element={<PoliticaPrivacidad />} />
       </Routes>
       <Footer />
     </div>

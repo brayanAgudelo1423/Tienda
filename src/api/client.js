@@ -1,6 +1,13 @@
 import { assetUrl, getPublicBase, normalizeStoreImagePath } from '../utils/assets.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+function connectionHint() {
+  if (import.meta.env.DEV) {
+    return 'Asegúrate de tener el backend corriendo: npm --prefix backend run dev';
+  }
+  return 'Verifica https://ozono.onrender.com/api/health y espera un minuto si el servidor estaba dormido.';
+}
 
 function getAdminToken() {
   return localStorage.getItem('ozono_admin_token');
@@ -27,9 +34,7 @@ async function request(path, options = {}) {
           : JSON.stringify(options.body),
     });
   } catch {
-    throw new Error(
-      'No se pudo conectar con el servidor. Verifica https://ozono.onrender.com/api/health y espera 1 minuto.'
-    );
+    throw new Error(`No se pudo conectar con el servidor. ${connectionHint()}`);
   }
 
   const data = await res.json().catch(() => ({}));
@@ -70,6 +75,11 @@ export const api = {
 
   createSale: (sale) => request('/api/sales', { method: 'POST', body: sale }),
 
+  createPayUCheckout: (payload) =>
+    request('/api/payments/checkout', { method: 'POST', body: payload }),
+
+  checkHealth: () => request('/api/health'),
+
   getSales: (limit = 100) =>
     request(`/api/sales/admin?limit=${limit}`, { auth: true }),
 
@@ -102,4 +112,23 @@ export function mediaUrl(path) {
 export function setAdminToken(token) {
   if (token) localStorage.setItem('ozono_admin_token', token);
   else localStorage.removeItem('ozono_admin_token');
+}
+
+export function submitPayUForm({ action, fields }) {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = action;
+  form.style.display = 'none';
+
+  Object.entries(fields).forEach(([name, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = String(value);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
 }

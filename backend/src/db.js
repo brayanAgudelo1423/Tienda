@@ -32,6 +32,7 @@ db.exec(`
     product_type TEXT NOT NULL DEFAULT 'Producto',
     price INTEGER NOT NULL,
     category TEXT NOT NULL DEFAULT 'Moda',
+    gender TEXT,
     rating REAL NOT NULL DEFAULT 4.6,
     review_count INTEGER NOT NULL DEFAULT 0,
     description TEXT NOT NULL DEFAULT '',
@@ -54,7 +55,10 @@ db.exec(`
     customer_city TEXT,
     customer_address TEXT,
     items TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'completada',
+    payment_method TEXT,
+    payu_reference TEXT,
+    payu_transaction_id TEXT,
+    status TEXT NOT NULL DEFAULT 'confirmada',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -64,6 +68,33 @@ db.exec(`
     password_hash TEXT NOT NULL
   );
 `);
+
+function ensureSalesColumns() {
+  const columns = db.prepare('PRAGMA table_info(sales)').all();
+  const names = new Set(columns.map((col) => col.name));
+  if (!names.has('payment_method')) {
+    db.exec('ALTER TABLE sales ADD COLUMN payment_method TEXT');
+  }
+  if (!names.has('payu_reference')) {
+    db.exec('ALTER TABLE sales ADD COLUMN payu_reference TEXT');
+  }
+  if (!names.has('payu_transaction_id')) {
+    db.exec('ALTER TABLE sales ADD COLUMN payu_transaction_id TEXT');
+  }
+}
+
+function ensureProductColumns() {
+  const columns = db.prepare('PRAGMA table_info(products)').all();
+  if (!columns.some((col) => col.name === 'gender')) {
+    db.exec('ALTER TABLE products ADD COLUMN gender TEXT');
+  }
+}
+
+function saleStatusForPayment(paymentMethod) {
+  if (paymentMethod === 'contraentrega') return 'confirmada';
+  if (paymentMethod === 'payu-card' || paymentMethod === 'pse') return 'pendiente_pago';
+  return 'confirmada';
+}
 
 function ensureAdminUser() {
   const count = db.prepare('SELECT COUNT(*) AS c FROM admin_users').get().c;
@@ -88,6 +119,7 @@ function rowToProduct(row) {
     productType: row.product_type,
     price: row.price,
     category: row.category,
+    gender: row.gender ?? null,
     rating: row.rating,
     reviewCount: row.review_count,
     description: row.description,
@@ -122,9 +154,9 @@ export function createProduct(data) {
   const result = db
     .prepare(
       `INSERT INTO products (
-        name, brand, brand_slug, product_type, price, category,
+        name, brand, brand_slug, product_type, price, category, gender,
         rating, review_count, description, image, hover_image, sizes, colors, active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       data.name,
@@ -133,6 +165,7 @@ export function createProduct(data) {
       data.productType,
       data.price,
       data.category,
+      data.gender ?? null,
       data.rating ?? 4.6,
       data.reviewCount ?? 0,
       data.description ?? '',
@@ -151,7 +184,7 @@ export function updateProduct(id, data) {
 
   db.prepare(
     `UPDATE products SET
-      name = ?, brand = ?, brand_slug = ?, product_type = ?, price = ?, category = ?,
+      name = ?, brand = ?, brand_slug = ?, product_type = ?, price = ?, category = ?, gender = ?,
       rating = ?, review_count = ?, description = ?, image = ?, hover_image = ?,
       sizes = ?, colors = ?, active = ?, updated_at = datetime('now')
     WHERE id = ?`
@@ -162,6 +195,7 @@ export function updateProduct(id, data) {
     data.productType ?? existing.productType,
     data.price ?? existing.price,
     data.category ?? existing.category,
+    data.gender !== undefined ? data.gender : existing.gender,
     data.rating ?? existing.rating,
     data.reviewCount ?? existing.reviewCount,
     data.description ?? existing.description,
@@ -191,31 +225,7 @@ export function upsertBrand({ name, slug, sortOrder = 0 }) {
   ).run(name, slug, sortOrder);
 }
 
-export function createSale(sale) {
-  const result = db
-    .prepare(
-      `INSERT INTO sales (
-        total, subtotal, customer_name, customer_email, customer_phone,
-        customer_city, customer_address, items, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(
-      sale.total,
-      sale.subtotal,
-      sale.customerName ?? null,
-      sale.customerEmail ?? null,
-      sale.customerPhone ?? null,
-      sale.customerCity ?? null,
-      sale.customerAddress ?? null,
-      JSON.stringify(sale.items),
-      sale.status ?? 'completada'
-    );
-  return getSaleById(result.lastInsertRowid);
-}
-
-export function getSaleById(id) {
-  const row = db.prepare('SELECT * FROM sales WHERE id = ?').get(id);
-  if (!row) return null;
+function saleRowToObject(row) {
   return {
     id: row.id,
     total: row.total,
@@ -226,28 +236,78 @@ export function getSaleById(id) {
     customerCity: row.customer_city,
     customerAddress: row.customer_address,
     items: JSON.parse(row.items),
+    paymentMethod: row.payment_method ?? null,
+    payuReference: row.payu_reference ?? null,
+    payuTransactionId: row.payu_transaction_id ?? null,
     status: row.status,
     createdAt: row.created_at,
   };
+}
+
+export function createSale(sale) {
+  const paymentMethod = sale.paymentMethod ?? null;
+  const status = sale.status ?? saleStatusForPayment(paymentMethod);
+
+  const result = db
+    .prepare(
+      `INSERT INTO sales (
+        total, subtotal, customer_name, customer_email, customer_phone,
+        customer_city, customer_address, items, payment_method, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      sale.total,
+      sale.subtotal,
+      sale.customerName ?? null,
+      sale.customerEmail ?? null,
+      sale.customerPhone ?? null,
+      sale.customerCity ?? null,
+      sale.customerAddress ?? null,
+      JSON.stringify(sale.items),
+      paymentMethod,
+      status
+    );
+  return getSaleById(result.lastInsertRowid);
+}
+
+export function getSaleById(id) {
+  const row = db.prepare('SELECT * FROM sales WHERE id = ?').get(id);
+  if (!row) return null;
+  return saleRowToObject(row);
+}
+
+export function getSaleByPayUReference(reference) {
+  if (!reference) return null;
+  const row = db.prepare('SELECT * FROM sales WHERE payu_reference = ?').get(reference);
+  if (!row) return null;
+  return saleRowToObject(row);
+}
+
+export function updateSalePayment(id, { status, payuReference, payuTransactionId }) {
+  const existing = getSaleById(id);
+  if (!existing) return null;
+
+  db.prepare(
+    `UPDATE sales SET
+      status = COALESCE(?, status),
+      payu_reference = COALESCE(?, payu_reference),
+      payu_transaction_id = COALESCE(?, payu_transaction_id)
+    WHERE id = ?`
+  ).run(
+    status ?? null,
+    payuReference ?? null,
+    payuTransactionId ?? null,
+    id
+  );
+
+  return getSaleById(id);
 }
 
 export function getSales(limit = 100) {
   const rows = db
     .prepare('SELECT * FROM sales ORDER BY created_at DESC LIMIT ?')
     .all(limit);
-  return rows.map((row) => ({
-    id: row.id,
-    total: row.total,
-    subtotal: row.subtotal,
-    customerName: row.customer_name,
-    customerEmail: row.customer_email,
-    customerPhone: row.customer_phone,
-    customerCity: row.customer_city,
-    customerAddress: row.customer_address,
-    items: JSON.parse(row.items),
-    status: row.status,
-    createdAt: row.created_at,
-  }));
+  return rows.map((row) => saleRowToObject(row));
 }
 
 export function getSalesStats() {
@@ -304,6 +364,8 @@ export function getProductCount() {
   return db.prepare('SELECT COUNT(*) AS c FROM products').get().c;
 }
 
+ensureProductColumns();
+ensureSalesColumns();
 ensureAdminUser();
 
 export default db;
