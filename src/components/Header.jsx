@@ -27,7 +27,7 @@ const Header = ({ cartCount }) => {
             <span className="brand-logo utility-brand">{BRAND.short}</span>
           </div>
           <div className="utility-bar-links">
-            <Link to="#">Buscar tienda</Link>
+            <Link to="/rastrear-pedido">Rastrear pedido</Link>
             <span>|</span>
             <Link to="/contacto">Ayuda</Link>
             <span>|</span>

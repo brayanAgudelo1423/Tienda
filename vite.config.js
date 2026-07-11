@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { cpSync } from 'node:fs'
+import { cpSync, existsSync } from 'node:fs'
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
@@ -16,7 +16,7 @@ export default defineConfig(({ command }) => ({
     {
       name: 'copy-404',
       closeBundle() {
-        if (command === 'build') {
+        if (command === 'build' && existsSync('dist/index.html')) {
           cpSync('dist/index.html', 'dist/404.html')
         }
       },

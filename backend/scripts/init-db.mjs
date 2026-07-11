@@ -36,8 +36,18 @@ await initDatabase();
 const countBefore = await getProductCount();
 console.log(`[OZONO] Productos actuales: ${countBefore}`);
 
-await runNode('scripts/seed.mjs');
-await runNode('scripts/seed-lociones.mjs');
+if (process.env.SKIP_SEED === '1' || process.env.SKIP_SEED === 'true') {
+  console.log('[OZONO] SKIP_SEED activo — no se ejecuta seed.');
+} else if (countBefore === 0) {
+  const { importCatalogFromExportIfEmpty } = await import('../src/catalogExport.js');
+  const imported = await importCatalogFromExportIfEmpty();
+  if (!imported) {
+    await runNode('scripts/seed.mjs');
+    await runNode('scripts/seed-lociones.mjs');
+  }
+} else {
+  console.log('[OZONO] Catálogo existente preservado — seed omitido.');
+}
 
 const countAfter = await getProductCount();
 console.log(`[OZONO] Base de datos lista (${countAfter} productos).`);

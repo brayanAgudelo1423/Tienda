@@ -16,6 +16,19 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app > main,
+.app > .checkout-page,
+.app > .track-page,
+.app > .promociones-page {
+  flex: 1;
+}
 body {
   font-family: var(--font-body);
   background-color: var(--color-bg);
@@ -958,15 +971,8 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     height: 46px;
   }
 
-  .site-footer-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 2rem 1.25rem !important;
-  }
-
-  .site-footer-copy-inner {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.35rem !important;
+  .site-footer-main {
+    padding-bottom: 2rem;
   }
 
   .btn:not(.hero-cta-btn):not(.promo-buy-btn):not(.lociones-apply-btn) {
@@ -1005,6 +1011,400 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 
   .site-footer-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ——— Footer ——— */
+.site-footer {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border-top: 1px solid var(--color-bg-alt);
+  margin-top: auto;
+}
+
+.site-footer-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr);
+  gap: 3rem;
+  padding: 3rem 2rem 2.5rem;
+  align-items: start;
+}
+
+.site-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.site-footer-logo {
+  font-size: 1.5rem;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.site-footer-tagline {
+  margin: 0;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  max-width: 280px;
+}
+
+.site-footer-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem 1.5rem;
+}
+
+.site-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.site-footer-heading {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  color: var(--color-primary);
+}
+
+.site-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.site-footer-links a,
+.site-footer-admin-btn {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.site-footer-links a:hover,
+.site-footer-admin-btn:hover {
+  color: var(--color-primary);
+}
+
+.site-footer-link-accent {
+  color: var(--color-secondary) !important;
+  font-weight: 600 !important;
+}
+
+.site-footer-admin-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.site-footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.site-footer-social-link {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--color-bg-alt);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  background: #fff;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.site-footer-social-link:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.site-footer-social-wa {
+  color: #25D366;
+  border-color: rgba(37, 211, 102, 0.35);
+}
+
+.site-footer-social-static {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.site-footer-legal {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  text-decoration: underline;
+  margin-top: 0.25rem;
+}
+
+.site-footer-bottom {
+  border-top: 1px solid var(--color-bg-alt);
+  background: #fafafa;
+}
+
+.site-footer-bottom-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1.1rem 2rem;
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
+.site-footer-payu strong {
+  color: var(--color-primary);
+}
+
+.site-footer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+}
+
+.site-footer-modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+.site-footer-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-light);
+  padding: 0.25rem;
+}
+
+.site-footer-modal-title {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+
+.site-footer-modal-desc {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+}
+
+.site-footer-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.site-footer-modal-form input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.site-footer-modal-error {
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.site-footer-modal-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+/* ——— Rastrear pedido ——— */
+.track-page {
+  min-height: 60vh;
+  background: #fff;
+}
+
+.track-hero {
+  padding: 2.5rem 1rem 1.75rem;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border-bottom: 1px solid #efefef;
+  text-align: center;
+}
+
+.track-hero-tag {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.track-hero h1 {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.track-hero-sub {
+  margin: 0.75rem auto 0;
+  max-width: 480px;
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.track-content {
+  max-width: 560px;
+  padding: 2rem 1rem 3.5rem;
+}
+
+.track-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.track-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.track-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.track-field input {
+  padding: 0.85rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+}
+
+.track-submit {
+  width: 100%;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.track-error {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.track-result {
+  border: 1px solid var(--color-bg-alt);
+  border-radius: 14px;
+  padding: 1.25rem;
+  background: #fafafa;
+}
+
+.track-result-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.track-result-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-family: var(--font-body);
+}
+
+.track-result-head p {
+  margin: 0.15rem 0 0;
+  color: var(--color-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.track-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 1rem;
+}
+
+.track-result-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #e8e8e8;
+}
+
+.track-result-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.track-result-help {
+  margin: 1rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+  .site-footer-main {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2.25rem 1rem 1.75rem;
+  }
+
+  .site-footer-columns {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem 1rem;
+  }
+
+  .site-footer-col-contact {
+    grid-column: 1 / -1;
+  }
+
+  .site-footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-footer-columns {
+    grid-template-columns: 1fr;
   }
 }
 

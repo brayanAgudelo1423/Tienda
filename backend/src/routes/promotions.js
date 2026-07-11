@@ -10,6 +10,7 @@ import {
   deletePromotion,
 } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { scheduleCatalogExport } from '../catalogExport.js';
 
 const router = Router();
 
@@ -66,6 +67,7 @@ router.get('/admin/all', requireAuth, async (_req, res, next) => {
 router.put('/admin/settings', requireAuth, async (req, res, next) => {
   try {
     const settings = await updatePromotionsSettings(normalizeSettingsBody(req.body));
+    scheduleCatalogExport();
     res.json(settings);
   } catch (err) {
     next(err);
@@ -78,6 +80,7 @@ router.patch('/admin/settings/toggle', requireAuth, async (_req, res, next) => {
     const settings = await updatePromotionsSettings({
       sectionEnabled: !current.sectionEnabled,
     });
+    scheduleCatalogExport();
     res.json(settings);
   } catch (err) {
     next(err);
@@ -91,6 +94,7 @@ router.post('/admin', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'El título es obligatorio' });
     }
     const promo = await createPromotion(data);
+    scheduleCatalogExport();
     res.status(201).json(promo);
   } catch (err) {
     next(err);
@@ -102,6 +106,7 @@ router.put('/admin/:id', requireAuth, async (req, res, next) => {
     const data = normalizeBody(req.body);
     const promo = await updatePromotion(Number(req.params.id), data);
     if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
+    scheduleCatalogExport();
     res.json(promo);
   } catch (err) {
     next(err);
@@ -113,6 +118,7 @@ router.patch('/admin/:id/toggle', requireAuth, async (req, res, next) => {
     const existing = await getPromotionById(Number(req.params.id));
     if (!existing) return res.status(404).json({ error: 'Promoción no encontrada' });
     const promo = await updatePromotion(existing.id, { active: !existing.active });
+    scheduleCatalogExport();
     res.json(promo);
   } catch (err) {
     next(err);
@@ -123,6 +129,7 @@ router.delete('/admin/:id', requireAuth, async (req, res, next) => {
   try {
     const ok = await deletePromotion(Number(req.params.id));
     if (!ok) return res.status(404).json({ error: 'Promoción no encontrada' });
+    scheduleCatalogExport();
     res.json({ success: true });
   } catch (err) {
     next(err);

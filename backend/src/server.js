@@ -13,7 +13,9 @@ import salesRoutes from './routes/sales.js';
 import uploadRoutes from './routes/upload.js';
 import paymentsRoutes from './routes/payments.js';
 import promotionsRoutes from './routes/promotions.js';
+import catalogRoutes from './routes/catalog.js';
 import { initDatabase, getProductCount } from './db.js';
+import { importCatalogFromExportIfEmpty } from './catalogExport.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -105,6 +107,7 @@ app.use('/api/brands', brandsRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/promotions', promotionsRoutes);
+app.use('/api/catalog', catalogRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.use((err, _req, res, _next) => {
@@ -131,11 +134,16 @@ async function runSeedScript(relativePath) {
 }
 
 const productCount = await getProductCount();
-if (productCount === 0) {
-  console.log('[OZONO] Catálogo vacío, sembrando productos...');
-  await runSeedScript('scripts/seed.mjs');
-  await runSeedScript('scripts/seed-lociones.mjs');
+if (productCount === 0 && process.env.SKIP_SEED !== '1' && process.env.SKIP_SEED !== 'true') {
+  console.log('[OZONO] Catálogo vacío, restaurando...');
+  const imported = await importCatalogFromExportIfEmpty();
+  if (!imported) {
+    await runSeedScript('scripts/seed.mjs');
+    await runSeedScript('scripts/seed-lociones.mjs');
+  }
   console.log(`[OZONO] Productos en catálogo: ${await getProductCount()}`);
+} else if (productCount > 0) {
+  console.log(`[OZONO] Catálogo preservado (${productCount} productos).`);
 }
 
 app.listen(PORT, '0.0.0.0', () => {

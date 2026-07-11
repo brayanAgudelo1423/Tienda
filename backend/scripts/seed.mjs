@@ -31,7 +31,14 @@ if ((await getProductCount()) > 0) {
   process.exit(0);
 }
 
-console.log('Sembrando marcas y productos...');
+const { importCatalogFromExportIfEmpty } = await import('../src/catalogExport.js');
+if (await importCatalogFromExportIfEmpty()) {
+  console.log('Catálogo restaurado desde catalog-export.json.');
+  await closePool();
+  process.exit(0);
+}
+
+console.log('Sembrando marcas y productos desde src/data.js...');
 
 for (const [index, brand] of NAV_BRANDS.entries()) {
   await upsertBrand({ name: brand.name, slug: brand.slug, sortOrder: index });

@@ -541,6 +541,28 @@ export async function getSaleById(id) {
   return rows[0] ? saleRowToObject(rows[0]) : null;
 }
 
+export async function getSaleForTracking(id, email) {
+  const sale = await getSaleById(Number(id));
+  if (!sale || !email?.trim()) return null;
+  const normalizedEmail = email.trim().toLowerCase();
+  if ((sale.customerEmail || '').trim().toLowerCase() !== normalizedEmail) {
+    return null;
+  }
+  return {
+    id: sale.id,
+    status: sale.status,
+    total: sale.total,
+    paymentMethod: sale.paymentMethod,
+    createdAt: sale.createdAt,
+    items: sale.items.map((item) => ({
+      name: item.name,
+      brand: item.brand,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+  };
+}
+
 export async function getSaleByPayUReference(reference) {
   if (!reference) return null;
   const { rows } = await getPool().query('SELECT * FROM sales WHERE payu_reference = $1', [

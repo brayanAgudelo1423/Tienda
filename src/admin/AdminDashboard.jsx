@@ -66,10 +66,37 @@ const AdminDashboard = () => {
       <Link
         to="/admin/ventas"
         className="btn btn-outline"
-        style={{ width: '100%', display: 'block', textAlign: 'center' }}
+        style={{ width: '100%', display: 'block', textAlign: 'center', marginBottom: '0.75rem' }}
       >
         Ver historial de ventas
       </Link>
+
+      <button
+        type="button"
+        className="btn btn-outline"
+        style={{ width: '100%' }}
+        onClick={async () => {
+          try {
+            const result = await api.exportCatalog();
+            const blob = new Blob([JSON.stringify(result.snapshot, null, 2)], {
+              type: 'application/json',
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `catalog-export-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert(
+              `Catálogo exportado (${result.productCount} productos). Guárdalo en backend/data/catalog-export.json y súbelo con git para respaldo.`
+            );
+          } catch (e) {
+            alert(e.message);
+          }
+        }}
+      >
+        Exportar catálogo (respaldo)
+      </button>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, X } from 'lucide-react';
+import { Phone, Mail, MapPin, X } from 'lucide-react';
 import { api, setAdminToken } from '../api/client';
 import { BRAND } from '../config/brand';
 
@@ -46,74 +46,126 @@ const Footer = () => {
   };
 
   return (
-    <footer className="site-footer" style={styles.footer}>
-      <div className="container site-footer-grid" style={styles.container}>
-        <div style={styles.col}>
-          <h2 className="brand-logo" style={styles.logo}>
-            {BRAND.name}
-          </h2>
-          <p style={styles.desc}>Moda deportiva y urbana de alto rendimiento. 100% original.</p>
+    <footer className="site-footer">
+      <div className="container site-footer-main">
+        <div className="site-footer-brand">
+          <h2 className="brand-logo site-footer-logo">{BRAND.name}</h2>
+          <p className="site-footer-tagline">
+            Moda deportiva y urbana de alto rendimiento. 100% original.
+          </p>
         </div>
-        <div style={styles.col}>
-          <h4 style={styles.title}>AYUDA</h4>
-          <ul style={styles.list}>
-            <li style={styles.linkItem} onClick={openAdmin} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openAdmin()}>
-              {BRAND.short}
-            </li>
-            <li style={{ cursor: 'pointer' }}>Estado del pedido</li>
-            <li style={{ cursor: 'pointer' }}>Envío y entrega</li>
-            <li style={{ cursor: 'pointer' }}>Devoluciones</li>
-            <li style={{ cursor: 'pointer' }}>Opciones de pago</li>
-            <li><Link to="/contacto" style={{ color: 'var(--color-secondary)', fontWeight: 600, textDecoration: 'none' }}>📞 Contacto & Ayuda</Link></li>
-          </ul>
-        </div>
-        <div style={styles.col}>
-          <h4 style={styles.title}>ACERCA DE {BRAND.short}</h4>
-          <ul style={styles.list}>
-            <li style={{ cursor: 'pointer' }}>Noticias</li>
-            <li style={{ cursor: 'pointer' }}>Empleo</li>
-            <li style={{ cursor: 'pointer' }}>Sostenibilidad</li>
-          </ul>
-        </div>
-        <div style={styles.col}>
-          <div style={styles.social}>
-            <a href="https://wa.me/573009902243" target="_blank" rel="noopener noreferrer" title="WhatsApp 300 990 2243">
-              <Phone size={24} style={{ cursor: 'pointer', color: '#25D366' }} />
-            </a>
-            <a href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==" target="_blank" rel="noopener noreferrer" title="Instagram @_ozono_3">
-              <Mail size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
-            </a>
-            <MapPin size={24} style={{ cursor: 'pointer', color: 'var(--color-primary)' }} />
+
+        <div className="site-footer-columns">
+          <div className="site-footer-col">
+            <h4 className="site-footer-heading">Ayuda</h4>
+            <ul className="site-footer-links">
+              <li>
+                <Link to="/rastrear-pedido">Estado del pedido</Link>
+              </li>
+              <li>
+                <Link to="/contacto">Envío y entrega</Link>
+              </li>
+              <li>
+                <Link to="/contacto">Devoluciones</Link>
+              </li>
+              <li>
+                <Link to="/checkout">Opciones de pago</Link>
+              </li>
+              <li>
+                <Link to="/contacto" className="site-footer-link-accent">
+                  Contacto &amp; Ayuda
+                </Link>
+              </li>
+            </ul>
           </div>
-          <Link to="/politica-de-privacidad" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', textDecoration: 'underline', marginTop: '0.5rem' }}>
-            Política de Privacidad
-          </Link>
+
+          <div className="site-footer-col">
+            <h4 className="site-footer-heading">Acerca de {BRAND.short}</h4>
+            <ul className="site-footer-links">
+              <li>
+                <button type="button" className="site-footer-admin-btn" onClick={openAdmin}>
+                  Panel {BRAND.short}
+                </button>
+              </li>
+              <li>
+                <Link to="/promociones">Promociones</Link>
+              </li>
+              <li>
+                <Link to="/lociones">Lociones originales</Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="site-footer-col site-footer-col-contact">
+            <h4 className="site-footer-heading">Contáctanos</h4>
+            <div className="site-footer-social">
+              <a
+                href="https://wa.me/573009902243"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="WhatsApp 300 990 2243"
+                className="site-footer-social-link site-footer-social-wa"
+              >
+                <Phone size={20} />
+              </a>
+              <a
+                href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram"
+                className="site-footer-social-link site-footer-social-ig"
+                aria-label="Instagram"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-8 3.999 3.999 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
+                </svg>
+              </a>
+              <a
+                href="mailto:contacto@virtusmonaco.store"
+                title="Correo"
+                className="site-footer-social-link"
+              >
+                <Mail size={20} />
+              </a>
+              <span className="site-footer-social-link site-footer-social-static" title="Colombia">
+                <MapPin size={20} />
+              </span>
+            </div>
+            <Link to="/politica-de-privacidad" className="site-footer-legal">
+              Política de Privacidad
+            </Link>
+          </div>
         </div>
       </div>
-      <div className="site-footer-copy" style={styles.copy}>
-        <div className="site-footer-copy-inner" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-          <span>&copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.</span>
-          <span>Pagos seguros procesados por <strong>PayU</strong> · <Link to="/politica-de-privacidad" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Política de Privacidad</Link></span>
+
+      <div className="site-footer-bottom">
+        <div className="container site-footer-bottom-inner">
+          <span>
+            &copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.
+          </span>
+          <span className="site-footer-payu">
+            Pagos seguros con <strong>PayU</strong>
+          </span>
         </div>
       </div>
 
       {showLogin && (
-        <div style={styles.overlay} onClick={closeLogin} role="presentation">
+        <div className="site-footer-modal-overlay" onClick={closeLogin} role="presentation">
           <div
-            style={styles.modal}
+            className="site-footer-modal"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-labelledby="vm-login-title"
             aria-modal="true"
           >
-            <button type="button" style={styles.closeBtn} onClick={closeLogin} aria-label="Cerrar">
+            <button type="button" className="site-footer-modal-close" onClick={closeLogin} aria-label="Cerrar">
               <X size={20} />
             </button>
-            <h2 id="vm-login-title" className="brand-logo" style={styles.modalTitle}>
+            <h2 id="vm-login-title" className="brand-logo site-footer-modal-title">
               {BRAND.name}
             </h2>
-            <p style={styles.modalDesc}>Panel de administración</p>
-            <form style={styles.adminForm} onSubmit={handleLogin}>
+            <p className="site-footer-modal-desc">Panel de administración</p>
+            <form className="site-footer-modal-form" onSubmit={handleLogin}>
               <input
                 type="text"
                 placeholder="Usuario"
@@ -121,7 +173,6 @@ const Footer = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 required
-                style={styles.adminInput}
               />
               <input
                 type="password"
@@ -130,110 +181,18 @@ const Footer = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
-                style={styles.adminInput}
               />
-              {error && <p style={styles.adminError}>{error}</p>}
-              <button type="submit" className="btn" disabled={loading} style={styles.adminBtn}>
+              {error && <p className="site-footer-modal-error">{error}</p>}
+              <button type="submit" className="btn" disabled={loading}>
                 {loading ? 'Entrando…' : 'Ingresar al admin'}
               </button>
             </form>
-            <p style={styles.adminHint}>Gestiona productos y ventas desde tu celular.</p>
+            <p className="site-footer-modal-hint">Gestiona productos y ventas desde tu celular.</p>
           </div>
         </div>
       )}
     </footer>
   );
-};
-
-const styles = {
-  footer: {
-    backgroundColor: 'var(--color-bg)',
-    color: 'var(--color-primary)',
-    paddingTop: '4rem',
-    borderTop: '1px solid var(--color-bg-alt)',
-  },
-  container: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '4rem',
-    marginBottom: '3rem',
-  },
-  col: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  logo: { fontSize: '1.75rem' },
-  desc: { color: 'var(--color-text-light)', fontSize: '0.9rem', lineHeight: '1.5' },
-  title: {
-    fontSize: '0.9rem',
-    fontWeight: 700,
-    marginBottom: '0.5rem',
-    fontFamily: 'var(--font-body)',
-  },
-  list: {
-    color: 'var(--color-text-light)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.8rem',
-    fontSize: '0.9rem',
-    fontWeight: 500,
-  },
-  linkItem: { cursor: 'pointer', color: 'var(--color-primary)', fontWeight: 600 },
-  social: { display: 'flex', gap: '1.5rem', justifyContent: 'flex-start' },
-  copy: {
-    padding: '1.5rem 2rem',
-    borderTop: '1px solid var(--color-bg-alt)',
-    fontSize: '0.75rem',
-    color: 'var(--color-text-light)',
-    backgroundColor: 'var(--color-bg)',
-  },
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '1.5rem',
-    zIndex: 1000,
-  },
-  modal: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: '380px',
-    background: '#fff',
-    borderRadius: '16px',
-    padding: '2rem 1.5rem',
-    boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)',
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: 'var(--color-text-light)',
-    padding: '0.25rem',
-  },
-  modalTitle: { fontSize: '1.5rem', marginBottom: '0.25rem' },
-  modalDesc: { color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: '1.25rem' },
-  adminForm: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  adminInput: {
-    width: '100%',
-    padding: '0.75rem',
-    fontSize: '0.9rem',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    background: '#fff',
-    color: 'var(--color-primary)',
-  },
-  adminBtn: { width: '100%', padding: '0.75rem', fontSize: '0.9rem', marginTop: '0.25rem' },
-  adminError: { color: '#b91c1c', fontSize: '0.85rem', margin: 0 },
-  adminHint: {
-    fontSize: '0.8rem',
-    color: 'var(--color-text-light)',
-    marginTop: '1rem',
-    marginBottom: 0,
-    textAlign: 'center',
-  },
 };
 
 export default Footer;

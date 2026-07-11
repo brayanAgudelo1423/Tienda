@@ -116,6 +116,13 @@ export const api = {
     request(`/api/sales/admin?limit=${limit}`, { auth: true }),
 
   getSalesStats: () => request('/api/sales/admin/stats', { auth: true }),
+
+  exportCatalog: () => request('/api/catalog/export', { method: 'POST', auth: true }),
+
+  trackOrder: (orderId, email) =>
+    request(
+      `/api/sales/track?orderId=${encodeURIComponent(orderId)}&email=${encodeURIComponent(email)}`
+    ),
 };
 
 export function mediaUrl(path) {

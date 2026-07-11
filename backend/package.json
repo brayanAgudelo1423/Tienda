@@ -14,6 +14,7 @@
     "dev": "node --watch src/server.js",
     "seed": "node scripts/seed.mjs",
     "seed:lociones": "node scripts/seed-lociones.mjs",
+    "catalog:export": "node scripts/export-catalog.mjs",
     "postinstall": "node -e \"console.log('OZONO backend listo')\""
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",
+    "nodemailer": "^9.0.3",
     "pg": "^8.16.0"
   }
 }

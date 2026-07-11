@@ -10,6 +10,7 @@ import {
   bulkDeleteProducts,
 } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { scheduleCatalogExport } from '../catalogExport.js';
 
 const router = Router();
 
@@ -79,6 +80,7 @@ router.post('/admin', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Nombre, marca, imagen y precio son obligatorios' });
     }
     const product = await createProduct(data);
+    scheduleCatalogExport();
     res.status(201).json(product);
   } catch (err) {
     next(err);
@@ -91,6 +93,7 @@ router.put('/admin/:id', requireAuth, async (req, res, next) => {
     const data = normalizeProductBody(req.body);
     const product = await updateProduct(id, data);
     if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
+    scheduleCatalogExport();
     res.json(product);
   } catch (err) {
     next(err);
@@ -102,6 +105,7 @@ router.patch('/admin/:id/toggle', requireAuth, async (req, res, next) => {
     const existing = await getProductById(Number(req.params.id));
     if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
     const product = await updateProduct(existing.id, { active: !existing.active });
+    scheduleCatalogExport();
     res.json(product);
   } catch (err) {
     next(err);
@@ -133,6 +137,7 @@ router.post('/admin/bulk', requireAuth, async (req, res, next) => {
     }
 
     res.json({ success: true, count });
+    scheduleCatalogExport();
   } catch (err) {
     next(err);
   }
@@ -142,6 +147,7 @@ router.delete('/admin/:id', requireAuth, async (req, res, next) => {
   try {
     const ok = await deleteProduct(Number(req.params.id));
     if (!ok) return res.status(404).json({ error: 'Producto no encontrado' });
+    scheduleCatalogExport();
     res.json({ success: true });
   } catch (err) {
     next(err);

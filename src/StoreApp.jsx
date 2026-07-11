@@ -14,6 +14,7 @@ import Contacto from './pages/Contacto';
 import Promociones from './pages/Promociones';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import CheckoutResult from './pages/CheckoutResult';
+import RastrearPedido from './pages/RastrearPedido';
 import { getCartItemId } from './utils/product';
 
 function StoreApp() {
@@ -63,6 +64,7 @@ function StoreApp() {
         <Route path="/checkout/resulto" element={<CheckoutResult />} />
         <Route path="/promociones" element={<Promociones onAddToCart={addToCart} />} />
         <Route path="/contacto" element={<Contacto />} />
+        <Route path="/rastrear-pedido" element={<RastrearPedido />} />
         <Route path="/politica-de-privacidad" element={<PoliticaPrivacidad />} />
       </Routes>
       <Footer />

@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { createSale, getSales, getSalesStats } from '../db.js';
+import { createSale, getSales, getSalesStats, getSaleForTracking } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { notifyNewOrder } from '../email.js';
 
 const router = Router();
 
@@ -47,7 +48,26 @@ router.post('/', async (req, res, next) => {
       paymentMethod: normalizedPayment,
     });
 
+    notifyNewOrder(sale).catch(() => {});
+
     res.status(201).json(sale);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/track', async (req, res, next) => {
+  try {
+    const orderId = req.query.orderId || req.query.id;
+    const email = req.query.email;
+    if (!orderId || !email) {
+      return res.status(400).json({ error: 'Ingresa número de pedido y correo electrónico' });
+    }
+    const sale = await getSaleForTracking(orderId, email);
+    if (!sale) {
+      return res.status(404).json({ error: 'Pedido no encontrado. Verifica el número y el correo.' });
+    }
+    res.json(sale);
   } catch (err) {
     next(err);
   }
