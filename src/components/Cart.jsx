@@ -79,13 +79,6 @@ const Cart = ({ items, onRemove }) => {
           </div>
         </div>
       )}
-      <style>{`
-        @media (max-width: 768px) {
-          .cart-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-          .cart-item-image { width: 100px !important; height: 100px !important; }
-          .cart-container { padding: 2rem 1.2rem !important; }
-        }
-      `}</style>
     </div>
   );
 };

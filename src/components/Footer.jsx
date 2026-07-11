@@ -46,8 +46,8 @@ const Footer = () => {
   };
 
   return (
-    <footer style={styles.footer}>
-      <div className="container" style={styles.container}>
+    <footer className="site-footer" style={styles.footer}>
+      <div className="container site-footer-grid" style={styles.container}>
         <div style={styles.col}>
           <h2 className="brand-logo" style={styles.logo}>
             {BRAND.name}
@@ -90,8 +90,8 @@ const Footer = () => {
           </Link>
         </div>
       </div>
-      <div style={styles.copy}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+      <div className="site-footer-copy" style={styles.copy}>
+        <div className="site-footer-copy-inner" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
           <span>&copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.</span>
           <span>Pagos seguros procesados por <strong>PayU</strong> · <Link to="/politica-de-privacidad" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Política de Privacidad</Link></span>
         </div>

@@ -21,7 +21,7 @@ const Hero = () => {
   const slides = [...HERO_IMAGES, ...HERO_IMAGES];
 
   return (
-    <section style={styles.hero}>
+    <section className="hero-section">
       <div className="hero-filmstrip">
         <div className="hero-filmstrip-track">
           {slides.map((image, index) => (
@@ -37,27 +37,22 @@ const Hero = () => {
         </div>
       </div>
 
-      <div style={styles.overlay} />
+      <div className="hero-overlay" />
 
-      <div className="container" style={styles.contentContainer}>
+      <div className="container hero-content-wrap">
         <motion.div
+          className="hero-content"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          style={styles.content}
         >
-          <div style={styles.btnGroup}>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => navigate('/marcas/novedades')}
-            >
+          <div className="hero-cta">
+            <button type="button" className="btn hero-cta-btn" onClick={() => navigate('/marcas/novedades')}>
               Comprar Ahora
             </button>
             <button
               type="button"
-              className="btn btn-outline"
-              style={{ backgroundColor: '#fff', border: 'none' }}
+              className="btn btn-outline hero-cta-btn hero-cta-btn--light"
               onClick={() => {
                 const el = document.getElementById('novedades-section');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -70,31 +65,6 @@ const Hero = () => {
       </div>
     </section>
   );
-};
-
-const styles = {
-  hero: { width: '100%', marginBottom: '2.5rem', position: 'relative' },
-  overlay: {
-    position: 'absolute',
-    inset: 0,
-    background:
-      'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.35) 100%)',
-    zIndex: 1,
-    pointerEvents: 'none',
-  },
-  contentContainer: {
-    position: 'absolute',
-    bottom: '10%',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    display: 'flex',
-    justifyContent: 'center',
-    zIndex: 2,
-    pointerEvents: 'none',
-  },
-  content: { maxWidth: '800px', padding: '0 1rem', width: '100%', pointerEvents: 'auto' },
-  btnGroup: { display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' },
 };
 
 export default Hero;

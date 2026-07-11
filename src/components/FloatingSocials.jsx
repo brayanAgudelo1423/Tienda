@@ -17,65 +17,31 @@ const InstagramIcon = () => (
 
 const FloatingSocials = () => {
   return (
-    <div style={styles.container}>
-      <motion.a 
-        whileHover={{ scale: 1.15, boxShadow: '0 8px 25px rgba(37, 211, 102, 0.5)' }} 
+    <div className="floating-socials">
+      <motion.a
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        href={`https://wa.me/573009902243?text=${encodeURIComponent(`Hola ${BRAND.name}, necesito ayuda con mi pedido.`)}`} 
+        className="floating-socials-wa"
+        href={`https://wa.me/573009902243?text=${encodeURIComponent(`Hola ${BRAND.name}, necesito ayuda con mi pedido.`)}`}
         target="_blank"
         rel="noopener noreferrer"
-        style={styles.whatsapp} 
         title="WhatsApp – 300 990 2243"
       >
         <WhatsAppIcon />
       </motion.a>
-      <motion.a 
-        whileHover={{ scale: 1.15, boxShadow: '0 8px 25px rgba(225, 48, 108, 0.5)' }} 
+      <motion.a
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==" 
+        className="floating-socials-ig"
+        href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ=="
         target="_blank"
         rel="noopener noreferrer"
-        style={styles.instagram} 
-        title="Instagram @_ozono_3"
+        title="Instagram"
       >
         <InstagramIcon />
       </motion.a>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    position: 'fixed',
-    bottom: '2rem',
-    right: '2rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    zIndex: 999
-  },
-  whatsapp: {
-    width: '55px',
-    height: '55px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #25D366, #128C7E)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 4px 15px rgba(37, 211, 102, 0.4)',
-    transition: 'all 0.3s ease',
-  },
-  instagram: {
-    width: '55px',
-    height: '55px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 4px 15px rgba(225, 48, 108, 0.4)',
-    transition: 'all 0.3s ease',
-  }
 };
 
 export default FloatingSocials;

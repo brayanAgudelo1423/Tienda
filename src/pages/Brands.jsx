@@ -104,15 +104,6 @@ const Brands = ({ onAddToCart }) => {
             )}
           </main>
         </div>
-
-        <style>{`
-          @media (max-width: 768px) {
-            .brands-layout { flex-direction: column !important; }
-            .brands-sidebar { width: 100% !important; margin-bottom: 2rem; border-right: none !important; padding-right: 0 !important; }
-            .brands-page-title { font-size: 2rem !important; }
-            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 1rem !important; }
-          }
-        `}</style>
       </div>
 
       {selectedProduct && (
