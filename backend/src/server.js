@@ -22,6 +22,8 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = new Set(
   [
     process.env.FRONTEND_URL,
+    'https://virtusmonaco.store',
+    'https://www.virtusmonaco.store',
     'https://brayanagudelo1423.github.io',
     'https://brayanagudelo1423-png.github.io',
     'http://localhost:5173',
@@ -34,6 +36,7 @@ const allowedOrigins = new Set(
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (allowedOrigins.has(origin)) return true;
+  if (origin.includes('virtusmonaco.store')) return true;
   if (origin.includes('github.io')) return true;
   if (/^http:\/\/localhost:\d+$/.test(origin)) return true;
   if (/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) return true;

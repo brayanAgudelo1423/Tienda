@@ -1,4 +1,4 @@
-/** Base pública según Vite (GitHub Pages: /Tienda/) */
+/** Base pública según Vite (dominio: /, GitHub Pages antiguo: /Tienda/) */
 export function getPublicBase() {
   return import.meta.env.BASE_URL || '/';
 }

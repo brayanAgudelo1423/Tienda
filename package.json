@@ -14,7 +14,7 @@
     "start": "npm --prefix backend start",
     "render:build": "npm --prefix backend install && npm --prefix backend run seed"
   },
-  "homepage": "https://brayanagudelo1423.github.io/Tienda",
+  "homepage": "https://virtusmonaco.store",
   "dependencies": {
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",

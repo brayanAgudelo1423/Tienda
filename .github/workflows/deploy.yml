@@ -25,7 +25,8 @@ jobs:
         env:
           # En GitHub Pages necesitamos la URL pública de la API (Render)
           # Puedes sobrescribirla con un secret del repo: VITE_API_URL
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://tienda-ur10.onrender.com' }}
+          VITE_BASE: /
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://tienda-1-7f8f.onrender.com' }}
         run: |
           npm ci
           npm run build
@@ -38,3 +39,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
+          cname: virtusmonaco.store

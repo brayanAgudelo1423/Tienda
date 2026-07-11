@@ -26,7 +26,7 @@ services:
           name: ozono-db
           property: connectionString
       - key: FRONTEND_URL
-        value: https://brayanagudelo1423.github.io/Tienda
+        value: https://virtusmonaco.store
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_USER
