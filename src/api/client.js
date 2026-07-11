@@ -6,7 +6,7 @@ function connectionHint() {
   if (import.meta.env.DEV) {
     return 'Asegúrate de tener el backend corriendo: npm --prefix backend run dev';
   }
-  return 'Verifica https://ozono.onrender.com/api/health y espera un minuto si el servidor estaba dormido.';
+  return 'Verifica https://tienda-1-7f8f.onrender.com/api/health y espera un minuto si el servidor estaba dormido.';
 }
 
 function getAdminToken() {
