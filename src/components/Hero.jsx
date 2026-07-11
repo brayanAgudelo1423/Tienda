@@ -73,7 +73,7 @@ const Hero = () => {
 };
 
 const styles = {
-  hero: { width: '100%', marginBottom: '4rem', position: 'relative' },
+  hero: { width: '100%', marginBottom: '2.5rem', position: 'relative' },
   overlay: {
     position: 'absolute',
     inset: 0,
@@ -94,7 +94,7 @@ const styles = {
     pointerEvents: 'none',
   },
   content: { maxWidth: '800px', padding: '0 1rem', width: '100%', pointerEvents: 'auto' },
-  btnGroup: { display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' },
+  btnGroup: { display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' },
 };
 
 export default Hero;

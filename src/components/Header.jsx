@@ -46,7 +46,7 @@ const Header = ({ cartCount }) => {
               <span className="brand-logo-short">{BRAND.short}</span>
             </Link>
           </div>
-          <nav style={styles.nav} className="desktop-nav">
+          <nav className="nav-main desktop-nav">
             <div
               className="nav-lociones-wrap"
               onMouseEnter={() => setLocionesOpen(true)}

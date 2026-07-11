@@ -26,7 +26,7 @@ jobs:
           # En GitHub Pages necesitamos la URL pública de la API (Render)
           # Puedes sobrescribirla con un secret del repo: VITE_API_URL
           VITE_BASE: /
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://tienda-1-7f8f.onrender.com' }}
+          VITE_API_URL: https://tienda-1-7f8f.onrender.com
         run: |
           npm ci
           npm run build

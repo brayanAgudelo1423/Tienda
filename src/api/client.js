@@ -1,6 +1,9 @@
 import { assetUrl, getPublicBase, normalizeStoreImagePath } from '../utils/assets.js';
 
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const PRODUCTION_API = 'https://tienda-1-7f8f.onrender.com';
+const API_BASE = (
+  import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PRODUCTION_API : '')
+).replace(/\/$/, '');
 
 function connectionHint() {
   if (import.meta.env.DEV) {
@@ -39,7 +42,12 @@ async function request(path, options = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || 'Error en la solicitud');
+    if (res.status === 404 && path.startsWith('/api/')) {
+      throw new Error(
+        'No se encontró la API. Verifica VITE_API_URL en GitHub Actions o espera el redeploy.'
+      );
+    }
+    throw new Error(data.error || `Error en la solicitud (${res.status})`);
   }
   return data;
 }

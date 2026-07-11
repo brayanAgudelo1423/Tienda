@@ -36,4 +36,4 @@ services:
       - key: PAYU_TEST
         value: "1"
       - key: BACKEND_URL
-        value: https://tienda-ur10.onrender.com
+        value: https://tienda-1-7f8f.onrender.com
