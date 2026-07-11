@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
-  getActivePromotions,
+  getPromotionsPage,
+  getPromotionsSettings,
+  updatePromotionsSettings,
   getAllPromotions,
   getPromotionById,
   createPromotion,
@@ -11,6 +13,12 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+function normalizePrice(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
+
 function normalizeBody(body) {
   return {
     title: body.title?.trim(),
@@ -19,14 +27,25 @@ function normalizeBody(body) {
     ctaText: body.ctaText?.trim() || 'Ver más',
     ctaLink: body.ctaLink?.trim() || '/',
     image: body.image?.trim() || '',
+    priceBefore: normalizePrice(body.priceBefore),
+    priceNow: normalizePrice(body.priceNow),
     sortOrder: Number(body.sortOrder ?? 0),
     active: body.active !== false,
   };
 }
 
+function normalizeSettingsBody(body) {
+  return {
+    sectionEnabled: body.sectionEnabled,
+    pageTitle: body.pageTitle?.trim(),
+    pageSubtitle: body.pageSubtitle?.trim(),
+    menuLabel: body.menuLabel?.trim(),
+  };
+}
+
 router.get('/', async (_req, res, next) => {
   try {
-    res.json(await getActivePromotions());
+    res.json(await getPromotionsPage());
   } catch (err) {
     next(err);
   }
@@ -34,7 +53,32 @@ router.get('/', async (_req, res, next) => {
 
 router.get('/admin/all', requireAuth, async (_req, res, next) => {
   try {
-    res.json(await getAllPromotions());
+    const [settings, promotions] = await Promise.all([
+      getPromotionsSettings(),
+      getAllPromotions(),
+    ]);
+    res.json({ settings, promotions });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/admin/settings', requireAuth, async (req, res, next) => {
+  try {
+    const settings = await updatePromotionsSettings(normalizeSettingsBody(req.body));
+    res.json(settings);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/admin/settings/toggle', requireAuth, async (_req, res, next) => {
+  try {
+    const current = await getPromotionsSettings();
+    const settings = await updatePromotionsSettings({
+      sectionEnabled: !current.sectionEnabled,
+    });
+    res.json(settings);
   } catch (err) {
     next(err);
   }

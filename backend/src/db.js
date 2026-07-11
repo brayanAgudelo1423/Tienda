@@ -165,10 +165,24 @@ export async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS promotions_settings (
+      id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+      section_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      page_title TEXT NOT NULL DEFAULT 'Promociones',
+      page_subtitle TEXT NOT NULL DEFAULT 'Ofertas exclusivas en VirtusMonaco',
+      menu_label TEXT NOT NULL DEFAULT 'Promociones'
+    );
+  `);
+
+  await db.query(`
+    ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_before INTEGER;
+    ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_now INTEGER;
   `);
 
   await ensureAdminUser();
   await ensureDefaultPromotions();
+  await ensurePromotionsSettings();
   initialized = true;
   console.log('[OZONO] Esquema PostgreSQL listo');
 }
@@ -197,6 +211,8 @@ function rowToPromotion(row) {
     ctaText: row.cta_text,
     ctaLink: row.cta_link,
     image: row.image ?? '',
+    priceBefore: row.price_before != null ? Number(row.price_before) : null,
+    priceNow: row.price_now != null ? Number(row.price_now) : null,
     sortOrder: row.sort_order,
     active: Boolean(row.active),
     createdAt: row.created_at,
@@ -214,30 +230,105 @@ async function ensureDefaultPromotions() {
       title: 'Lociones originales',
       subtitle: 'Selección premium con descuento especial esta semana',
       badge: '-20%',
+      priceBefore: 350000,
+      priceNow: 280000,
       sortOrder: 0,
     },
     {
-      title: 'Envío gratis',
-      subtitle: 'En compras superiores a $200.000 COP',
-      badge: 'ENVÍO',
+      title: 'Combo moda urbana',
+      subtitle: 'Piezas seleccionadas con precio especial por tiempo limitado',
+      badge: '-15%',
+      priceBefore: 420000,
+      priceNow: 357000,
       sortOrder: 1,
     },
     {
       title: 'Novedades de temporada',
-      subtitle: 'Piezas limitadas en moda y accesorios',
-      badge: 'NUEVO',
+      subtitle: 'Lo más nuevo con precio de lanzamiento',
+      badge: '-25%',
+      priceBefore: 480000,
+      priceNow: 360000,
       sortOrder: 2,
     },
   ];
 
   for (const promo of defaults) {
     await db.query(
-      `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, sort_order, active)
-       VALUES ($1, $2, $3, '', '', $4, TRUE)`,
-      [promo.title, promo.subtitle, promo.badge, promo.sortOrder]
+      `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, price_before, price_now, sort_order, active)
+       VALUES ($1, $2, $3, '', '', $4, $5, $6, TRUE)`,
+      [promo.title, promo.subtitle, promo.badge, promo.priceBefore, promo.priceNow, promo.sortOrder]
     );
   }
   console.log(`[OZONO] ${defaults.length} promociones iniciales creadas`);
+}
+
+const DEFAULT_PROMOTIONS_SETTINGS = {
+  sectionEnabled: true,
+  pageTitle: 'Promociones',
+  pageSubtitle: 'Ofertas exclusivas en VirtusMonaco',
+  menuLabel: 'Promociones',
+};
+
+function rowToPromotionsSettings(row) {
+  if (!row) return { ...DEFAULT_PROMOTIONS_SETTINGS };
+  return {
+    sectionEnabled: Boolean(row.section_enabled),
+    pageTitle: row.page_title ?? DEFAULT_PROMOTIONS_SETTINGS.pageTitle,
+    pageSubtitle: row.page_subtitle ?? DEFAULT_PROMOTIONS_SETTINGS.pageSubtitle,
+    menuLabel: row.menu_label ?? DEFAULT_PROMOTIONS_SETTINGS.menuLabel,
+  };
+}
+
+async function ensurePromotionsSettings() {
+  const db = getPool();
+  const { rows } = await db.query('SELECT COUNT(*)::int AS c FROM promotions_settings');
+  if (rows[0].c > 0) return;
+
+  await db.query(
+    `INSERT INTO promotions_settings (id, section_enabled, page_title, page_subtitle, menu_label)
+     VALUES (1, TRUE, $1, $2, $3)`,
+    [
+      DEFAULT_PROMOTIONS_SETTINGS.pageTitle,
+      DEFAULT_PROMOTIONS_SETTINGS.pageSubtitle,
+      DEFAULT_PROMOTIONS_SETTINGS.menuLabel,
+    ]
+  );
+}
+
+export async function getPromotionsSettings() {
+  const { rows } = await getPool().query('SELECT * FROM promotions_settings WHERE id = 1');
+  return rowToPromotionsSettings(rows[0]);
+}
+
+export async function updatePromotionsSettings(data) {
+  const existing = await getPromotionsSettings();
+  const next = {
+    sectionEnabled:
+      data.sectionEnabled !== undefined ? Boolean(data.sectionEnabled) : existing.sectionEnabled,
+    pageTitle: data.pageTitle?.trim() || existing.pageTitle,
+    pageSubtitle:
+      data.pageSubtitle !== undefined ? data.pageSubtitle.trim() : existing.pageSubtitle,
+    menuLabel: data.menuLabel?.trim() || existing.menuLabel,
+  };
+
+  await getPool().query(
+    `INSERT INTO promotions_settings (id, section_enabled, page_title, page_subtitle, menu_label)
+     VALUES (1, $1, $2, $3, $4)
+     ON CONFLICT (id) DO UPDATE SET
+       section_enabled = EXCLUDED.section_enabled,
+       page_title = EXCLUDED.page_title,
+       page_subtitle = EXCLUDED.page_subtitle,
+       menu_label = EXCLUDED.menu_label`,
+    [next.sectionEnabled, next.pageTitle, next.pageSubtitle, next.menuLabel]
+  );
+
+  return getPromotionsSettings();
+}
+
+export async function getPromotionsPage() {
+  const settings = await getPromotionsSettings();
+  const items = settings.sectionEnabled ? await getActivePromotions() : [];
+  return { settings, items };
 }
 
 export async function getActivePromotions() {
@@ -261,8 +352,8 @@ export async function getPromotionById(id) {
 
 export async function createPromotion(data) {
   const { rows } = await getPool().query(
-    `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, image, sort_order, active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO promotions (title, subtitle, badge, cta_text, cta_link, image, price_before, price_now, sort_order, active)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING id`,
     [
       data.title,
@@ -271,6 +362,8 @@ export async function createPromotion(data) {
       data.ctaText ?? 'Ver más',
       data.ctaLink ?? '/',
       data.image || null,
+      data.priceBefore ?? null,
+      data.priceNow ?? null,
       data.sortOrder ?? 0,
       data.active !== false,
     ]
@@ -285,8 +378,8 @@ export async function updatePromotion(id, data) {
   await getPool().query(
     `UPDATE promotions SET
       title = $1, subtitle = $2, badge = $3, cta_text = $4, cta_link = $5,
-      image = $6, sort_order = $7, active = $8, updated_at = NOW()
-    WHERE id = $9`,
+      image = $6, price_before = $7, price_now = $8, sort_order = $9, active = $10, updated_at = NOW()
+    WHERE id = $11`,
     [
       data.title ?? existing.title,
       data.subtitle !== undefined ? data.subtitle : existing.subtitle,
@@ -294,6 +387,8 @@ export async function updatePromotion(id, data) {
       data.ctaText ?? existing.ctaText,
       data.ctaLink ?? existing.ctaLink,
       data.image !== undefined ? data.image || null : existing.image || null,
+      data.priceBefore !== undefined ? data.priceBefore : existing.priceBefore,
+      data.priceNow !== undefined ? data.priceNow : existing.priceNow,
       data.sortOrder !== undefined ? data.sortOrder : existing.sortOrder,
       data.active === undefined ? existing.active : Boolean(data.active),
       id,

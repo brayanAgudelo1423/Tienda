@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { BRAND } from '../config/brand';
 
-const COMPANY = 'OZONO';
+const COMPANY = BRAND.name;
 const CONTACT_PHONE = '+57 300 990 2243';
 const CONTACT_INSTAGRAM = 'https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==';
 const LAST_UPDATED = '29 de mayo de 2025';

@@ -73,6 +73,12 @@ export const api = {
 
   getAdminPromotions: () => request('/api/promotions/admin/all', { auth: true }),
 
+  updatePromotionsSettings: (settings) =>
+    request('/api/promotions/admin/settings', { method: 'PUT', body: settings, auth: true }),
+
+  togglePromotionsSection: () =>
+    request('/api/promotions/admin/settings/toggle', { method: 'PATCH', auth: true }),
+
   createPromotion: (promotion) =>
     request('/api/promotions/admin', { method: 'POST', body: promotion, auth: true }),
 

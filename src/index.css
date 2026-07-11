@@ -404,7 +404,126 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* Promociones — inicio */
+/* Promociones — página dedicada */
+.promociones-page {
+  min-height: 60vh;
+  background: #fff;
+}
+
+.promociones-hero {
+  padding: 2.75rem 1.2rem 2rem;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border-bottom: 1px solid #efefef;
+  text-align: center;
+}
+
+.promociones-hero-inner h1 {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.85rem, 5vw, 2.75rem);
+  font-family: var(--font-heading);
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+
+.promociones-hero-tag {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.promociones-hero-sub {
+  margin: 0.85rem auto 0;
+  max-width: 520px;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: var(--color-text-light);
+  line-height: 1.55;
+}
+
+.promociones-content {
+  padding: 2rem 1.2rem 3.5rem;
+}
+
+.promociones-content.container {
+  max-width: 1140px;
+}
+
+.promotions-track--page {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.promotions-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed #ddd;
+  border-radius: 16px;
+  background: #fafafa;
+}
+
+.promotions-empty p {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.promotions-empty span {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--color-text-light);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.brand-logo-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  line-height: 1;
+}
+
+.brand-logo-full {
+  letter-spacing: 0.06em;
+}
+
+.brand-logo-short {
+  display: none;
+  font-size: 1.1em;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 520px) {
+  .brand-logo-full {
+    display: none;
+  }
+
+  .brand-logo-short {
+    display: inline;
+  }
+}
+
+.nav-link.is-active {
+  color: var(--color-secondary);
+}
+
+/* Promociones — legacy section styles (cards) */
 .promotions-section {
   padding: 2.5rem 1.2rem 3rem;
   background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
@@ -446,15 +565,24 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
+  border: 1px solid #ececec;
+  border-radius: 18px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.promo-card-inner:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.09);
+}
+
+.promo-card-visual {
+  position: relative;
 }
 
 .promo-card-media {
-  position: relative;
   aspect-ratio: 4/3;
   overflow: hidden;
   background: #111;
@@ -464,14 +592,27 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.promo-card-inner:hover .promo-card-media img {
+  transform: scale(1.04);
 }
 
 .promo-card-banner {
-  min-height: 108px;
+  min-height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.25rem 1rem;
+}
+
+.promo-card-banner-mark {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.22);
+  font-family: var(--font-heading);
 }
 
 .promo-card-banner--0 {
@@ -517,29 +658,152 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   left: 12px;
   z-index: 2;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: var(--color-secondary);
 }
 
 .promo-card-body {
-  padding: 1.1rem 1.15rem 1.25rem;
+  padding: 1.15rem 1.2rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.55rem;
   flex: 1;
-  text-align: center;
+  text-align: left;
 }
 
 .promo-card-body h3 {
-  font-size: 1.12rem;
+  font-size: 1.15rem;
   margin: 0;
   line-height: 1.25;
   font-family: var(--font-heading);
 }
 
-.promo-card-body p {
+.promo-card-desc {
   margin: 0;
   font-size: 0.84rem;
   color: var(--color-text-light);
   line-height: 1.5;
+}
+
+.promo-price-block {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.promo-price-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.promo-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.promo-price-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+}
+
+.promo-price-before {
+  font-size: 0.92rem;
+  color: #999;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.promo-price-row--now .promo-price-label {
+  color: var(--color-secondary);
+}
+
+.promo-price-now {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.promo-price-save {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #166534;
+  background: #ecfdf3;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  align-self: flex-start;
+}
+
+.promo-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.promo-buy-btn {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.promo-buy-btn--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.promo-buy-btn--primary:hover {
+  opacity: 0.92;
+}
+
+.promo-buy-btn--added {
+  border-color: #166534;
+  background: #ecfdf3;
+  color: #166534;
+  cursor: default;
+}
+
+.promo-buy-btn:disabled {
+  opacity: 1;
+}
+
+.cart-item-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #111 0%, #444 100%);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .promo-card--skeleton {
@@ -553,6 +817,189 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 @keyframes promoShimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .promotions-track--page {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .promociones-hero {
+    padding: 1.75rem 1rem 1.35rem;
+  }
+
+  .promociones-hero-inner h1 {
+    font-size: clamp(1.55rem, 6vw, 2rem);
+  }
+
+  .promociones-hero-sub {
+    font-size: 0.88rem;
+    padding: 0 0.25rem;
+  }
+
+  .promociones-content {
+    padding: 1rem 0.75rem 2.5rem;
+  }
+
+  .promociones-content.container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .promotions-track--page {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .promo-card-inner {
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: 14px;
+    min-height: 132px;
+  }
+
+  .promo-card-visual {
+    flex: 0 0 clamp(108px, 32vw, 140px);
+    display: flex;
+  }
+
+  .promo-card-media {
+    flex: 1;
+    width: 100%;
+    aspect-ratio: auto;
+    min-height: 100%;
+  }
+
+  .promo-card-banner {
+    flex: 1;
+    width: 100%;
+    min-height: 100%;
+    min-height: 132px;
+    padding: 0.75rem;
+  }
+
+  .promo-card-banner-mark {
+    font-size: 1.75rem;
+  }
+
+  .promo-badge--overlay {
+    top: 8px;
+    left: 8px;
+    font-size: 0.62rem;
+    padding: 0.22rem 0.48rem;
+    letter-spacing: 0.06em;
+  }
+
+  .promo-card-body {
+    flex: 1;
+    min-width: 0;
+    padding: 0.8rem 0.85rem 0.85rem;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .promo-card-body h3 {
+    font-size: 0.98rem;
+    line-height: 1.22;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .promo-card-desc {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .promo-price-block {
+    padding-top: 0.55rem;
+    gap: 0.35rem;
+    border-top-color: #f3f3f3;
+  }
+
+  .promo-price-main {
+    gap: 0.2rem;
+  }
+
+  .promo-price-row {
+    gap: 0.5rem;
+  }
+
+  .promo-price-label {
+    font-size: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .promo-price-before {
+    font-size: 0.82rem;
+  }
+
+  .promo-price-now {
+    font-size: 1.08rem;
+    line-height: 1.1;
+  }
+
+  .promo-price-save {
+    font-size: 0.72rem;
+    padding: 0.28rem 0.55rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .promo-card-actions {
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .promo-buy-btn {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.74rem;
+  }
+
+  .promotions-empty {
+    padding: 2rem 1rem;
+    border-radius: 14px;
+  }
+
+  .promo-card--skeleton {
+    min-height: 132px;
+  }
+}
+
+@media (max-width: 380px) {
+  .promo-card-visual {
+    flex-basis: 100px;
+  }
+
+  .promo-card-body {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .promo-price-now {
+    font-size: 1rem;
+  }
+}
+
+@media (hover: none) {
+  .promo-card-inner:hover {
+    transform: none;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  }
+
+  .promo-card-inner:hover .promo-card-media img {
+    transform: none;
+  }
 }
 
 @media (max-width: 768px) {

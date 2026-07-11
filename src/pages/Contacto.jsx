@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { BRAND } from '../config/brand';
 
 const WHATSAPP_NUMBER = '573009902243';
 const INSTAGRAM_URL = 'https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==';
@@ -39,7 +40,7 @@ const faqs = [
   },
   {
     q: '¿Mis datos de pago están seguros?',
-    a: 'Sí. Todo el proceso de pago es gestionado por PayU, plataforma certificada con estándares PCI DSS. Ozono nunca almacena los datos de tu tarjeta.',
+    a: `Sí. Todo el proceso de pago es gestionado por PayU, plataforma certificada con estándares PCI DSS. ${BRAND.name} nunca almacena los datos de tu tarjeta.`,
   },
 ];
 
@@ -53,14 +54,14 @@ const Contacto = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const text = encodeURIComponent(
-      `Hola OZONO 👋\n\nNombre: ${form.nombre}\nEmail: ${form.email}\nNro. Pedido: ${form.pedido || 'N/A'}\n\nMensaje:\n${form.mensaje}`
+      `Hola ${BRAND.name} 👋\n\nNombre: ${form.nombre}\nEmail: ${form.email}\nNro. Pedido: ${form.pedido || 'N/A'}\n\nMensaje:\n${form.mensaje}`
     );
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank', 'noopener,noreferrer');
     setSent(true);
     setTimeout(() => setSent(false), 5000);
   };
 
-  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola OZONO, necesito ayuda con mi pedido.')}`;
+  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola ${BRAND.name}, necesito ayuda con mi pedido.`)}`;
 
   return (
     <main style={s.page}>

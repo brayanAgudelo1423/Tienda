@@ -3,9 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, Heart, Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../context/ProductsContext';
+import { usePromotions } from '../context/PromotionsContext';
+import { BRAND } from '../config/brand';
 
 const Header = ({ cartCount }) => {
   const { fashionBrands, fragranceBrands } = useProducts();
+  const { settings: promoSettings } = usePromotions();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [locionesOpen, setLocionesOpen] = useState(false);
   const [locionesMobileOpen, setLocionesMobileOpen] = useState(false);
@@ -21,7 +24,7 @@ const Header = ({ cartCount }) => {
       <div style={styles.utilityBar} className="utility-bar">
         <div className="container" style={styles.utilityContainer}>
           <div style={styles.brandGroup}>
-            <span className="brand-logo" style={styles.utilityBrand}>OZONO</span>
+            <span className="brand-logo" style={styles.utilityBrand}>{BRAND.short}</span>
           </div>
           <div style={styles.utilityLinks}>
             <Link to="#">Buscar tienda</Link>
@@ -38,7 +41,10 @@ const Header = ({ cartCount }) => {
       <header style={styles.header} className="header-mobile">
         <div className="container" style={styles.container}>
           <div className="brand-logo" style={styles.logo}>
-            <Link to="/">OZONO</Link>
+            <Link to="/" className="brand-logo-link">
+              <span className="brand-logo-full">{BRAND.name}</span>
+              <span className="brand-logo-short">{BRAND.short}</span>
+            </Link>
           </div>
           <nav style={styles.nav} className="desktop-nav">
             <div
@@ -93,6 +99,15 @@ const Header = ({ cartCount }) => {
                 {brand.name}
               </Link>
             ))}
+            {promoSettings.sectionEnabled && (
+              <Link
+                to="/promociones"
+                className={`nav-link ${location.pathname === '/promociones' ? 'is-active' : ''}`}
+                style={{ ...styles.link, fontWeight: 600, color: 'var(--color-secondary)' }}
+              >
+                {promoSettings.menuLabel}
+              </Link>
+            )}
             <Link
               to="/contacto"
               className="nav-link"
@@ -136,7 +151,10 @@ const Header = ({ cartCount }) => {
             style={styles.mobileOverlay}
           >
             <div style={styles.mobileOverlayHeader}>
-              <span className="brand-logo" style={styles.logo}>OZONO</span>
+              <span className="brand-logo brand-logo-link" style={styles.logo}>
+                <span className="brand-logo-full">{BRAND.name}</span>
+                <span className="brand-logo-short">{BRAND.short}</span>
+              </span>
               <button onClick={closeMobile}>
                 <X size={30} />
               </button>
@@ -192,6 +210,16 @@ const Header = ({ cartCount }) => {
                   {brand.name}
                 </Link>
               ))}
+              {promoSettings.sectionEnabled && (
+                <Link
+                  to="/promociones"
+                  onClick={closeMobile}
+                  className="nav-link"
+                  style={{ ...styles.mobileLink, color: 'var(--color-secondary)', fontWeight: 700 }}
+                >
+                  {promoSettings.menuLabel}
+                </Link>
+              )}
               <Link
                 to="/contacto"
                 onClick={closeMobile}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { BRAND } from '../config/brand';
 
 // Using inline SVGs to avoid lucide-react missing exports
 const WhatsAppIcon = () => (
@@ -20,7 +21,7 @@ const FloatingSocials = () => {
       <motion.a 
         whileHover={{ scale: 1.15, boxShadow: '0 8px 25px rgba(37, 211, 102, 0.5)' }} 
         whileTap={{ scale: 0.95 }}
-        href="https://wa.me/573009902243?text=Hola%20OZONO%2C%20necesito%20ayuda%20con%20mi%20pedido." 
+        href={`https://wa.me/573009902243?text=${encodeURIComponent(`Hola ${BRAND.name}, necesito ayuda con mi pedido.`)}`} 
         target="_blank"
         rel="noopener noreferrer"
         style={styles.whatsapp} 

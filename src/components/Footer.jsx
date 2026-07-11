@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, X } from 'lucide-react';
 import { api, setAdminToken } from '../api/client';
+import { BRAND } from '../config/brand';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Footer = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const openOzono = () => {
+  const openAdmin = () => {
     if (hasToken) {
       navigate('/admin');
       return;
@@ -49,15 +50,15 @@ const Footer = () => {
       <div className="container" style={styles.container}>
         <div style={styles.col}>
           <h2 className="brand-logo" style={styles.logo}>
-            OZONO
+            {BRAND.name}
           </h2>
           <p style={styles.desc}>Moda deportiva y urbana de alto rendimiento. 100% original.</p>
         </div>
         <div style={styles.col}>
           <h4 style={styles.title}>AYUDA</h4>
           <ul style={styles.list}>
-            <li style={styles.linkItem} onClick={openOzono} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openOzono()}>
-              Ozono
+            <li style={styles.linkItem} onClick={openAdmin} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openAdmin()}>
+              {BRAND.short}
             </li>
             <li style={{ cursor: 'pointer' }}>Estado del pedido</li>
             <li style={{ cursor: 'pointer' }}>Envío y entrega</li>
@@ -67,7 +68,7 @@ const Footer = () => {
           </ul>
         </div>
         <div style={styles.col}>
-          <h4 style={styles.title}>ACERCA DE OZONO</h4>
+          <h4 style={styles.title}>ACERCA DE {BRAND.short}</h4>
           <ul style={styles.list}>
             <li style={{ cursor: 'pointer' }}>Noticias</li>
             <li style={{ cursor: 'pointer' }}>Empleo</li>
@@ -91,7 +92,7 @@ const Footer = () => {
       </div>
       <div style={styles.copy}>
         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-          <span>&copy; {new Date().getFullYear()} OZONO, Inc. Todos los derechos reservados.</span>
+          <span>&copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.</span>
           <span>Pagos seguros procesados por <strong>PayU</strong> · <Link to="/politica-de-privacidad" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Política de Privacidad</Link></span>
         </div>
       </div>
@@ -102,14 +103,14 @@ const Footer = () => {
             style={styles.modal}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
-            aria-labelledby="ozono-login-title"
+            aria-labelledby="vm-login-title"
             aria-modal="true"
           >
             <button type="button" style={styles.closeBtn} onClick={closeLogin} aria-label="Cerrar">
               <X size={20} />
             </button>
-            <h2 id="ozono-login-title" className="brand-logo" style={styles.modalTitle}>
-              OZONO
+            <h2 id="vm-login-title" className="brand-logo" style={styles.modalTitle}>
+              {BRAND.name}
             </h2>
             <p style={styles.modalDesc}>Panel de administración</p>
             <form style={styles.adminForm} onSubmit={handleLogin}>

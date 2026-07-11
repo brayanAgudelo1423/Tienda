@@ -86,13 +86,14 @@ const Checkout = ({ items, onOrderComplete }) => {
     };
 
     const saleItems = items.map((item) => ({
-      id: item.id,
+      id: item.promotionId ?? item.id,
       name: item.name,
       brand: item.brand,
       price: item.price,
       quantity: item.quantity,
-      size: item.selectedSize,
-      color: item.colorName,
+      size: item.isPromotion ? 'Promoción' : item.selectedSize,
+      color: item.isPromotion ? 'Oferta' : item.colorName,
+      isPromotion: Boolean(item.isPromotion),
     }));
 
     try {
@@ -373,16 +374,23 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
       {items.map((item) => (
         <li key={item.cartId} className="checkout-order-item">
           <div className="checkout-order-thumb">
-            <img src={mediaUrl(item.image)} alt={item.name} />
+            {item.image ? (
+              <img src={mediaUrl(item.image)} alt={item.name} />
+            ) : (
+              <div className="cart-item-placeholder">Oferta</div>
+            )}
             <span className="checkout-order-qty">{item.quantity}</span>
           </div>
           <div className="checkout-order-info">
             <p className="checkout-order-brand">{item.brand}</p>
             <p className="checkout-order-name">{item.name}</p>
-            {!compact && item.selectedSize && (
+            {!compact && !item.isPromotion && item.selectedSize && (
               <p className="checkout-order-meta">
                 Talla {item.selectedSize} · {item.colorName}
               </p>
+            )}
+            {!compact && item.isPromotion && (
+              <p className="checkout-order-meta">Oferta promocional</p>
             )}
           </div>
           <span className="checkout-order-price">{formatCOP(item.price * item.quantity)}</span>

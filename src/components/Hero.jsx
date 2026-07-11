@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { imageUrl, hugoBossImageUrl } from '../utils/assets';
+import { BRAND } from '../config/brand';
 
 const HERO_IMAGES = [
   { src: imageUrl('Novedades', 'Polo Michael Kors Cafe Ref1.jpeg'), alt: 'Polo Michael Kors' },
@@ -62,7 +63,7 @@ const Hero = () => {
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
             >
-              Explorar OZONO
+              Explorar {BRAND.short}
             </button>
           </div>
         </motion.div>

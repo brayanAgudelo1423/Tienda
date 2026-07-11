@@ -24,13 +24,17 @@ const Cart = ({ items, onRemove }) => {
           <div style={styles.itemsList}>
             <div style={styles.shippingPromo}>
               <p style={{fontWeight: 700, marginBottom: '0.5rem'}}>Envío y devoluciones gratuitos</p>
-              <p style={{fontSize: '0.9rem', color: 'var(--color-text-light)'}}>Los miembros de OZONO disfrutan de envíos estándar gratuitos y devoluciones gratuitas.</p>
+              <p style={{fontSize: '0.9rem', color: 'var(--color-text-light)'}}>Los miembros de VirtusMonaco disfrutan de envíos estándar gratuitos y devoluciones gratuitas.</p>
             </div>
             
             {items.map(item => (
               <motion.div key={item.cartId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={styles.item}>
                 <div className="cart-item-image" style={styles.imageContainer}>
-                  <img src={mediaUrl(item.image)} alt={item.name} style={styles.image} />
+                  {item.image ? (
+                    <img src={mediaUrl(item.image)} alt={item.name} style={styles.image} />
+                  ) : (
+                    <div className="cart-item-placeholder">Oferta</div>
+                  )}
                 </div>
                 <div style={styles.itemDetails}>
                   <div style={styles.itemHeader}>
@@ -39,7 +43,9 @@ const Cart = ({ items, onRemove }) => {
                   </div>
                   <p style={styles.itemBrand}>{item.brand}</p>
                   <p style={styles.itemMeta}>
-                    {item.productType} · Talla {item.selectedSize} · {item.colorName}
+                    {item.isPromotion
+                      ? 'Oferta promocional'
+                      : `${item.productType} · Talla ${item.selectedSize} · ${item.colorName}`}
                   </p>
                   
                   <div style={styles.itemActions}>

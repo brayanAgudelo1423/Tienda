@@ -50,7 +50,7 @@ router.post('/checkout', async (req, res, next) => {
     }
 
     const config = getPayUConfig();
-    const referenceCode = `OZONO${sale.id}${Date.now()}`;
+    const referenceCode = `VM${sale.id}${Date.now()}`;
     const amount = Math.round(sale.total);
     const signature = buildPaymentSignature({
       referenceCode,
@@ -69,7 +69,7 @@ router.post('/checkout', async (req, res, next) => {
     const fields = {
       merchantId: config.merchantId,
       accountId: config.accountId,
-      description: `Pedido OZONO #${sale.id}`,
+      description: `Pedido VirtusMonaco #${sale.id}`,
       referenceCode,
       amount: String(amount),
       tax: '0',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, setAdminToken } from '../api/client';
+import { BRAND } from '../config/brand';
 import './admin.css';
 
 const AdminLogin = () => {
@@ -29,7 +30,7 @@ const AdminLogin = () => {
     <div className="admin-login-page">
       <div className="admin-login-card">
         <h1 className="brand-logo" style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
-          OZONO
+          {BRAND.name}
         </h1>
         <p style={{ color: 'var(--color-text-light)', marginBottom: '1.5rem' }}>
           Panel de administración — Colombia
