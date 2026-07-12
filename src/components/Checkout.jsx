@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { api, mediaUrl, submitPayUForm } from '../api/client';
 import { formatCOP } from '../utils/currency';
+import BrandLogo from './BrandLogo';
 
 const PAYMENT_METHODS = [
   {
@@ -175,6 +176,7 @@ const Checkout = ({ items, onOrderComplete }) => {
     <div className="checkout-page">
       <div className="checkout-container">
         <header className="checkout-header">
+          <BrandLogo variant="checkout" className="checkout-brand-logo" />
           <p className="checkout-step">Paso 2 de 2</p>
           <h1>Finalizar compra</h1>
           <p className="checkout-subtitle">Completa tus datos para recibir tu pedido</p>
@@ -428,7 +430,13 @@ const checkoutStyles = `
   }
 
   .checkout-header {
+    text-align: center;
     margin-bottom: 1.5rem;
+  }
+
+  .checkout-brand-logo {
+    display: flex;
+    justify-content: center;
   }
 
   .checkout-step {

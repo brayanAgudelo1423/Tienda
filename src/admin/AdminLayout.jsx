@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, Plus, LogOut, ShoppingBag, Tag } from 'lucide-react';
 import { setAdminToken } from '../api/client';
-import { BRAND } from '../config/brand';
+import BrandLogo from '../components/BrandLogo';
 import './admin.css';
 
 const AdminLayout = () => {
@@ -16,7 +16,7 @@ const AdminLayout = () => {
   return (
     <div className="admin-shell">
       <header className="admin-topbar">
-        <h1 className="brand-logo">{BRAND.short}</h1>
+        <BrandLogo variant="admin-bar" asLink={false} />
         <button type="button" onClick={logout} aria-label="Cerrar sesión">
           <LogOut size={22} />
         </button>

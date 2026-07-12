@@ -4,4 +4,6 @@ export const BRAND = {
   legal: 'VirtusMonaco',
   domain: 'virtusmonaco.store',
   siteUrl: 'https://virtusmonaco.store',
+  logo: '/Logo/Logo.jpg',
+  logoAlt: 'VirtusMonaco — Moda y lociones originales',
 };

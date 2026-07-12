@@ -48,6 +48,127 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 500; col
   text-transform: uppercase;
 }
 
+.brand-logo-link--img {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.brand-logo-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.brand-logo-visual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.brand-logo-visual--spin {
+  animation: brand-logo-spin 14s linear infinite;
+}
+
+.brand-logo-visual--spin:hover {
+  animation-duration: 5s;
+}
+
+@keyframes brand-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.brand-logo-mark {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--color-primary);
+  line-height: 1;
+  user-select: none;
+}
+
+.brand-logo-unit--utility .brand-logo-mark {
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+}
+
+.brand-logo-unit--drawer .brand-logo-mark {
+  font-size: 1.15rem;
+}
+
+.brand-logo-unit--admin-bar .brand-logo-mark {
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-visual--spin {
+    animation: none;
+  }
+}
+
+.brand-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.brand-logo-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-logo-img--utility {
+  height: 26px;
+  max-width: 88px;
+  opacity: 0.92;
+}
+
+.brand-logo-img--header {
+  height: 44px;
+  max-width: 148px;
+}
+
+.brand-logo-img--drawer {
+  height: 52px;
+  max-width: 168px;
+}
+
+.brand-logo-img--footer {
+  height: 76px;
+  max-width: 200px;
+  margin-bottom: 0.15rem;
+}
+
+.brand-logo-img--checkout {
+  height: 56px;
+  max-width: 180px;
+  margin: 0 auto 0.75rem;
+  object-position: center center;
+}
+
+.brand-logo-img--admin {
+  height: 88px;
+  max-width: 220px;
+  margin: 0 auto 0.5rem;
+  object-position: center center;
+}
+
+.brand-logo-img--admin-bar {
+  height: 36px;
+  max-width: 120px;
+}
+
 .nav-link {
   font-family: var(--font-nav);
   font-weight: 400;
@@ -126,6 +247,8 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   font-size: 1.75rem;
   line-height: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 .site-header-actions {
@@ -860,14 +983,30 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     gap: 0.5rem;
   }
 
-  .site-header-logo,
-  .site-header-logo .brand-logo-link {
-    font-size: 1.15rem !important;
-    letter-spacing: 0.1em !important;
+  .site-header-logo {
+    min-width: 0;
+    flex: 1;
+    max-width: 148px;
   }
 
-  .site-header-logo .brand-logo-full { display: none; }
-  .site-header-logo .brand-logo-short { display: inline; }
+  .brand-logo-img--header {
+    height: 38px;
+    max-width: 108px;
+  }
+
+  .brand-logo-unit--header .brand-logo-mark {
+    font-size: 0.95rem;
+  }
+
+  .brand-logo-img--drawer {
+    height: 48px;
+    max-width: 150px;
+  }
+
+  .brand-logo-img--footer {
+    height: 68px;
+    max-width: 180px;
+  }
 
   .site-cart {
     padding: 0.5rem;

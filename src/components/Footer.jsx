@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, X } from 'lucide-react';
 import { api, setAdminToken } from '../api/client';
 import { BRAND } from '../config/brand';
+import BrandLogo from './BrandLogo';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Footer = () => {
     <footer className="site-footer">
       <div className="container site-footer-main">
         <div className="site-footer-brand">
-          <h2 className="brand-logo site-footer-logo">{BRAND.name}</h2>
+          <BrandLogo variant="footer" />
           <p className="site-footer-tagline">
             Moda deportiva y urbana de alto rendimiento. 100% original.
           </p>
@@ -158,12 +159,11 @@ const Footer = () => {
             aria-labelledby="vm-login-title"
             aria-modal="true"
           >
+            <div id="vm-login-title" className="visually-hidden">{BRAND.name} — Admin</div>
             <button type="button" className="site-footer-modal-close" onClick={closeLogin} aria-label="Cerrar">
               <X size={20} />
             </button>
-            <h2 id="vm-login-title" className="brand-logo site-footer-modal-title">
-              {BRAND.name}
-            </h2>
+            <BrandLogo variant="admin" asLink={false} className="site-footer-modal-brand" />
             <p className="site-footer-modal-desc">Panel de administración</p>
             <form className="site-footer-modal-form" onSubmit={handleLogin}>
               <input

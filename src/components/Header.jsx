@@ -4,7 +4,7 @@ import { ShoppingBag, Search, Heart, Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../context/ProductsContext';
 import { usePromotions } from '../context/PromotionsContext';
-import { BRAND } from '../config/brand';
+import BrandLogo from './BrandLogo';
 
 const Header = ({ cartCount }) => {
   const { fashionBrands, fragranceBrands } = useProducts();
@@ -24,7 +24,7 @@ const Header = ({ cartCount }) => {
       <div className="utility-bar">
         <div className="container utility-bar-inner">
           <div className="utility-bar-brand">
-            <span className="brand-logo utility-brand">{BRAND.short}</span>
+            <BrandLogo variant="utility" />
           </div>
           <div className="utility-bar-links">
             <Link to="/rastrear-pedido">Rastrear pedido</Link>
@@ -40,11 +40,8 @@ const Header = ({ cartCount }) => {
 
       <header className="site-header header-mobile">
         <div className="container site-header-inner">
-          <div className="site-header-logo brand-logo">
-            <Link to="/" className="brand-logo-link">
-              <span className="brand-logo-full">{BRAND.name}</span>
-              <span className="brand-logo-short">{BRAND.short}</span>
-            </Link>
+          <div className="site-header-logo">
+            <BrandLogo variant="header" />
           </div>
           <nav className="nav-main desktop-nav">
             <div
@@ -152,10 +149,7 @@ const Header = ({ cartCount }) => {
             className="mobile-drawer"
           >
             <div className="mobile-drawer-head">
-              <span className="brand-logo brand-logo-link mobile-drawer-logo">
-                <span className="brand-logo-full">{BRAND.name}</span>
-                <span className="brand-logo-short">{BRAND.short}</span>
-              </span>
+              <BrandLogo variant="drawer" onClick={closeMobile} />
               <button type="button" onClick={closeMobile} aria-label="Cerrar menú">
                 <X size={28} />
               </button>

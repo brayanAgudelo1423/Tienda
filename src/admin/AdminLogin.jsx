@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, setAdminToken } from '../api/client';
-import { BRAND } from '../config/brand';
+import BrandLogo from '../components/BrandLogo';
 import './admin.css';
 
 const AdminLogin = () => {
@@ -29,10 +29,8 @@ const AdminLogin = () => {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <h1 className="brand-logo" style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
-          {BRAND.name}
-        </h1>
-        <p style={{ color: 'var(--color-text-light)', marginBottom: '1.5rem' }}>
+        <BrandLogo variant="admin" asLink={false} className="admin-login-brand" />
+        <p style={{ color: 'var(--color-text-light)', marginBottom: '1.5rem', textAlign: 'center' }}>
           Panel de administración — Colombia
         </p>
 

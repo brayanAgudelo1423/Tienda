@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import BrandLogo from '../components/BrandLogo';
 
 const STATE_COPY = {
   APPROVED: {
@@ -54,6 +55,7 @@ const CheckoutResult = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
     >
+      <BrandLogo variant="checkout" asLink={false} />
       <Icon size={56} strokeWidth={1.5} />
       <h1>{copy.title}</h1>
       {orderId && <p className="checkout-result-order">Pedido #{orderId}</p>}
