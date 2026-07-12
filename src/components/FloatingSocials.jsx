@@ -33,7 +33,7 @@ const FloatingSocials = () => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         className="floating-socials-ig"
-        href="https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ=="
+        href="https://www.instagram.com/virtusmonaco_?igsh=eG9taG5yNWpwNWY1&utm_source=qr"
         target="_blank"
         rel="noopener noreferrer"
         title="Instagram"
