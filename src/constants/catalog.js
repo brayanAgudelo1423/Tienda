@@ -51,6 +51,6 @@ export const FASHION_BRAND_NAMES = [
   'Lacoste',
   'Calvin Klein',
   'Psycho Bunny',
-  'Tomi',
+  'Tommy',
   'Novedades',
 ];

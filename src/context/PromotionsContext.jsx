@@ -91,9 +91,11 @@ export function PromotionsProvider({ children }) {
     };
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVisibility);
+    const interval = setInterval(loadPromotions, 15000);
     return () => {
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
+      clearInterval(interval);
     };
   }, [loadPromotions]);
 

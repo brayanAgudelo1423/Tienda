@@ -9,7 +9,7 @@ export const NAV_BRANDS = [
   { name: 'Lacoste', slug: 'lacoste' },
   { name: 'Calvin Klein', slug: 'calvin-klein' },
   { name: 'Psycho Bunny', slug: 'psycho-bunny' },
-  { name: 'Tomi', slug: 'tomi' },
+  { name: 'Tommy', slug: 'tomi' },
   { name: 'Novedades', slug: 'novedades' },
 ];
 
@@ -398,7 +398,7 @@ const catalogProducts = [
     return {
       id: 100 + index,
       name: filename.replace(/\.jpe?g$/i, ''),
-      brand: 'Tomi',
+      brand: 'Tommy',
       productType: meta.productType,
       price: meta.price,
       category: meta.category,
@@ -408,7 +408,7 @@ const catalogProducts = [
       colors: meta.colors,
       image: url,
       hoverImage: url,
-      description: 'Estilo premium Tomi.',
+      description: 'Estilo premium Tommy.',
     };
   }),
   ...NOVEDADES_IMAGE_FILES.map((filename, index) => {

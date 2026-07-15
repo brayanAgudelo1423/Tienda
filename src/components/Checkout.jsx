@@ -52,8 +52,8 @@ const SUCCESS_COPY = {
     body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
   },
   contraentrega: {
-    title: '¡Pedido confirmado!',
-    body: 'Tu pedido quedó agendado. Pagas en efectivo o datáfono cuando lo recibas.',
+    title: '¡Compra exitosa!',
+    body: 'Tu compra fue registrada correctamente. Pronto nos contactaremos contigo para coordinar la entrega.',
   },
 };
 
@@ -163,7 +163,9 @@ const Checkout = ({ items, onOrderComplete }) => {
           <CheckCircle size={64} strokeWidth={1.5} />
         </div>
         <h1>{copy.title}</h1>
-        {orderId && <p className="checkout-order-id">Pedido #{orderId}</p>}
+        {orderId && completedPayment !== 'contraentrega' && (
+          <p className="checkout-order-id">Pedido #{orderId}</p>
+        )}
         <p>{copy.body}</p>
         <Link to="/" className="btn">
           Volver a la tienda

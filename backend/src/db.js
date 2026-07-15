@@ -183,6 +183,7 @@ export async function initDatabase() {
   await ensureAdminUser();
   await ensureDefaultPromotions();
   await ensurePromotionsSettings();
+  await applyCatalogPatches();
   initialized = true;
   console.log('[OZONO] Esquema PostgreSQL listo');
 }
@@ -200,6 +201,12 @@ async function ensureAdminUser() {
     hash,
   ]);
   console.log(`Admin creado: usuario "${username}"`);
+}
+
+async function applyCatalogPatches() {
+  const db = getPool();
+  await db.query(`UPDATE brands SET name = 'Tommy' WHERE slug = 'tomi' AND name = 'Tomi'`);
+  await db.query(`UPDATE products SET brand = 'Tommy' WHERE brand = 'Tomi'`);
 }
 
 function rowToPromotion(row) {

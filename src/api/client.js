@@ -31,6 +31,7 @@ async function request(path, options = {}) {
     res = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers,
+      cache: 'no-store',
       body:
         options.body instanceof FormData || options.body === undefined
           ? options.body

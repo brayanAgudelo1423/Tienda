@@ -8,7 +8,7 @@ const HERO_IMAGES = [
   { src: imageUrl('Novedades', 'Polo Michael Kors Cafe Ref1.jpeg'), alt: 'Polo Michael Kors' },
   { src: imageUrl('CK', 'Polo CK Negra Ref1.jpeg'), alt: 'Polo Calvin Klein' },
   { src: imageUrl('Novedades', 'Chaqueta Jordan Ref1.jpeg'), alt: 'Chaqueta Jordan' },
-  { src: imageUrl('Tomi', 'Polo Tomi Azul Ref1.jpeg'), alt: 'Polo Tomi' },
+  { src: imageUrl('Tomi', 'Polo Tomi Azul Ref1.jpeg'), alt: 'Polo Tommy' },
   {
     src: imageUrl('Lacoste', 'Conjunto o separado Lacoste Azul.jpeg'),
     alt: 'Conjunto Lacoste Azul',
