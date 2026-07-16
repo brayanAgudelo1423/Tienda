@@ -3,6 +3,7 @@ import { ImagePlus } from 'lucide-react';
 import { api, mediaUrl } from '../api/client';
 import { BRAND } from '../config/brand';
 import { formatCOP, parseCOPInput } from '../utils/currency';
+import { compressImageForUpload } from '../utils/compressImage';
 import { promoDiscountPercent, resolvePromoBadge } from '../utils/promo';
 
 const emptyForm = {
@@ -87,7 +88,8 @@ const AdminPromotions = () => {
     setUploading(true);
     setError('');
     try {
-      const { url } = await api.uploadImage(file);
+      const prepared = await compressImageForUpload(file);
+      const { url } = await api.uploadImage(prepared);
       setForm((f) => ({ ...f, image: url }));
     } catch (err) {
       setError(err.message);

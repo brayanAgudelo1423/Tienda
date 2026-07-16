@@ -4,6 +4,7 @@ import { ImagePlus, Camera, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { parseCOPInput } from '../utils/currency';
+import { compressImageForUpload } from '../utils/compressImage';
 import { ALL_BRANDS } from '../data';
 import {
   PRODUCT_CATEGORIES,
@@ -106,7 +107,8 @@ const AdminProductForm = () => {
     setUploading(true);
     setError('');
     try {
-      const { url } = await api.uploadImage(file);
+      const prepared = await compressImageForUpload(file);
+      const { url } = await api.uploadImage(prepared);
       if (target === 'hover') {
         update('hoverImage', url);
       } else if (target === 'gallery') {

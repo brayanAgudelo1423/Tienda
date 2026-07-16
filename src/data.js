@@ -10,6 +10,7 @@ export const NAV_BRANDS = [
   { name: 'Calvin Klein', slug: 'calvin-klein' },
   { name: 'Psycho Bunny', slug: 'psycho-bunny' },
   { name: 'Tommy', slug: 'tomi' },
+  { name: 'The North Face', slug: 'the-north-face' },
   { name: 'Novedades', slug: 'novedades' },
 ];
 

@@ -207,6 +207,11 @@ async function applyCatalogPatches() {
   const db = getPool();
   await db.query(`UPDATE brands SET name = 'Tommy' WHERE slug = 'tomi' AND name = 'Tomi'`);
   await db.query(`UPDATE products SET brand = 'Tommy' WHERE brand = 'Tomi'`);
+  await db.query(
+    `INSERT INTO brands (name, slug, sort_order) VALUES ($1, $2, $3)
+     ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order`,
+    ['The North Face', 'the-north-face', 5]
+  );
 }
 
 function rowToPromotion(row) {
