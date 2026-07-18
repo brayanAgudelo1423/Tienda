@@ -108,7 +108,7 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.
           </span>
           <span className="site-footer-payu">
-            Pagos seguros con <strong>PayU</strong>
+            Pagos seguros con <strong>Mercado Pago</strong>
           </span>
         </div>
       </div>

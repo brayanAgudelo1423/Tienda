@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -16,29 +16,30 @@ import { api, mediaUrl, submitPayUForm } from '../api/client';
 import { formatCOP } from '../utils/currency';
 import BrandLogo from './BrandLogo';
 
-const PAYMENT_METHODS = [
+const FALLBACK_PAYMENT_METHODS = [
   {
-    id: 'payu-online',
-    label: 'Pago en línea — PayU',
-    desc: 'Elige en la pasarela segura: tarjetas, PSE (todos los bancos), Nequi, Daviplata, Addi, Sistecredito y más.',
+    id: 'mercadopago',
+    label: 'Pago en línea — Mercado Pago',
+    desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
   },
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
 ];
 
-const PAYU_AVAILABLE_METHODS = [
+const MP_AVAILABLE_METHODS = [
   'Tarjetas crédito/débito',
   'PSE — todos los bancos',
   'Nequi',
   'Daviplata',
-  'Bancolombia',
   'Efecty',
-  'Addi',
-  'Sistecredito',
   'Baloto',
   'Pago en efectivo',
 ];
 
 const SUCCESS_COPY = {
+  mercadopago: {
+    title: 'Redirigiendo a Mercado Pago…',
+    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Daviplata u otro método disponible.',
+  },
   'payu-online': {
     title: 'Redirigiendo a PayU…',
     body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
@@ -64,9 +65,27 @@ const Checkout = ({ items, onOrderComplete }) => {
   const [completedPayment, setCompletedPayment] = useState('contraentrega');
   const [error, setError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [payment, setPayment] = useState('payu-online');
+  const [paymentMethods, setPaymentMethods] = useState(FALLBACK_PAYMENT_METHODS);
+  const [payment, setPayment] = useState('mercadopago');
 
+  const isMercadoPago = payment === 'mercadopago';
   const isPayU = payment === 'payu-online' || payment === 'payu-card' || payment === 'pse';
+
+  useEffect(() => {
+    api
+      .getPaymentMethods()
+      .then(({ methods }) => {
+        if (methods?.length) {
+          setPaymentMethods(methods);
+          const firstOnline = methods.find((m) => m.id !== 'contraentrega');
+          if (firstOnline) setPayment(firstOnline.id);
+        }
+      })
+      .catch(() => {
+        setPaymentMethods(FALLBACK_PAYMENT_METHODS);
+        setPayment('mercadopago');
+      });
+  }, []);
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shipping = subtotal > 0 ? 0 : 0;
@@ -105,6 +124,17 @@ const Checkout = ({ items, onOrderComplete }) => {
         items: saleItems,
         paymentMethod: payment,
       });
+
+      if (isMercadoPago) {
+        const mp = await api.createMercadoPagoCheckout({
+          saleId: sale.id,
+          customer,
+        });
+
+        onOrderComplete?.();
+        window.location.href = mp.initPoint;
+        return;
+      }
 
       if (isPayU) {
         const documentNumber = String(form.get('documentNumber') || '').trim();
@@ -302,7 +332,7 @@ const Checkout = ({ items, onOrderComplete }) => {
               </h2>
 
               <div className="payment-options">
-                {PAYMENT_METHODS.map((m) => (
+                {paymentMethods.map((m) => (
                   <label key={m.id} className={`payment-option ${payment === m.id ? 'is-active' : ''}`}>
                     <input
                       type="radio"
@@ -319,11 +349,22 @@ const Checkout = ({ items, onOrderComplete }) => {
                 ))}
               </div>
 
+              {isMercadoPago && (
+                <div className="checkout-payu-methods">
+                  <p className="checkout-payu-methods-title">Medios disponibles en Mercado Pago:</p>
+                  <ul className="checkout-payu-methods-list">
+                    {MP_AVAILABLE_METHODS.map((name) => (
+                      <li key={name}>{name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {payment === 'payu-online' && (
                 <div className="checkout-payu-methods">
                   <p className="checkout-payu-methods-title">Medios disponibles en PayU:</p>
                   <ul className="checkout-payu-methods-list">
-                    {PAYU_AVAILABLE_METHODS.map((name) => (
+                    {MP_AVAILABLE_METHODS.map((name) => (
                       <li key={name}>{name}</li>
                     ))}
                   </ul>
@@ -331,9 +372,9 @@ const Checkout = ({ items, onOrderComplete }) => {
               )}
 
               <p className="checkout__payu-note">
-                Al pagar en línea serás redirigido a PayU, donde podrás elegir cualquier método
-                activo en tu cuenta (PSE con cualquier banco, Nequi, Daviplata, tarjetas, Addi,
-                Sistecredito, efectivo y más). ORÍGEN nunca almacena los datos de tu tarjeta.
+                Al pagar en línea serás redirigido a una pasarela segura (Mercado Pago), donde podrás
+                elegir PSE, Nequi, tarjeta, Daviplata, efectivo y más. VirtusMonaco nunca almacena los
+                datos de tu tarjeta.
               </p>
             </section>
 

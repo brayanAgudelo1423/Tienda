@@ -12,6 +12,14 @@ import {
   isPayUConfigured,
   mapPayUState,
 } from '../payu.js';
+import {
+  createCheckoutPreference,
+  extractWebhookPaymentId,
+  extractWebhookTopic,
+  fetchMercadoPagoPayment,
+  isMercadoPagoConfigured,
+  mapMercadoPagoStatus,
+} from '../mercadopago.js';
 
 const router = Router();
 
@@ -25,6 +33,117 @@ function backendBaseUrl(req) {
 function frontendBaseUrl() {
   return (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
 }
+
+router.get('/methods', (_req, res) => {
+  const methods = [];
+
+  if (isMercadoPagoConfigured()) {
+    methods.push({
+      id: 'mercadopago',
+      label: 'Pago en línea — Mercado Pago',
+      desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
+    });
+  }
+
+  if (isPayUConfigured()) {
+    methods.push({
+      id: 'payu-online',
+      label: 'Pago en línea — PayU',
+      desc: 'Pasarela alternativa: tarjetas, PSE, Nequi y otros medios.',
+    });
+  }
+
+  methods.push({
+    id: 'contraentrega',
+    label: 'Pago contraentrega',
+    desc: 'Pagas en efectivo o datáfono al recibir',
+  });
+
+  res.json({ methods });
+});
+
+router.post('/mercadopago/checkout', async (req, res, next) => {
+  try {
+    if (!isMercadoPagoConfigured()) {
+      return res.status(503).json({
+        error:
+          'Mercado Pago no está configurado. Agrega MERCADOPAGO_ACCESS_TOKEN en Render.',
+      });
+    }
+
+    const { saleId, customer } = req.body;
+    const sale = await getSaleById(Number(saleId));
+
+    if (!sale) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    if (!customer?.email || !customer?.name || !customer?.phone) {
+      return res.status(400).json({ error: 'Datos del cliente incompletos' });
+    }
+
+    const checkout = await createCheckoutPreference({
+      sale,
+      customer,
+      backendUrl: backendBaseUrl(req),
+      frontendUrl: frontendBaseUrl(),
+    });
+
+    await updateSalePayment(sale.id, {
+      payuReference: checkout.reference,
+      status: 'pendiente_pago',
+    });
+
+    res.json({
+      initPoint: checkout.initPoint,
+      preferenceId: checkout.preferenceId,
+      reference: checkout.reference,
+      test: checkout.test,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+async function processMercadoPagoPayment(paymentId) {
+  const payment = await fetchMercadoPagoPayment(paymentId);
+  const saleId = Number(payment.external_reference);
+  const sale =
+    (saleId ? await getSaleById(saleId) : null) ||
+    (payment.metadata?.reference
+      ? await getSaleByPayUReference(String(payment.metadata.reference))
+      : null);
+
+  if (!sale) {
+    console.warn('[Mercado Pago] Pago sin pedido asociado:', paymentId);
+    return;
+  }
+
+  await updateSalePayment(sale.id, {
+    status: mapMercadoPagoStatus(payment.status),
+    payuTransactionId: String(payment.id),
+    payuReference: payment.metadata?.reference || sale.payuReference,
+  });
+}
+
+async function handleMercadoPagoWebhook(req, res, next) {
+  try {
+    const topic = extractWebhookTopic(req);
+    const paymentId = extractWebhookPaymentId(req);
+
+    if (paymentId && (topic.includes('payment') || req.method === 'GET')) {
+      await processMercadoPagoPayment(paymentId);
+    }
+
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('[Mercado Pago] Webhook error:', err.message);
+    res.status(200).send('OK');
+  }
+}
+
+router.post('/mercadopago/webhook', handleMercadoPagoWebhook);
+router.get('/mercadopago/webhook', handleMercadoPagoWebhook);
 
 router.post('/checkout', async (req, res, next) => {
   try {

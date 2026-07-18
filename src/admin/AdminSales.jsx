@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { formatCOP } from '../utils/currency';
 
 const PAYMENT_LABELS = {
+  mercadopago: 'Mercado Pago',
   'payu-online': 'PayU (todos los medios)',
   'payu-card': 'PayU (todos los medios)',
   pse: 'PayU (todos los medios)',

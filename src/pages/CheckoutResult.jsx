@@ -8,7 +8,7 @@ const STATE_COPY = {
   APPROVED: {
     icon: CheckCircle,
     title: '¡Pago aprobado!',
-    body: 'Tu pago fue procesado correctamente por PayU. Te enviaremos la confirmación por correo.',
+    body: 'Tu pago fue procesado correctamente. Te enviaremos la confirmación por correo.',
     tone: 'success',
   },
   PENDING: {
@@ -31,23 +31,42 @@ const STATE_COPY = {
   },
 };
 
+function normalizePaymentState(params) {
+  const gateway = params.get('gateway');
+
+  if (gateway === 'mp') {
+    const mpStatus = (
+      params.get('collection_status') ||
+      params.get('status') ||
+      'pending'
+    ).toLowerCase();
+
+    if (mpStatus === 'approved') return 'APPROVED';
+    if (mpStatus === 'rejected' || mpStatus === 'failure') return 'DECLINED';
+    return 'PENDING';
+  }
+
+  return String(
+    params.get('lapTransactionState') ||
+      params.get('transactionState') ||
+      params.get('state_pol') ||
+      'PENDING'
+  ).toUpperCase();
+}
+
 const CheckoutResult = () => {
   const [params] = useSearchParams();
   const [state, setState] = useState('PENDING');
 
   useEffect(() => {
-    const lapState =
-      params.get('lapTransactionState') ||
-      params.get('transactionState') ||
-      params.get('state_pol') ||
-      'PENDING';
-    setState(String(lapState).toUpperCase());
+    setState(normalizePaymentState(params));
   }, [params]);
 
   const copy = STATE_COPY[state] || STATE_COPY.PENDING;
   const Icon = copy.icon;
-  const reference = params.get('referenceCode') || params.get('reference_pol');
-  const orderId = params.get('extra1');
+  const reference = params.get('referenceCode') || params.get('reference_pol') || params.get('payment_id');
+  const orderId = params.get('external_reference') || params.get('extra1');
+  const isMercadoPago = params.get('gateway') === 'mp';
 
   return (
     <motion.div
@@ -58,7 +77,7 @@ const CheckoutResult = () => {
       <BrandLogo variant="checkout" asLink={false} />
       <Icon size={56} strokeWidth={1.5} />
       <h1>{copy.title}</h1>
-      {orderId && <p className="checkout-result-order">Pedido #{orderId}</p>}
+      {orderId && !isMercadoPago && <p className="checkout-result-order">Pedido #{orderId}</p>}
       {reference && <p className="checkout-result-ref">Ref. {reference}</p>}
       <p>{copy.body}</p>
       <div className="checkout-result-actions">

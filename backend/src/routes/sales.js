@@ -5,7 +5,13 @@ import { notifyNewOrder } from '../email.js';
 
 const router = Router();
 
-const VALID_PAYMENT_METHODS = new Set(['payu-online', 'payu-card', 'pse', 'contraentrega']);
+const VALID_PAYMENT_METHODS = new Set([
+  'mercadopago',
+  'payu-online',
+  'payu-card',
+  'pse',
+  'contraentrega',
+]);
 
 function normalizePaymentMethod(paymentMethod) {
   if (paymentMethod === 'payu-card' || paymentMethod === 'pse') return 'payu-online';

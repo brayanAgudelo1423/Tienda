@@ -48,6 +48,7 @@ function saleStatusForPayment(paymentMethod) {
   if (paymentMethod === 'payu-online' || paymentMethod === 'payu-card' || paymentMethod === 'pse') {
     return 'pendiente_pago';
   }
+  if (paymentMethod === 'mercadopago') return 'pendiente_pago';
   return 'confirmada';
 }
 
