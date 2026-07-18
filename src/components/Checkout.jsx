@@ -15,7 +15,6 @@ import {
 import { api, mediaUrl } from '../api/client';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
-import { displayStoreText } from '../utils/displayText';
 import BrandLogo from './BrandLogo';
 
 const FALLBACK_PAYMENT_METHODS = [
