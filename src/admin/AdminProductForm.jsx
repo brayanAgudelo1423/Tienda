@@ -496,7 +496,7 @@ const AdminProductForm = () => {
             <input
               value={customSize}
               onChange={(e) => setCustomSize(e.target.value)}
-              placeholder={isLocion ? 'Ej. 150ml' : 'Talla extra'}
+              placeholder={isLocion ? 'Ej. 150ml' : 'Ej. US10/11'}
             />
             <button type="button" className="admin-btn-sm" onClick={addSize}>
               +
