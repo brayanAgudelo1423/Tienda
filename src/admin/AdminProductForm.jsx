@@ -197,8 +197,15 @@ const AdminProductForm = () => {
       ALL_BRANDS.find((b) => b.name === form.brand)?.slug ||
       form.brand.toLowerCase().replace(/\s+/g, '-');
 
+    const pendingSize = customSize.trim();
+    const sizes =
+      pendingSize && !form.sizes.includes(pendingSize)
+        ? [...form.sizes, pendingSize]
+        : form.sizes;
+
     const payload = {
       ...form,
+      sizes,
       brandSlug,
       gender: isLocion ? form.gender : null,
       price: parseCOPInput(form.price),
@@ -209,6 +216,7 @@ const AdminProductForm = () => {
     try {
       if (isEdit) await api.updateProduct(id, payload);
       else await api.createProduct(payload);
+      if (pendingSize) setCustomSize('');
       await reloadProducts();
       navigate('/admin/productos');
     } catch (err) {
@@ -496,6 +504,12 @@ const AdminProductForm = () => {
             <input
               value={customSize}
               onChange={(e) => setCustomSize(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addSize();
+                }
+              }}
               placeholder={isLocion ? 'Ej. 150ml' : 'Ej. US10/11'}
             />
             <button type="button" className="admin-btn-sm" onClick={addSize}>

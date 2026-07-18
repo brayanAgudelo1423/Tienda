@@ -35,8 +35,9 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
   if (!product) return null;
 
   const isLocion = product.category === LOCIONES_CATEGORY;
+  const sizes = product.sizes ?? [];
   const defaultColor = product.colors?.[0]?.hex || '#d4c4a8';
-  const defaultSize = product.sizes?.[0] || (isLocion ? '100ml' : 'Única');
+  const defaultSize = sizes[0] || (isLocion ? '100ml' : 'Única');
 
   const buildCartItem = () => {
     const size = selectedSize || defaultSize;
@@ -113,12 +114,13 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
               <p style={styles.price}>{formatCOP(product.price)}</p>
               <p style={styles.description}>{product.description}</p>
 
+              {sizes.length > 0 && (
               <div style={styles.optionGroup}>
                 <h4 style={styles.optionLabel}>
-                  {isLocion ? 'Presentación (opcional)' : 'Talla (opcional)'}
+                  {isLocion ? 'Presentación' : 'Talla'}
                 </h4>
                 <div style={styles.sizeGrid}>
-                  {product.sizes.map((size) => (
+                  {sizes.map((size) => (
                     <button
                       key={size}
                       type="button"
@@ -136,10 +138,11 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
                   ))}
                 </div>
               </div>
+              )}
 
               {(!isLocion || product.colors.length > 1) && (
               <div style={styles.optionGroup}>
-                <h4 style={styles.optionLabel}>{isLocion ? 'Variante (opcional)' : 'Color (opcional)'}</h4>
+                <h4 style={styles.optionLabel}>{isLocion ? 'Variante' : 'Color'}</h4>
                 <div style={styles.colorGrid}>
                   {product.colors.map((color) => (
                     <button
