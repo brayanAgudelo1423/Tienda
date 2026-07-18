@@ -43,15 +43,11 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
       return null;
     }
     const colorHex = selectedColor || defaultColor;
-    if (!isLocion && !selectedColor) {
-      setError('Selecciona un color');
-      return null;
-    }
     return {
       ...product,
       selectedSize,
       selectedColor: colorHex,
-      colorName: product.colors.find((c) => c.hex === colorHex)?.name ?? colorHex,
+      colorName: product.colors?.find((c) => c.hex === colorHex)?.name ?? 'Estándar',
     };
   };
 
