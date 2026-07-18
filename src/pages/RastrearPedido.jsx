@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Search } from 'lucide-react';
+import { Package, Search, Truck } from 'lucide-react';
 import { api } from '../api/client';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 import { BRAND } from '../config/brand';
 
 const STATUS_LABELS = {
   confirmada: 'Confirmado — en preparación',
   pendiente_pago: 'Pendiente de pago',
-  pagada: 'Pagado — en preparación',
+  pagada: 'Pagado — en preparación para envío',
   rechazada: 'Pago rechazado',
 };
+
+function shippingMessage(status) {
+  if (status === 'rechazada') {
+    return 'Tu pago no fue aprobado. Realiza un nuevo pedido o contáctanos si necesitas ayuda.';
+  }
+  if (status === 'pendiente_pago') {
+    return 'Estamos esperando la confirmación del pago. Cuando se apruebe, prepararemos tu pedido para envío con Coordinadora.';
+  }
+  return 'Tu pedido será enviado por Coordinadora. Te enviaremos la guía de rastreo por correo y WhatsApp en cuanto despachemos el paquete.';
+}
 
 const RastrearPedido = () => {
   const [orderId, setOrderId] = useState('');
@@ -92,16 +103,34 @@ const RastrearPedido = () => {
                 <p>{STATUS_LABELS[order.status] || order.status}</p>
               </div>
             </div>
+
+            <div className="track-shipping-box">
+              <Truck size={22} />
+              <div>
+                <strong>Envío con Coordinadora</strong>
+                <p>{shippingMessage(order.status)}</p>
+                {order.status !== 'rechazada' && order.status !== 'pendiente_pago' && (
+                  <p className="track-shipping-note">
+                    Con tu guía podrás rastrear el paquete en{' '}
+                    <a href="https://www.coordinadora.com/rastreo" target="_blank" rel="noreferrer">
+                      coordinadora.com
+                    </a>
+                    .
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="track-result-meta">
               <span>Fecha: {new Date(order.createdAt).toLocaleString('es-CO')}</span>
               <span>Total: {formatCOP(order.total)}</span>
-              {order.paymentMethod && <span>Pago: {order.paymentMethod}</span>}
+              {order.paymentMethod && <span>Pago: {order.paymentMethod === 'mercadopago' ? 'En línea' : order.paymentMethod}</span>}
             </div>
             <ul className="track-result-items">
               {order.items.map((item, i) => (
                 <li key={`${item.name}-${i}`}>
                   <span>
-                    {item.name} × {item.quantity}
+                    {displayStoreText(item.brand ? `${item.brand} — ${item.name}` : item.name)} × {item.quantity}
                   </span>
                   <span>{formatCOP(item.price * item.quantity)}</span>
                 </li>
@@ -114,6 +143,35 @@ const RastrearPedido = () => {
           </div>
         )}
       </div>
+
+      <style>{`
+        .track-shipping-box {
+          display: flex;
+          gap: 0.85rem;
+          align-items: flex-start;
+          margin: 1rem 0;
+          padding: 1rem;
+          background: var(--color-bg-alt);
+          border-radius: 12px;
+        }
+        .track-shipping-box strong {
+          display: block;
+          margin-bottom: 0.35rem;
+        }
+        .track-shipping-box p {
+          margin: 0;
+          color: var(--color-text-light);
+          line-height: 1.5;
+          font-size: 0.92rem;
+        }
+        .track-shipping-note {
+          margin-top: 0.5rem !important;
+        }
+        .track-shipping-box svg {
+          flex-shrink: 0;
+          color: var(--color-secondary);
+        }
+      `}</style>
     </main>
   );
 };

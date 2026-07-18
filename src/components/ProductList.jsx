@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 import { mediaUrl } from '../api/client';
 import { motion } from 'framer-motion';
 import ProductDetail from './ProductDetail';
@@ -52,8 +53,8 @@ const ProductList = ({ onAddToCart }) => {
                 />
               </div>
               <div className="product-card-info">
-                <p className="product-card-brand">{product.brand}</p>
-                <h3 className="product-card-name">{product.name}</h3>
+                <p className="product-card-brand">{displayStoreText(product.brand)}</p>
+                <h3 className="product-card-name">{displayStoreText(product.name)}</h3>
                 <p className="product-card-type">{product.productType}</p>
                 <StarRating rating={product.rating} size={14} />
                 <p className="product-card-price">{formatCOP(product.price)}</p>

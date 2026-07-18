@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 
 const AdminProducts = () => {
   const { reloadProducts } = useProducts();
@@ -10,6 +11,8 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(new Set());
   const [busy, setBusy] = useState(false);
+  const [brandFilter, setBrandFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   const load = () => {
     setLoading(true);
@@ -23,8 +26,29 @@ const AdminProducts = () => {
     load();
   }, []);
 
+  const brands = useMemo(
+    () => [...new Set(products.map((p) => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [products]
+  );
+
+  const categories = useMemo(
+    () =>
+      [...new Set(products.map((p) => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [products]
+  );
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((p) => {
+        if (brandFilter !== 'all' && p.brand !== brandFilter) return false;
+        if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
+        return true;
+      }),
+    [products, brandFilter, categoryFilter]
+  );
+
   const selectedIds = useMemo(() => [...selected], [selected]);
-  const allSelected = products.length > 0 && selected.size === products.length;
+  const allSelected = filteredProducts.length > 0 && filteredProducts.every((p) => selected.has(p.id));
 
   const toggleSelect = (id) => {
     setSelected((prev) => {
@@ -37,9 +61,17 @@ const AdminProducts = () => {
 
   const toggleSelectAll = () => {
     if (allSelected) {
-      setSelected(new Set());
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filteredProducts.forEach((p) => next.delete(p.id));
+        return next;
+      });
     } else {
-      setSelected(new Set(products.map((p) => p.id)));
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filteredProducts.forEach((p) => next.add(p.id));
+        return next;
+      });
     }
   };
 
@@ -86,17 +118,55 @@ const AdminProducts = () => {
     <>
       <div className="admin-products-head">
         <h2 style={{ fontSize: '1.35rem', margin: 0 }}>
-          Productos ({products.length})
+          Productos ({filteredProducts.length}
+          {filteredProducts.length !== products.length ? ` de ${products.length}` : ''})
         </h2>
         <label className="admin-select-all">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={toggleSelectAll}
-            disabled={busy || products.length === 0}
+            disabled={busy || filteredProducts.length === 0}
           />
-          Seleccionar todos
+          Seleccionar visibles
         </label>
+      </div>
+
+      <div className="admin-filter-row">
+        <label>
+          Marca
+          <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}>
+            <option value="all">Todas las marcas</option>
+            {brands.map((brand) => (
+              <option key={brand} value={brand}>
+                {displayStoreText(brand)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Categoría
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="all">Todas las categorías</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </label>
+        {(brandFilter !== 'all' || categoryFilter !== 'all') && (
+          <button
+            type="button"
+            className="admin-btn-sm"
+            onClick={() => {
+              setBrandFilter('all');
+              setCategoryFilter('all');
+            }}
+          >
+            Limpiar filtros
+          </button>
+        )}
       </div>
 
       {selectedIds.length > 0 && (
@@ -141,7 +211,11 @@ const AdminProducts = () => {
         </div>
       )}
 
-      {products.map((p) => (
+      {filteredProducts.length === 0 && (
+        <p style={{ color: 'var(--color-text-light)' }}>No hay productos con estos filtros.</p>
+      )}
+
+      {filteredProducts.map((p) => (
         <article
           key={p.id}
           className={`admin-product-card${selected.has(p.id) ? ' is-selected' : ''}`}
@@ -160,11 +234,11 @@ const AdminProducts = () => {
           </div>
           <div className="admin-product-info">
             <h3>
-              {p.name}
+              {displayStoreText(p.name)}
               {!p.active && <span className="admin-badge-inactive">No disponible</span>}
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: 0 }}>
-              {p.brand} · {formatCOP(p.price)}
+              {displayStoreText(p.brand)} · {p.category} · {formatCOP(p.price)}
             </p>
             <div className="admin-product-actions">
               <Link to={`/admin/productos/${p.id}`} className="admin-btn-sm">

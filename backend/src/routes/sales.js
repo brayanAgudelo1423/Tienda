@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createSale, getSales, getSalesStats, getSaleForTracking } from '../db.js';
+import { createSale, deleteSale, getSales, getSalesStats, getSaleForTracking } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { notifyNewOrder } from '../email.js';
 
@@ -50,6 +50,9 @@ router.post('/', async (req, res, next) => {
       customerPhone: customer.phone.trim(),
       customerCity: customer.city.trim(),
       customerAddress: customer.address.trim(),
+      customerDocument: customer.documentNumber?.trim()
+        ? `${customer.documentType || 'CC'} ${String(customer.documentNumber).trim()}`
+        : null,
       items,
       paymentMethod: normalizedPayment,
     });
@@ -91,6 +94,18 @@ router.get('/admin', requireAuth, async (req, res, next) => {
 router.get('/admin/stats', requireAuth, async (_req, res, next) => {
   try {
     res.json(await getSalesStats());
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/admin/:id', requireAuth, async (req, res, next) => {
+  try {
+    const deleted = await deleteSale(Number(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

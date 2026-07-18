@@ -4,6 +4,7 @@ import { SlidersHorizontal, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 import { mediaUrl } from '../api/client';
 import { LOCIONES_CATEGORY, GENDERS } from '../constants/catalog';
 import { getBrandNameBySlug } from '../utils/brands';
@@ -216,8 +217,8 @@ const Lociones = ({ onAddToCart }) => {
                     />
                   </div>
                   <div className="lociones-card-info">
-                    <p className="lociones-card-brand">{product.brand}</p>
-                    <h3>{product.name}</h3>
+                    <p className="lociones-card-brand">{displayStoreText(product.brand)}</p>
+                    <h3>{displayStoreText(product.name)}</h3>
                     <p className="lociones-card-type">{product.productType}</p>
                     <StarRating rating={product.rating} size={14} />
                     <p className="lociones-card-price">{formatCOP(product.price)}</p>

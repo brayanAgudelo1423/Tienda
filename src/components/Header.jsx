@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../context/ProductsContext';
 import { usePromotions } from '../context/PromotionsContext';
 import BrandLogo from './BrandLogo';
+import { displayStoreText } from '../utils/displayText';
 
 const Header = ({ cartCount }) => {
   const { fashionBrands, fragranceBrands } = useProducts();
@@ -76,7 +77,7 @@ const Header = ({ cartCount }) => {
                           to={`/lociones/marca/${brand.slug}`}
                           className="nav-lociones-dropdown-item"
                         >
-                          {brand.name}
+                          {displayStoreText(brand.name)}
                         </Link>
                       ))}
                     </div>
@@ -91,7 +92,7 @@ const Header = ({ cartCount }) => {
                 to={`/marcas/${brand.slug}`}
                 className="nav-link"
               >
-                {brand.name}
+                {displayStoreText(brand.name)}
               </Link>
             ))}
             {promoSettings.sectionEnabled && (
@@ -187,7 +188,7 @@ const Header = ({ cartCount }) => {
                         onClick={closeMobile}
                         className="nav-lociones-mobile-item"
                       >
-                        {brand.name}
+                        {displayStoreText(brand.name)}
                       </Link>
                     ))}
                   </div>
@@ -201,7 +202,7 @@ const Header = ({ cartCount }) => {
                   onClick={closeMobile}
                   className="nav-link mobile-drawer-link"
                 >
-                  {brand.name}
+                  {displayStoreText(brand.name)}
                 </Link>
               ))}
               {promoSettings.sectionEnabled && (

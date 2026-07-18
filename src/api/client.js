@@ -129,6 +129,9 @@ export const api = {
   getSales: (limit = 100) =>
     request(`/api/sales/admin?limit=${limit}`, { auth: true }),
 
+  deleteSale: (id) =>
+    request(`/api/sales/admin/${id}`, { method: 'DELETE', auth: true }),
+
   getSalesStats: () => request('/api/sales/admin/stats', { auth: true }),
 
   exportCatalog: () => request('/api/catalog/export', { method: 'POST', auth: true }),

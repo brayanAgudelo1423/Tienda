@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
 import { getBrandBySlug } from '../utils/product';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 import { mediaUrl } from '../api/client';
 import { motion } from 'framer-motion';
 import ProductDetail from '../components/ProductDetail';
@@ -93,8 +94,8 @@ const Brands = ({ onAddToCart }) => {
                     />
                   </div>
                   <div style={styles.info}>
-                    <p style={styles.cardBrand}>{product.brand}</p>
-                    <h3 style={styles.name}>{product.name}</h3>
+                    <p style={styles.cardBrand}>{displayStoreText(product.brand)}</p>
+                    <h3 style={styles.name}>{displayStoreText(product.name)}</h3>
                     <p style={styles.productType}>{product.productType}</p>
                     <StarRating rating={product.rating} size={14} />
                     <p style={styles.price}>{formatCOP(product.price)}</p>

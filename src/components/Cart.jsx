@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
 import { mediaUrl } from '../api/client';
 
 const Cart = ({ items, onRemove }) => {
@@ -38,10 +39,10 @@ const Cart = ({ items, onRemove }) => {
                 </div>
                 <div style={styles.itemDetails}>
                   <div style={styles.itemHeader}>
-                    <h3 style={styles.itemName}>{item.name}</h3>
+                    <h3 style={styles.itemName}>{displayStoreText(item.name)}</h3>
                     <p style={styles.itemPrice}>{formatCOP(item.price)}</p>
                   </div>
-                  <p style={styles.itemBrand}>{item.brand}</p>
+                  <p style={styles.itemBrand}>{displayStoreText(item.brand)}</p>
                   <p style={styles.itemMeta}>
                     {item.isPromotion
                       ? 'Oferta promocional'

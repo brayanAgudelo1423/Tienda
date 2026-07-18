@@ -12,14 +12,16 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { api, mediaUrl, submitPayUForm } from '../api/client';
+import { api, mediaUrl } from '../api/client';
 import { formatCOP } from '../utils/currency';
+import { displayStoreText } from '../utils/displayText';
+import { displayStoreText } from '../utils/displayText';
 import BrandLogo from './BrandLogo';
 
 const FALLBACK_PAYMENT_METHODS = [
   {
     id: 'mercadopago',
-    label: 'Pago en línea — Mercado Pago',
+    label: 'Pago en línea',
     desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
   },
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
@@ -37,20 +39,8 @@ const MP_AVAILABLE_METHODS = [
 
 const SUCCESS_COPY = {
   mercadopago: {
-    title: 'Redirigiendo a Mercado Pago…',
-    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Daviplata u otro método disponible.',
-  },
-  'payu-online': {
-    title: 'Redirigiendo a PayU…',
-    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
-  },
-  'payu-card': {
-    title: 'Redirigiendo a PayU…',
-    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
-  },
-  pse: {
-    title: 'Redirigiendo a PayU…',
-    body: 'En la siguiente pantalla elige cómo pagar: PSE, Nequi, tarjeta, Addi, Sistecredito u otro método disponible.',
+    title: 'Redirigiendo al pago…',
+    body: 'Elige tu medio de pago: tarjeta, PSE, Nequi, Daviplata, Efecty u otro disponible.',
   },
   contraentrega: {
     title: '¡Compra exitosa!',
@@ -71,15 +61,24 @@ const Checkout = ({ items, onOrderComplete }) => {
   const [payment, setPayment] = useState('mercadopago');
 
   const isMercadoPago = payment === 'mercadopago';
-  const isPayU = payment === 'payu-online' || payment === 'payu-card' || payment === 'pse';
+
+  const normalizeMethods = (methods) =>
+    (methods ?? [])
+      .filter((m) => m.id === 'mercadopago' || m.id === 'contraentrega')
+      .map((m) =>
+        m.id === 'mercadopago'
+          ? { ...m, label: 'Pago en línea', desc: FALLBACK_PAYMENT_METHODS[0].desc }
+          : m
+      );
 
   useEffect(() => {
     api
       .getPaymentMethods()
       .then(({ methods }) => {
-        if (methods?.length) {
-          setPaymentMethods(methods);
-          const firstOnline = methods.find((m) => m.id !== 'contraentrega');
+        const filtered = normalizeMethods(methods);
+        if (filtered.length) {
+          setPaymentMethods(filtered);
+          const firstOnline = filtered.find((m) => m.id !== 'contraentrega');
           if (firstOnline) setPayment(firstOnline.id);
         }
       })
@@ -121,6 +120,7 @@ const Checkout = ({ items, onOrderComplete }) => {
       quantity: item.quantity,
       size: item.isPromotion ? 'Promoción' : item.selectedSize,
       color: item.isPromotion ? 'Oferta' : item.colorName,
+      image: item.image,
       isPromotion: Boolean(item.isPromotion),
     }));
 
@@ -151,26 +151,6 @@ const Checkout = ({ items, onOrderComplete }) => {
 
         onOrderComplete?.();
         window.location.href = mp.initPoint;
-        return;
-      }
-
-      if (isPayU) {
-        const documentNumber = customer.documentNumber;
-        const documentType = customer.documentType || 'CC';
-        if (!documentNumber) {
-          throw new Error('Ingresa tu número de documento para pagar con PayU');
-        }
-
-        const payu = await api.createPayUCheckout({
-          saleId: sale.id,
-          customer,
-          paymentMethod: payment,
-          documentType,
-          documentNumber,
-        });
-
-        onOrderComplete?.();
-        submitPayUForm(payu);
         return;
       }
 
@@ -313,7 +293,7 @@ const Checkout = ({ items, onOrderComplete }) => {
               </div>
             </section>
 
-            {(isPayU || isMercadoPago) && (
+            {isMercadoPago && (
             <section className="checkout-card">
               <h2>
                 <Lock size={18} />
@@ -336,7 +316,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                     name="documentNumber"
                     type="text"
                     inputMode="numeric"
-                    required={isMercadoPago || isPayU}
+                    required={isMercadoPago}
                     placeholder="Ej. 1020304050"
                   />
                 </div>
@@ -370,23 +350,7 @@ const Checkout = ({ items, onOrderComplete }) => {
 
               {isMercadoPago && (
                 <div className="checkout-payu-methods">
-                  <p className="checkout-payu-methods-title">Medios disponibles en Mercado Pago:</p>
-                  <ul className="checkout-payu-methods-list">
-                    {MP_AVAILABLE_METHODS.map((name) => (
-                      <li key={name}>{name}</li>
-                    ))}
-                  </ul>
-                  <p className="checkout-mp-tip">
-                    Tarjeta débito/crédito: mínimo ${MP_MIN_AMOUNT_COP.toLocaleString('es-CO')} COP.
-                    Usa un correo distinto al de tu cuenta vendedora de Mercado Pago y activa
-                    &quot;compras por internet&quot; en tu banco.
-                  </p>
-                </div>
-              )}
-
-              {payment === 'payu-online' && (
-                <div className="checkout-payu-methods">
-                  <p className="checkout-payu-methods-title">Medios disponibles en PayU:</p>
+                  <p className="checkout-payu-methods-title">Medios disponibles:</p>
                   <ul className="checkout-payu-methods-list">
                     {MP_AVAILABLE_METHODS.map((name) => (
                       <li key={name}>{name}</li>
@@ -396,14 +360,13 @@ const Checkout = ({ items, onOrderComplete }) => {
               )}
 
               <p className="checkout__payu-note">
-                Al pagar en línea serás redirigido a una pasarela segura (Mercado Pago), donde podrás
-                elegir PSE, Nequi, tarjeta, Daviplata, efectivo y más. VirtusMonaco nunca almacena los
-                datos de tu tarjeta.
+                Al pagar en línea serás redirigido a una pasarela segura donde podrás elegir tarjeta,
+                PSE, Nequi, Daviplata, efectivo y más. VirtusMonaco nunca almacena los datos de tu tarjeta.
               </p>
             </section>
 
             <button type="submit" className="btn checkout-submit-desktop" disabled={isProcessing}>
-              {isProcessing ? 'Procesando…' : `Pagar ${formatCOP(total)}`}
+              {isProcessing ? 'Procesando…' : 'Pagar'}
             </button>
           </form>
 
@@ -426,7 +389,7 @@ const Checkout = ({ items, onOrderComplete }) => {
             className="btn checkout-sticky-btn"
             disabled={isProcessing}
           >
-            {isProcessing ? 'Procesando…' : 'Pagar ahora'}
+            {isProcessing ? 'Procesando…' : 'Pagar'}
           </button>
         </div>
       </div>
@@ -451,8 +414,8 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
             <span className="checkout-order-qty">{item.quantity}</span>
           </div>
           <div className="checkout-order-info">
-            <p className="checkout-order-brand">{item.brand}</p>
-            <p className="checkout-order-name">{item.name}</p>
+            <p className="checkout-order-brand">{displayStoreText(item.brand)}</p>
+            <p className="checkout-order-name">{displayStoreText(item.name)}</p>
             {!compact && !item.isPromotion && item.selectedSize && (
               <p className="checkout-order-meta">
                 Talla {item.selectedSize} · {item.colorName}

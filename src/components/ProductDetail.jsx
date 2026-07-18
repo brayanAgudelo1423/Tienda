@@ -8,6 +8,7 @@ import { formatCOP } from '../utils/currency';
 import { mediaUrl } from '../api/client';
 import { getProductGalleryImages } from '../utils/productImages';
 import { LOCIONES_CATEGORY } from '../constants/catalog';
+import { displayStoreText } from '../utils/displayText';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const navigate = useNavigate();
@@ -102,11 +103,11 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
             </div>
 
             <div style={styles.content}>
-              <p style={styles.brand}>{product.brand}</p>
+              <p style={styles.brand}>{displayStoreText(product.brand)}</p>
               <p style={styles.productType}>{product.productType}</p>
 
               <h2 id="product-detail-title" style={styles.name}>
-                {product.name}
+                {displayStoreText(product.name)}
               </h2>
 
               <StarRating rating={product.rating} reviewCount={product.reviewCount} />

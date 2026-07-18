@@ -86,6 +86,7 @@ function saleRowToObject(row) {
     customerPhone: row.customer_phone,
     customerCity: row.customer_city,
     customerAddress: row.customer_address,
+    customerDocument: row.customer_document ?? null,
     items: parseJson(row.items, []),
     paymentMethod: row.payment_method ?? null,
     payuReference: row.payu_reference ?? null,
@@ -179,6 +180,7 @@ export async function initDatabase() {
   await db.query(`
     ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_before INTEGER;
     ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_now INTEGER;
+    ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_document TEXT;
   `);
 
   await ensureAdminUser();
@@ -208,6 +210,10 @@ async function applyCatalogPatches() {
   const db = getPool();
   await db.query(`UPDATE brands SET name = 'Tommy' WHERE slug = 'tomi' AND name = 'Tomi'`);
   await db.query(`UPDATE products SET brand = 'Tommy' WHERE brand = 'Tomi'`);
+  await db.query(`UPDATE products SET name = REPLACE(name, 'Tomi', 'Tommy') WHERE name ILIKE '%tomi%'`);
+  await db.query(
+    `UPDATE products SET description = REPLACE(description, 'Tomi', 'Tommy') WHERE description ILIKE '%tomi%'`
+  );
   await db.query(
     `INSERT INTO brands (name, slug, sort_order) VALUES ($1, $2, $3)
      ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order`,
@@ -529,8 +535,8 @@ export async function createSale(sale) {
   const { rows } = await getPool().query(
     `INSERT INTO sales (
       total, subtotal, customer_name, customer_email, customer_phone,
-      customer_city, customer_address, items, payment_method, status
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10)
+      customer_city, customer_address, customer_document, items, payment_method, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11)
     RETURNING id`,
     [
       sale.total,
@@ -540,6 +546,7 @@ export async function createSale(sale) {
       sale.customerPhone ?? null,
       sale.customerCity ?? null,
       sale.customerAddress ?? null,
+      sale.customerDocument ?? null,
       JSON.stringify(sale.items),
       paymentMethod,
       status,
@@ -606,6 +613,11 @@ export async function getSales(limit = 100) {
     [limit]
   );
   return rows.map(saleRowToObject);
+}
+
+export async function deleteSale(id) {
+  const { rowCount } = await getPool().query('DELETE FROM sales WHERE id = $1', [id]);
+  return rowCount > 0;
 }
 
 export async function getSalesStats() {

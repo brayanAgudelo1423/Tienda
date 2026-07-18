@@ -40,16 +40,8 @@ router.get('/methods', (_req, res) => {
   if (isMercadoPagoConfigured()) {
     methods.push({
       id: 'mercadopago',
-      label: 'Pago en línea — Mercado Pago',
+      label: 'Pago en línea',
       desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
-    });
-  }
-
-  if (isPayUConfigured()) {
-    methods.push({
-      id: 'payu-online',
-      label: 'Pago en línea — PayU',
-      desc: 'Pasarela alternativa: tarjetas, PSE, Nequi y otros medios.',
     });
   }
 
