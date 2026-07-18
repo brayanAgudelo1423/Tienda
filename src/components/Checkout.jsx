@@ -58,7 +58,7 @@ const SUCCESS_COPY = {
   },
 };
 
-const MP_MIN_AMOUNT_COP = 1500;
+const MP_MIN_AMOUNT_COP = 10000;
 
 const Checkout = ({ items, onOrderComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -376,6 +376,11 @@ const Checkout = ({ items, onOrderComplete }) => {
                       <li key={name}>{name}</li>
                     ))}
                   </ul>
+                  <p className="checkout-mp-tip">
+                    Tarjeta débito/crédito: mínimo ${MP_MIN_AMOUNT_COP.toLocaleString('es-CO')} COP.
+                    Usa un correo distinto al de tu cuenta vendedora de Mercado Pago y activa
+                    &quot;compras por internet&quot; en tu banco.
+                  </p>
                 </div>
               )}
 
@@ -684,6 +689,13 @@ const checkoutStyles = `
     background: #fff;
     border: 1px solid #e5e5e5;
     border-radius: 999px;
+    color: var(--color-text-light);
+  }
+
+  .checkout-mp-tip {
+    margin: 10px 0 0;
+    font-size: 0.76rem;
+    line-height: 1.45;
     color: var(--color-text-light);
   }
 

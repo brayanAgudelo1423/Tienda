@@ -1,5 +1,5 @@
 const MP_API = 'https://api.mercadopago.com';
-const MP_MIN_AMOUNT_COP = 1500;
+const MP_MIN_AMOUNT_COP = 10000;
 
 export function getMercadoPagoConfig() {
   return {
@@ -34,6 +34,7 @@ export function buildPreferenceItems(sale) {
     quantity: Math.max(1, Number(item.quantity) || 1),
     unit_price: Math.round(Number(item.price) || 0),
     currency_id: 'COP',
+    category_id: 'others',
   }));
 
   const itemsTotal = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
@@ -47,6 +48,7 @@ export function buildPreferenceItems(sale) {
         quantity: 1,
         unit_price: saleTotal,
         currency_id: 'COP',
+        category_id: 'others',
       },
     ];
   }
@@ -54,12 +56,23 @@ export function buildPreferenceItems(sale) {
   return items;
 }
 
+function splitCustomerName(fullName) {
+  const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    first_name: parts[0] || 'Cliente',
+    last_name: parts.slice(1).join(' ') || '-',
+  };
+}
+
 function buildPayer(customer) {
   const phoneDigits = String(customer.phone || '').replace(/\D/g, '');
   const localNumber = phoneDigits.slice(-10);
+  const { first_name, last_name } = splitCustomerName(customer.name);
 
   const payer = {
     name: customer.name,
+    first_name,
+    last_name,
     email: customer.email,
     phone: {
       area_code: localNumber.length >= 10 ? localNumber.slice(0, 3) : '300',
