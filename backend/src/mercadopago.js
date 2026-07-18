@@ -54,6 +54,42 @@ export function buildPreferenceItems(sale) {
   return items;
 }
 
+function buildPayer(customer) {
+  const phoneDigits = String(customer.phone || '').replace(/\D/g, '');
+  const localNumber = phoneDigits.slice(-10);
+
+  const payer = {
+    name: customer.name,
+    email: customer.email,
+    phone: {
+      area_code: localNumber.length >= 10 ? localNumber.slice(0, 3) : '300',
+      number: localNumber || phoneDigits,
+    },
+  };
+
+  const docNumber = String(customer.documentNumber || '').replace(/\D/g, '');
+  if (docNumber) {
+    payer.identification = {
+      type: customer.documentType || 'CC',
+      number: docNumber,
+    };
+  }
+
+  const zip = String(customer.zip || '').replace(/\D/g, '').slice(0, 8);
+  const street = customer.street || customer.address;
+  const cityName = customer.cityName || customer.city;
+
+  if (street || cityName || zip) {
+    payer.address = {
+      zip_code: zip || '110111',
+      street_name: String(street || 'Colombia').slice(0, 200),
+      city_name: String(cityName || 'Bogota').split(',')[0].trim().slice(0, 100),
+    };
+  }
+
+  return payer;
+}
+
 export async function createCheckoutPreference({ sale, customer, backendUrl, frontendUrl }) {
   const { accessToken, test } = getMercadoPagoConfig();
   if (!accessToken) {
@@ -72,13 +108,12 @@ export async function createCheckoutPreference({ sale, customer, backendUrl, fro
 
   const preference = {
     items: buildPreferenceItems(sale),
-    payer: {
-      name: customer.name,
-      email: customer.email,
-      phone: {
-        number: String(customer.phone || '').replace(/\D/g, '').slice(-10),
-      },
+    payer: buildPayer(customer),
+    payment_methods: {
+      installments: 12,
+      default_installments: 1,
     },
+    binary_mode: false,
     back_urls: {
       success: `${resultBase}?gateway=mp`,
       failure: `${resultBase}?gateway=mp&return=cancel`,

@@ -105,6 +105,12 @@ const Checkout = ({ items, onOrderComplete }) => {
       phone: form.get('phone'),
       city: `${form.get('city')}, ${form.get('state')}`,
       address: `${form.get('address')} — C.P. ${form.get('zip')}`,
+      street: form.get('address'),
+      cityName: form.get('city'),
+      stateName: form.get('state'),
+      zip: form.get('zip'),
+      documentType: form.get('documentType') || 'CC',
+      documentNumber: String(form.get('documentNumber') || '').trim(),
     };
 
     const saleItems = items.map((item) => ({
@@ -134,6 +140,10 @@ const Checkout = ({ items, onOrderComplete }) => {
       });
 
       if (isMercadoPago) {
+        if (!customer.documentNumber) {
+          throw new Error('Ingresa tu número de documento para pagar con Mercado Pago');
+        }
+
         const mp = await api.createMercadoPagoCheckout({
           saleId: sale.id,
           customer,
@@ -145,8 +155,8 @@ const Checkout = ({ items, onOrderComplete }) => {
       }
 
       if (isPayU) {
-        const documentNumber = String(form.get('documentNumber') || '').trim();
-        const documentType = form.get('documentType') || 'CC';
+        const documentNumber = customer.documentNumber;
+        const documentType = customer.documentType || 'CC';
         if (!documentNumber) {
           throw new Error('Ingresa tu número de documento para pagar con PayU');
         }
@@ -303,7 +313,7 @@ const Checkout = ({ items, onOrderComplete }) => {
               </div>
             </section>
 
-            {isPayU && (
+            {(isPayU || isMercadoPago) && (
             <section className="checkout-card">
               <h2>
                 <Lock size={18} />
@@ -326,6 +336,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                     name="documentNumber"
                     type="text"
                     inputMode="numeric"
+                    required={isMercadoPago || isPayU}
                     placeholder="Ej. 1020304050"
                   />
                 </div>
