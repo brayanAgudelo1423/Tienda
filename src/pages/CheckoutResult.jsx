@@ -15,7 +15,7 @@ const STATE_COPY = {
   PENDING: {
     icon: Clock,
     title: 'Pago pendiente',
-    body: 'Tu pago está en proceso. Te avisaremos cuando se confirme.',
+    body: 'Mercado Pago aún no confirmó el cobro. Si usaste PSE o efectivo, puede tardar horas. Si pagaste con tarjeta y no ves el descuento, el pago no se completó — intenta de nuevo.',
     tone: 'pending',
   },
   CANCELLED: {
@@ -99,18 +99,22 @@ const CheckoutResult = () => {
     setState(urlState);
 
     const orderId = params.get('external_reference');
+    const paymentId = params.get('payment_id');
     if (!orderId || params.get('gateway') !== 'mp') return undefined;
 
     let cancelled = false;
 
-    api
-      .getPaymentStatus(orderId)
-      .then((sale) => {
-        if (cancelled) return;
-        const backendState = mapSaleStatus(sale.status);
-        if (backendState) setState(backendState);
-      })
-      .catch(() => {});
+    const applySale = (sale) => {
+      if (cancelled || !sale) return;
+      const backendState = mapSaleStatus(sale.status);
+      if (backendState) setState(backendState);
+    };
+
+    const syncPromise = isNullishParam(paymentId)
+      ? api.getPaymentStatus(orderId)
+      : api.syncMercadoPagoPayment({ saleId: orderId, paymentId });
+
+    syncPromise.then(applySale).catch(() => {});
 
     return () => {
       cancelled = true;

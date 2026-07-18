@@ -124,6 +124,8 @@ async function processMercadoPagoPayment(paymentId) {
     payuTransactionId: String(payment.id),
     payuReference: payment.metadata?.reference || sale.payuReference,
   });
+
+  return getSaleById(sale.id);
 }
 
 async function handleMercadoPagoWebhook(req, res, next) {
@@ -144,6 +146,34 @@ async function handleMercadoPagoWebhook(req, res, next) {
 
 router.post('/mercadopago/webhook', handleMercadoPagoWebhook);
 router.get('/mercadopago/webhook', handleMercadoPagoWebhook);
+
+router.post('/mercadopago/sync', async (req, res, next) => {
+  try {
+    if (!isMercadoPagoConfigured()) {
+      return res.status(503).json({ error: 'Mercado Pago no está configurado' });
+    }
+
+    const paymentId = String(req.body.paymentId || '').trim();
+    if (!paymentId) {
+      return res.status(400).json({ error: 'paymentId requerido' });
+    }
+
+    const sale = await processMercadoPagoPayment(paymentId);
+    if (!sale) {
+      return res.status(404).json({ error: 'No se encontró el pedido de este pago' });
+    }
+
+    res.json({
+      id: sale.id,
+      status: sale.status,
+      paymentMethod: sale.paymentMethod,
+      payuReference: sale.payuReference,
+      payuTransactionId: sale.payuTransactionId,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.post('/checkout', async (req, res, next) => {
   try {
