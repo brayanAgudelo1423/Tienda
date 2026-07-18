@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BrandLogo from '../components/BrandLogo';
+import { api } from '../api/client';
 
 const STATE_COPY = {
   APPROVED: {
@@ -17,10 +18,16 @@ const STATE_COPY = {
     body: 'Tu pago está en proceso. Te avisaremos cuando se confirme.',
     tone: 'pending',
   },
+  CANCELLED: {
+    icon: Clock,
+    title: 'Pago no completado',
+    body: 'Saliste de Mercado Pago sin pagar. Puedes volver al carrito e intentar de nuevo cuando quieras.',
+    tone: 'pending',
+  },
   DECLINED: {
     icon: XCircle,
     title: 'Pago rechazado',
-    body: 'No se pudo completar el pago. Puedes intentar de nuevo desde tu carrito.',
+    body: 'Mercado Pago no aprobó el pago. Prueba otro medio (PSE, Nequi u otra tarjeta) o contacta a tu banco.',
     tone: 'error',
   },
   EXPIRED: {
@@ -31,18 +38,30 @@ const STATE_COPY = {
   },
 };
 
+function isNullishParam(value) {
+  return !value || value === 'null' || value === 'undefined';
+}
+
 function normalizePaymentState(params) {
   const gateway = params.get('gateway');
 
   if (gateway === 'mp') {
+    if (params.get('return') === 'cancel') return 'CANCELLED';
+
     const mpStatus = (
       params.get('collection_status') ||
       params.get('status') ||
-      'pending'
+      ''
     ).toLowerCase();
+    const paymentId = params.get('payment_id');
+    const hasPaymentId = !isNullishParam(paymentId);
 
     if (mpStatus === 'approved') return 'APPROVED';
-    if (mpStatus === 'rejected' || mpStatus === 'failure') return 'DECLINED';
+    if (mpStatus === 'rejected' || mpStatus === 'failure') {
+      return hasPaymentId ? 'DECLINED' : 'CANCELLED';
+    }
+    if (mpStatus === 'pending' || mpStatus === 'in_process') return 'PENDING';
+    if (!hasPaymentId && !mpStatus) return 'CANCELLED';
     return 'PENDING';
   }
 
@@ -54,19 +73,54 @@ function normalizePaymentState(params) {
   ).toUpperCase();
 }
 
+function mapSaleStatus(status) {
+  if (status === 'pagada') return 'APPROVED';
+  if (status === 'rechazada') return 'DECLINED';
+  if (status === 'pendiente_pago') return 'PENDING';
+  return null;
+}
+
+function pickReference(params) {
+  const candidates = [
+    params.get('payment_id'),
+    params.get('referenceCode'),
+    params.get('reference_pol'),
+    params.get('merchant_order_id'),
+  ];
+  return candidates.find((value) => !isNullishParam(value)) || null;
+}
+
 const CheckoutResult = () => {
   const [params] = useSearchParams();
   const [state, setState] = useState('PENDING');
 
   useEffect(() => {
-    setState(normalizePaymentState(params));
+    const urlState = normalizePaymentState(params);
+    setState(urlState);
+
+    const orderId = params.get('external_reference');
+    if (!orderId || params.get('gateway') !== 'mp') return undefined;
+
+    let cancelled = false;
+
+    api
+      .getPaymentStatus(orderId)
+      .then((sale) => {
+        if (cancelled) return;
+        const backendState = mapSaleStatus(sale.status);
+        if (backendState) setState(backendState);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, [params]);
 
   const copy = STATE_COPY[state] || STATE_COPY.PENDING;
   const Icon = copy.icon;
-  const reference = params.get('referenceCode') || params.get('reference_pol') || params.get('payment_id');
+  const reference = pickReference(params);
   const orderId = params.get('external_reference') || params.get('extra1');
-  const isMercadoPago = params.get('gateway') === 'mp';
 
   return (
     <motion.div
@@ -77,14 +131,16 @@ const CheckoutResult = () => {
       <BrandLogo variant="checkout" asLink={false} />
       <Icon size={56} strokeWidth={1.5} />
       <h1>{copy.title}</h1>
-      {orderId && !isMercadoPago && <p className="checkout-result-order">Pedido #{orderId}</p>}
+      {orderId && !isNullishParam(orderId) && (
+        <p className="checkout-result-order">Pedido #{orderId}</p>
+      )}
       {reference && <p className="checkout-result-ref">Ref. {reference}</p>}
       <p>{copy.body}</p>
       <div className="checkout-result-actions">
         <Link to="/" className="btn">
           Volver a la tienda
         </Link>
-        {state === 'DECLINED' && (
+        {(state === 'DECLINED' || state === 'CANCELLED') && (
           <Link to="/cart" className="btn btn-outline">
             Revisar carrito
           </Link>

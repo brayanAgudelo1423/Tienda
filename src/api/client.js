@@ -113,6 +113,8 @@ export const api = {
   createMercadoPagoCheckout: (payload) =>
     request('/api/payments/mercadopago/checkout', { method: 'POST', body: payload }),
 
+  getPaymentStatus: (saleId) => request(`/api/payments/status/${saleId}`),
+
   createPayUCheckout: (payload) =>
     request('/api/payments/checkout', { method: 'POST', body: payload }),
 

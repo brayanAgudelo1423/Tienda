@@ -58,6 +58,8 @@ const SUCCESS_COPY = {
   },
 };
 
+const MP_MIN_AMOUNT_COP = 1500;
+
 const Checkout = ({ items, onOrderComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -117,6 +119,12 @@ const Checkout = ({ items, onOrderComplete }) => {
     }));
 
     try {
+      if (isMercadoPago && total < MP_MIN_AMOUNT_COP) {
+        throw new Error(
+          `Mercado Pago exige un mínimo de $${MP_MIN_AMOUNT_COP.toLocaleString('es-CO')} COP. Agrega más productos o elige contraentrega.`
+        );
+      }
+
       const sale = await api.createSale({
         total,
         subtotal,

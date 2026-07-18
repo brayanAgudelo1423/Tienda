@@ -1,4 +1,4 @@
-const MP_API = 'https://api.mercadopago.com';
+const MP_MIN_AMOUNT_COP = 1500;
 
 export function getMercadoPagoConfig() {
   return {
@@ -61,6 +61,13 @@ export async function createCheckoutPreference({ sale, customer, backendUrl, fro
 
   const reference = `VM-MP-${sale.id}-${Date.now()}`;
   const resultBase = `${frontendUrl.replace(/\/$/, '')}/checkout/resulto`;
+  const saleTotal = Math.round(Number(sale.total) || 0);
+
+  if (saleTotal < MP_MIN_AMOUNT_COP) {
+    throw new Error(
+      `Mercado Pago exige un monto mínimo de $${MP_MIN_AMOUNT_COP.toLocaleString('es-CO')} COP. Ajusta el precio del producto o agrega más artículos.`
+    );
+  }
 
   const preference = {
     items: buildPreferenceItems(sale),
@@ -72,9 +79,9 @@ export async function createCheckoutPreference({ sale, customer, backendUrl, fro
       },
     },
     back_urls: {
-      success: `${resultBase}?gateway=mp&collection_status=approved`,
-      failure: `${resultBase}?gateway=mp&collection_status=rejected`,
-      pending: `${resultBase}?gateway=mp&collection_status=pending`,
+      success: `${resultBase}?gateway=mp`,
+      failure: `${resultBase}?gateway=mp&return=cancel`,
+      pending: `${resultBase}?gateway=mp`,
     },
     auto_return: 'approved',
     external_reference: String(sale.id),
