@@ -1,3 +1,4 @@
+const MP_API = 'https://api.mercadopago.com';
 const MP_MIN_AMOUNT_COP = 1500;
 
 export function getMercadoPagoConfig() {
