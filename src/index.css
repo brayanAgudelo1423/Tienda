@@ -203,7 +203,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 
 .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
 
-/* ——— Header ——— */
+/* âââ Header âââ */
 .utility-bar {
   background: var(--color-bg-alt);
   padding: 0.4rem 0;
@@ -470,7 +470,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   padding: 0.45rem 0;
 }
 
-/* ——— Hero ——— */
+/* âââ Hero âââ */
 .hero-section {
   width: 100%;
   margin-bottom: 2rem;
@@ -523,7 +523,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   border: none !important;
 }
 
-/* ——— Home catalogs (carrusel horizontal) ——— */
+/* âââ Home catalogs (carrusel horizontal) âââ */
 .home-catalogs {
   padding: 2rem 0 0.75rem;
 }
@@ -656,7 +656,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   overflow: hidden;
   opacity: 0.95;
   transition: opacity 0.4s ease;
-  /* recorta el JPG cuadrado → solo se ve el emblema redondo */
+  /* recorta el JPG cuadrado â solo se ve el emblema redondo */
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
@@ -774,7 +774,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* ——— Home products ——— */
+/* âââ Home products âââ */
 .home-products {
   padding: 1.5rem 0 3.5rem;
 }
@@ -890,7 +890,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   to { opacity: 1; transform: translateY(0); } 
 }
 
-/* Efecto video — zoom y paneo suave en cada imagen del hero */
+/* Efecto video â zoom y paneo suave en cada imagen del hero */
 @keyframes heroLiving {
   0% { transform: scale(1.12) translate(0%, 0%); }
   25% { transform: scale(1.18) translate(-2%, -1%); }
@@ -973,7 +973,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   .hero-slide { flex: 0 0 100vw; }
 }
 
-/* Cards (home + brands) — marco uniforme + look móvil más estético */
+/* Cards (home + brands) â marco uniforme + look mÃ³vil mÃ¡s estÃ©tico */
 .product-card-image {
   position: relative;
   overflow: hidden;
@@ -1002,7 +1002,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   transform: translateZ(0);
 }
 
-/* Galería en ficha de producto */
+/* GalerÃ­a en ficha de producto */
 .product-gallery {
   position: relative;
   z-index: 1;
@@ -1181,7 +1181,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* Tira de marcas — desplazamiento hacia la derecha */
+/* Tira de marcas â desplazamiento hacia la derecha */
 .brand-marquee {
   overflow: hidden;
   width: 100%;
@@ -1213,7 +1213,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* Mobile — layout principal */
+/* Mobile â layout principal */
 @media (max-width: 768px) {
   .container { padding: 0 1rem; }
 
@@ -1405,7 +1405,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* ——— Footer ——— */
+/* âââ Footer âââ */
 .site-footer {
   background: var(--color-bg);
   color: var(--color-primary);
@@ -1640,7 +1640,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   text-align: center;
 }
 
-/* ——— Rastrear pedido ——— */
+/* âââ Rastrear pedido âââ */
 .track-page {
   min-height: 60vh;
   background: #fff;
@@ -1808,7 +1808,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* Promociones — página dedicada */
+/* Promociones â pÃ¡gina dedicada */
 .promociones-page {
   min-height: 60vh;
   background: #fff;
@@ -1938,7 +1938,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   color: var(--color-secondary);
 }
 
-/* Promociones — legacy section styles (cards) */
+/* Promociones â legacy section styles (cards) */
 .promotions-section {
   padding: 2.5rem 1.2rem 3rem;
   background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
@@ -2443,7 +2443,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   }
 }
 
-/* ��� Contacto / ayuda (simple) ��� */
+/* --- Contacto / ayuda (simple) --- */
 .help-page {
   background: var(--color-bg);
   padding: 1.5rem 0 4rem;
