@@ -428,7 +428,7 @@ const catalogProducts = [
       colors: meta.colors,
       image: url,
       hoverImage: url,
-      description: 'Lo más nuevo en OZONO.',
+      description: 'Lo más nuevo en VirtusMonaco.',
     };
   }),
   ...hugoBossProducts,

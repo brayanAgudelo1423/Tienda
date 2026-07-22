@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
 import { getBrandBySlug } from '../utils/product';
@@ -8,27 +8,43 @@ import { mediaUrl } from '../api/client';
 import { motion } from 'framer-motion';
 import ProductDetail from '../components/ProductDetail';
 import StarRating from '../components/StarRating';
+import BackNav from '../components/BackNav';
 
 const Brands = ({ onAddToCart }) => {
   const { brandSlug } = useParams();
   const [hoveredProduct, setHoveredProduct] = useState(null);
-  const [maxPrice, setMaxPrice] = useState(500000);
+  const [maxPrice, setMaxPrice] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const { products, brands } = useProducts();
   const activeBrand = getBrandBySlug(brands, brandSlug);
 
+  const brandProducts = useMemo(
+    () => (activeBrand ? products.filter((p) => p.brand === activeBrand) : []),
+    [products, activeBrand]
+  );
+
+  const maxProductPrice = useMemo(
+    () => Math.max(...brandProducts.map((p) => p.price), 50000),
+    [brandProducts]
+  );
+
+  // Al entrar / cambiar de marca: filtro en el precio máximo
+  useEffect(() => {
+    setMaxPrice(maxProductPrice);
+  }, [brandSlug, maxProductPrice]);
+
   if (!activeBrand) {
     return <Navigate to="/marcas/lacoste" replace />;
   }
 
-  const brandProducts = products.filter((p) => p.brand === activeBrand);
-  const maxProductPrice = Math.max(...brandProducts.map((p) => p.price), 500000);
-  const filteredProducts = brandProducts.filter((product) => product.price <= maxPrice);
+  const effectiveMax = maxPrice ?? maxProductPrice;
+  const filteredProducts = brandProducts.filter((product) => product.price <= effectiveMax);
 
   return (
     <>
       <div className="container" style={styles.container}>
+        <BackNav label="Volver" />
         <div style={styles.header}>
           <h1 style={styles.pageTitle} className="brands-page-title">
             {activeBrand}
@@ -39,12 +55,12 @@ const Brands = ({ onAddToCart }) => {
         <div className="brands-layout" style={styles.layout}>
           <aside className="brands-sidebar" style={styles.sidebar}>
             <div style={styles.filterGroup}>
-              <h3 style={styles.filterTitle}>Precio máximo: {formatCOP(maxPrice)}</h3>
+              <h3 style={styles.filterTitle}>Precio máximo: {formatCOP(effectiveMax)}</h3>
               <input
                 type="range"
                 min="50000"
                 max={maxProductPrice}
-                value={Math.min(maxPrice, maxProductPrice)}
+                value={Math.min(effectiveMax, maxProductPrice)}
                 onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))}
                 style={styles.rangeInput}
               />

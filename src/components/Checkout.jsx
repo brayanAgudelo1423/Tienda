@@ -26,16 +26,6 @@ const FALLBACK_PAYMENT_METHODS = [
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
 ];
 
-const MP_AVAILABLE_METHODS = [
-  'Tarjetas crédito/débito',
-  'PSE — todos los bancos',
-  'Nequi',
-  'Daviplata',
-  'Efecty',
-  'Baloto',
-  'Pago en efectivo',
-];
-
 const SUCCESS_COPY = {
   mercadopago: {
     title: 'Redirigiendo al pago…',
@@ -282,7 +272,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                   <input id="city" name="city" type="text" required placeholder="Bogotá" />
                 </div>
                 <div className="checkout-field">
-                  <label htmlFor="state">Estado</label>
+                  <label htmlFor="state">Departamento</label>
                   <input id="state" name="state" type="text" required placeholder="Cundinamarca" />
                 </div>
                 <div className="checkout-field">
@@ -346,22 +336,6 @@ const Checkout = ({ items, onOrderComplete }) => {
                   </label>
                 ))}
               </div>
-
-              {isMercadoPago && (
-                <div className="checkout-payu-methods">
-                  <p className="checkout-payu-methods-title">Medios disponibles:</p>
-                  <ul className="checkout-payu-methods-list">
-                    {MP_AVAILABLE_METHODS.map((name) => (
-                      <li key={name}>{name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <p className="checkout__payu-note">
-                Al pagar en línea serás redirigido a una pasarela segura donde podrás elegir tarjeta,
-                PSE, Nequi, Daviplata, efectivo y más. VirtusMonaco nunca almacena los datos de tu tarjeta.
-              </p>
             </section>
 
             <button type="submit" className="btn checkout-submit-desktop" disabled={isProcessing}>
@@ -432,10 +406,6 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
       <div className="checkout-order-row">
         <span>Subtotal</span>
         <span>{formatCOP(subtotal)}</span>
-      </div>
-      <div className="checkout-order-row">
-        <span>Envío</span>
-        <span className="checkout-free">Gratis</span>
       </div>
       <div className="checkout-order-row checkout-order-total">
         <span>Total</span>

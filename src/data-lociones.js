@@ -59,7 +59,7 @@ function buildLocionesProducts() {
     colors: [{ name: 'Original', hex: '#d4c4a8' }],
     image: LOCIONES_PLACEHOLDER,
     hoverImage: LOCIONES_PLACEHOLDER,
-    description: `${item.name} — loción original ${item.brand}. Autenticidad garantizada en OZONO.`,
+    description: `${item.name} — loción original ${item.brand}. Autenticidad garantizada en VirtusMonaco.`,
   }));
 }
 

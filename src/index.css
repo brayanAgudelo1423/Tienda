@@ -26,7 +26,8 @@
 .app > main,
 .app > .checkout-page,
 .app > .track-page,
-.app > .promociones-page {
+.app > .promociones-page,
+.app > .help-page {
   flex: 1;
 }
 body {
@@ -520,6 +521,257 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   background: #fff !important;
   color: var(--color-primary) !important;
   border: none !important;
+}
+
+/* ——— Home catalogs (carrusel horizontal) ——— */
+.home-catalogs {
+  padding: 2rem 0 0.75rem;
+}
+
+.home-catalogs-head-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.1rem;
+  position: relative;
+}
+
+.home-catalogs-head {
+  margin-bottom: 0;
+  max-width: 36rem;
+  text-align: center;
+  width: 100%;
+}
+
+.home-catalogs-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.home-catalogs-lead {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-light);
+  font-size: 1rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+.home-catalogs-controls {
+  display: flex;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.home-catalogs-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: #fff;
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.home-catalogs-nav-btn:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.home-catalogs-rail {
+  padding-left: max(1rem, calc((100vw - min(100vw, 1200px)) / 2 + 1rem));
+}
+
+.home-catalogs-track {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 0.25rem;
+  padding: 0.15rem 1rem 1rem 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.home-catalogs-track:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 4px;
+}
+
+.home-catalog-slide {
+  flex: 0 0 min(68vw, 220px);
+  scroll-snap-align: start;
+}
+
+.home-catalog-card {
+  position: relative;
+  display: block;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(165deg, #efefef 0%, #e6e6e6 45%, #d8d8d8 100%);
+  color: #111;
+  text-decoration: none;
+  min-height: 168px;
+  height: 168px;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-catalog-card:hover,
+.home-catalog-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+.home-catalog-card-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.home-catalog-logo-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58%;
+  max-width: 118px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.95;
+  transition: opacity 0.4s ease;
+  /* recorta el JPG cuadrado → solo se ve el emblema redondo */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.home-catalog-card:hover .home-catalog-logo-spin {
+  opacity: 1;
+  animation-duration: 5s;
+}
+
+.home-catalog-logo-img {
+  width: 118%;
+  height: 118%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  mix-blend-mode: multiply;
+  transform: scale(1.08);
+}
+
+.home-catalog-card-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(239, 239, 239, 0.2) 0%,
+    rgba(239, 239, 239, 0.05) 40%,
+    rgba(17, 17, 17, 0.58) 100%
+  );
+  pointer-events: none;
+}
+
+.home-catalog-card-body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  min-height: 0;
+  padding: 0.95rem 0.95rem 1rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.home-catalog-card-body h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+  line-height: 1.2;
+}
+
+.home-catalog-card-arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.35s ease;
+}
+
+.home-catalog-card:hover .home-catalog-card-arrow {
+  transform: translate(2px, -2px);
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.back-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.85rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.45rem;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.back-nav:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-catalog-logo-spin {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-catalogs-controls {
+    display: none;
+  }
+
+  .home-catalog-slide {
+    flex-basis: min(72vw, 200px);
+  }
+
+  .home-catalog-card {
+    min-height: 150px;
+    height: 150px;
+  }
 }
 
 /* ——— Home products ——— */
@@ -1569,6 +1821,17 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   text-align: center;
 }
 
+.promociones-hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.promociones-hero-inner .back-nav {
+  align-self: flex-start;
+  margin-bottom: 0.75rem;
+}
+
 .promociones-hero-inner h1 {
   margin: 0.35rem 0 0;
   font-size: clamp(1.85rem, 5vw, 2.75rem);
@@ -2177,5 +2440,160 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     flex: 0 0 82%;
     max-width: 280px;
     scroll-snap-align: start;
+  }
+}
+
+/* ��� Contacto / ayuda (simple) ��� */
+.help-page {
+  background: var(--color-bg);
+  padding: 1.5rem 0 4rem;
+}
+
+.help-page-inner {
+  max-width: 880px;
+}
+
+.help-header {
+  margin: 0.25rem 0 1.5rem;
+  text-align: center;
+}
+
+.help-header h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 500;
+}
+
+.help-header p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-light);
+  font-size: 0.98rem;
+}
+
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2.25rem;
+}
+
+.help-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.help-action:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.help-action--wa {
+  background: #25d366;
+}
+
+.help-action--ig {
+  background: #111;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.help-form,
+.help-faq {
+  background: #fff;
+  border: 1px solid #efefef;
+  border-radius: 14px;
+  padding: 1.35rem 1.25rem 1.5rem;
+}
+
+.help-form h2,
+.help-faq h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.help-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.help-form input,
+.help-form textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  font: inherit;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.help-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.help-faq-item + .help-faq-item {
+  border-top: 1px solid #f0f0f0;
+}
+
+.help-faq-q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+.help-faq-a {
+  margin: 0 0 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-text-light);
+}
+
+@media (max-width: 720px) {
+  .help-grid {
+    grid-template-columns: 1fr;
   }
 }

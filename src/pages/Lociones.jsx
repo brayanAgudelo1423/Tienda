@@ -10,6 +10,7 @@ import { LOCIONES_CATEGORY, GENDERS } from '../constants/catalog';
 import { getBrandNameBySlug } from '../utils/brands';
 import ProductDetail from '../components/ProductDetail';
 import StarRating from '../components/StarRating';
+import BackNav from '../components/BackNav';
 
 const Lociones = ({ onAddToCart }) => {
   const { brandSlug } = useParams();
@@ -45,12 +46,10 @@ const Lociones = ({ onAddToCart }) => {
 
   useEffect(() => {
     setBrand(activeBrand || 'all');
-  }, [activeBrand]);
-
-  useEffect(() => {
+    setGender('all');
     setMinPrice(priceBounds.min);
     setMaxPrice(priceBounds.max);
-  }, [priceBounds.min, priceBounds.max]);
+  }, [activeBrand, brandSlug, priceBounds.min, priceBounds.max]);
 
   const filteredProducts = useMemo(() => {
     return lociones.filter((product) => {
@@ -152,6 +151,7 @@ const Lociones = ({ onAddToCart }) => {
   return (
     <>
       <div className="lociones-page container">
+        <BackNav label="Volver" />
         <header className="lociones-header">
           <div>
             <p className="lociones-eyebrow">Perfumería de lujo</p>
