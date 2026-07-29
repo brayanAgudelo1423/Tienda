@@ -17,6 +17,7 @@ import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import CheckoutResult from './pages/CheckoutResult';
 import RastrearPedido from './pages/RastrearPedido';
 import VerTodo from './pages/VerTodo';
+import StoreBootSplash from './components/StoreBootSplash';
 import { getCartItemId } from './utils/product';
 
 function StoreApp() {
@@ -45,6 +46,7 @@ function StoreApp() {
 
   return (
     <div className="app">
+      <StoreBootSplash />
       <Header cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
       <FloatingSocials />
       <Routes>

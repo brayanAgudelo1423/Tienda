@@ -40,6 +40,50 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+.store-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+
+.store-splash--out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.store-splash-logo {
+  width: min(42vw, 168px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.92;
+  animation: store-splash-breathe 2.2s ease-in-out infinite;
+}
+
+@keyframes store-splash-breathe {
+  0%,
+  100% {
+    opacity: 0.88;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-splash-logo {
+    animation: none;
+  }
+}
+
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 500; color: var(--color-primary); letter-spacing: 0.02em; }
 
 .brand-logo {
