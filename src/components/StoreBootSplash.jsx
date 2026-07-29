@@ -6,6 +6,11 @@ import { usePromotions } from '../context/PromotionsContext';
 const MIN_VISIBLE_MS = 800;
 const FADE_MS = 450;
 
+function unlockPageScroll() {
+  document.body.style.removeProperty('overflow');
+  document.documentElement.style.removeProperty('overflow');
+}
+
 const StoreBootSplash = () => {
   const { loading: productsLoading } = useProducts();
   const { loading: promosLoading } = usePromotions();
@@ -37,14 +42,16 @@ const StoreBootSplash = () => {
   }, [dataReady, phase]);
 
   useEffect(() => {
-    if (phase === 'hidden') return undefined;
+    if (phase === 'hidden' || phase === 'fading') {
+      unlockPageScroll();
+      return undefined;
+    }
 
-    const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    return unlockPageScroll;
   }, [phase]);
+
+  useEffect(() => () => unlockPageScroll(), []);
 
   if (phase === 'hidden') return null;
 
