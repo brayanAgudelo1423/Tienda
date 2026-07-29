@@ -2,14 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { BRAND } from '../config/brand';
 import { useProducts } from '../context/ProductsContext';
 import { usePromotions } from '../context/PromotionsContext';
+import { forceUnlockPageScroll } from '../utils/scrollLock';
 
 const MIN_VISIBLE_MS = 800;
 const FADE_MS = 450;
-
-function unlockPageScroll() {
-  document.body.style.removeProperty('overflow');
-  document.documentElement.style.removeProperty('overflow');
-}
 
 const StoreBootSplash = () => {
   const { loading: productsLoading } = useProducts();
@@ -37,21 +33,20 @@ const StoreBootSplash = () => {
     if (!dataReady || phase !== 'visible') return undefined;
 
     setPhase('fading');
-    const timer = setTimeout(() => setPhase('hidden'), FADE_MS);
+    const timer = setTimeout(() => {
+      setPhase('hidden');
+      forceUnlockPageScroll();
+    }, FADE_MS);
     return () => clearTimeout(timer);
   }, [dataReady, phase]);
 
   useEffect(() => {
-    if (phase === 'hidden' || phase === 'fading') {
-      unlockPageScroll();
-      return undefined;
+    if (phase === 'hidden') {
+      forceUnlockPageScroll();
     }
-
-    document.body.style.overflow = 'hidden';
-    return unlockPageScroll;
   }, [phase]);
 
-  useEffect(() => () => unlockPageScroll(), []);
+  useEffect(() => () => forceUnlockPageScroll(), []);
 
   if (phase === 'hidden') return null;
 
@@ -61,6 +56,7 @@ const StoreBootSplash = () => {
       role="status"
       aria-live="polite"
       aria-label="Cargando tienda"
+      aria-hidden={phase === 'fading'}
     >
       <img src={BRAND.logo} alt={BRAND.name} className="store-splash-logo" />
     </div>

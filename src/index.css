@@ -36,8 +36,6 @@ body {
   color: var(--color-text);
   line-height: 1.5;
   overflow-x: hidden;
-  overflow-y: auto;
-  touch-action: pan-y pinch-zoom;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -45,7 +43,11 @@ body {
 
 html {
   scroll-behavior: auto;
-  overflow-y: auto;
+}
+
+html.store-scroll-locked,
+html.store-scroll-locked body {
+  overflow: hidden !important;
 }
 
 .store-splash {
@@ -58,6 +60,8 @@ html {
   background: #fff;
   opacity: 1;
   transition: opacity 0.45s ease;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 .store-splash--out {
@@ -654,7 +658,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   overscroll-behavior-x: contain;
-  touch-action: pan-x pinch-zoom;
 }
 
 .home-catalogs-track:focus-visible {

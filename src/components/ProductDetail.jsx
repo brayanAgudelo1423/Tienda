@@ -9,6 +9,7 @@ import { mediaUrl } from '../api/client';
 import { getProductGalleryImages } from '../utils/productImages';
 import { LOCIONES_CATEGORY } from '../constants/catalog';
 import { displayStoreText } from '../utils/displayText';
+import { lockPageScroll, unlockPageScroll } from '../utils/scrollLock';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const navigate = useNavigate();
@@ -17,15 +18,12 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (product) {
-      setSelectedSize('');
-      setSelectedColor('');
-      setError('');
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    if (!product) return undefined;
+    setSelectedSize('');
+    setSelectedColor('');
+    setError('');
+    lockPageScroll();
+    return unlockPageScroll;
   }, [product]);
 
   const galleryImages = useMemo(

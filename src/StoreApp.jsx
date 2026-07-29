@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { forceUnlockPageScroll } from './utils/scrollLock';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -22,6 +23,18 @@ import { getCartItemId } from './utils/product';
 
 function StoreApp() {
   const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    const unlock = () => forceUnlockPageScroll();
+    const t1 = setTimeout(unlock, 2500);
+    const t2 = setTimeout(unlock, 5000);
+    window.addEventListener('pageshow', unlock);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('pageshow', unlock);
+    };
+  }, []);
 
   const addToCart = (product) => {
     const cartId = getCartItemId(product);
