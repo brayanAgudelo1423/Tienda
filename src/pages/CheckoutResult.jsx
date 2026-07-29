@@ -16,19 +16,19 @@ const STATE_COPY = {
   PENDING: {
     icon: Clock,
     title: 'Pago pendiente',
-    body: 'Mercado Pago aún no confirmó el cobro. Si usaste PSE o efectivo, puede tardar horas. Si pagaste con tarjeta y no ves el descuento, el pago no se completó — intenta de nuevo.',
+    body: 'Aún no confirmamos el pago. Si ya completaste el proceso, espera unos minutos; si no, intenta de nuevo.',
     tone: 'pending',
   },
   CANCELLED: {
     icon: Clock,
     title: 'Pago no completado',
-    body: 'Saliste de Mercado Pago sin pagar. Puedes volver al carrito e intentar de nuevo cuando quieras.',
+    body: 'No se completó el pago. Puedes volver al carrito e intentar de nuevo cuando quieras.',
     tone: 'pending',
   },
   DECLINED: {
     icon: XCircle,
     title: 'Pago rechazado',
-    body: 'Mercado Pago no aprobó el pago. Prueba otro medio (PSE, Nequi u otra tarjeta) o contacta a tu banco.',
+    body: 'El pago no fue aprobado. Prueba otro medio o contacta a soporte.',
     tone: 'error',
   },
   EXPIRED: {
@@ -87,12 +87,9 @@ const CheckoutResult = () => {
   const { reloadProducts } = useProducts();
 
   useEffect(() => {
+    const gateway = params.get('gateway');
     const urlState = normalizePaymentState(params);
     setState(urlState);
-
-    const orderId = params.get('external_reference');
-    const paymentId = params.get('payment_id');
-    if (!orderId || params.get('gateway') !== 'mp') return undefined;
 
     let cancelled = false;
 
@@ -102,13 +99,40 @@ const CheckoutResult = () => {
       if (backendState) setState(backendState);
     };
 
+    const afterSync = () => reloadProducts({ silent: true });
+
+    if (gateway === 'sc') {
+      const paymentRef = params.get('paymentRef');
+      const orderId = params.get('orderId');
+      const saleId = orderId?.match(/^VM-(\d+)$/i)?.[1] || orderId;
+
+      if (!paymentRef && !saleId) return undefined;
+
+      api
+        .syncSistecreditoPayment({
+          paymentRef: paymentRef || undefined,
+          saleId: saleId || undefined,
+        })
+        .then(applySale)
+        .then(afterSync)
+        .catch(() => {});
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const orderId = params.get('external_reference');
+    const paymentId = params.get('payment_id');
+    if (!orderId || gateway !== 'mp') return undefined;
+
     const syncPromise = isNullishParam(paymentId)
       ? api.getPaymentStatus(orderId)
       : api.syncMercadoPagoPayment({ saleId: orderId, paymentId });
 
     syncPromise
       .then(applySale)
-      .then(() => reloadProducts({ silent: true }))
+      .then(afterSync)
       .catch(() => {});
 
     return () => {

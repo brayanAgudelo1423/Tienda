@@ -122,6 +122,15 @@ export const api = {
       body: { saleId, paymentId },
     }),
 
+  createSistecreditoCheckout: (payload) =>
+    request('/api/payments/sistecredito/checkout', { method: 'POST', body: payload }),
+
+  syncSistecreditoPayment: ({ paymentRef, saleId }) =>
+    request('/api/payments/sistecredito/sync', {
+      method: 'POST',
+      body: { paymentRef, saleId },
+    }),
+
   getPaymentStatus: (saleId) => request(`/api/payments/status/${saleId}`),
 
   createPayUCheckout: (payload) =>

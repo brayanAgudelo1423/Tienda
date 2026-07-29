@@ -20,6 +20,13 @@ import {
   isMercadoPagoConfigured,
   mapMercadoPagoStatus,
 } from '../mercadopago.js';
+import {
+  createSistecreditoCheckout,
+  fetchSistecreditoTransaction,
+  extractSaleIdFromNotification,
+  isSistecreditoConfigured,
+  mapSistecreditoStatus,
+} from '../sistecredito.js';
 
 const router = Router();
 
@@ -42,6 +49,14 @@ router.get('/methods', (_req, res) => {
       id: 'mercadopago',
       label: 'Pago en línea',
       desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
+    });
+  }
+
+  if (isSistecreditoConfigured()) {
+    methods.push({
+      id: 'sistecredito',
+      label: 'Sistecrédito',
+      desc: 'Financia tu compra a cuotas con tu cupo Sistecrédito.',
     });
   }
 
@@ -161,6 +176,134 @@ router.post('/mercadopago/sync', async (req, res, next) => {
       paymentMethod: sale.paymentMethod,
       payuReference: sale.payuReference,
       payuTransactionId: sale.payuTransactionId,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+async function processSistecreditoNotification(payload) {
+  const paymentRef = payload?._id || payload?.data?._id;
+  if (!paymentRef) return null;
+
+  const tx = await fetchSistecreditoTransaction(paymentRef);
+  const status = tx?.transactionStatus || tx?.paymentMethodResponse?.statusResponse;
+  const saleId =
+    extractSaleIdFromNotification(payload) ||
+    extractSaleIdFromNotification(tx) ||
+    Number(String(tx?.invoice || '').replace(/^VM-/i, ''));
+
+  const sale =
+    (saleId ? await getSaleById(saleId) : null) ||
+    (await getSaleByPayUReference(String(paymentRef)));
+
+  if (!sale) {
+    console.warn('[Sistecrédito] Notificación sin pedido asociado:', paymentRef);
+    return null;
+  }
+
+  const authorizationCode = tx?.paymentMethodResponse?.authorizationCode;
+
+  await updateSalePayment(sale.id, {
+    status: mapSistecreditoStatus(status),
+    payuReference: String(paymentRef),
+    payuTransactionId: authorizationCode ? String(authorizationCode) : sale.payuTransactionId,
+  });
+
+  return getSaleById(sale.id);
+}
+
+router.post('/sistecredito/checkout', async (req, res, next) => {
+  try {
+    if (!isSistecreditoConfigured()) {
+      return res.status(503).json({
+        error:
+          'Sistecrédito no está configurado. Agrega SISTECREDITO_SUBSCRIPTION_KEY y SISTECREDITO_ALLIED_PUBLIC_KEY en Render.',
+      });
+    }
+
+    const { saleId, customer } = req.body;
+    const sale = await getSaleById(Number(saleId));
+
+    if (!sale) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    if (!customer?.email || !customer?.name || !customer?.phone) {
+      return res.status(400).json({ error: 'Datos del cliente incompletos' });
+    }
+
+    if (!String(customer.documentNumber || '').trim()) {
+      return res.status(400).json({ error: 'Documento requerido para Sistecrédito' });
+    }
+
+    const checkout = await createSistecreditoCheckout({
+      sale,
+      customer,
+      backendUrl: backendBaseUrl(req),
+      frontendUrl: frontendBaseUrl(),
+    });
+
+    await updateSalePayment(sale.id, {
+      payuReference: checkout.paymentRef,
+      status: 'pendiente_pago',
+    });
+
+    res.json({
+      redirectUrl: checkout.redirectUrl,
+      paymentRef: checkout.paymentRef,
+      invoice: checkout.invoice,
+      test: checkout.test,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/sistecredito/confirmation', async (req, res, next) => {
+  try {
+    if (!isSistecreditoConfigured()) {
+      return res.status(503).send('Sistecrédito no configurado');
+    }
+
+    await processSistecreditoNotification(req.body);
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('[Sistecrédito] Webhook error:', err.message);
+    res.status(200).send('OK');
+  }
+});
+
+router.post('/sistecredito/sync', async (req, res, next) => {
+  try {
+    if (!isSistecreditoConfigured()) {
+      return res.status(503).json({ error: 'Sistecrédito no está configurado' });
+    }
+
+    const paymentRef = String(req.body.paymentRef || req.body.saleId || '').trim();
+    if (!paymentRef) {
+      return res.status(400).json({ error: 'paymentRef requerido' });
+    }
+
+    let sale = await getSaleByPayUReference(paymentRef);
+    if (!sale && /^\d+$/.test(paymentRef)) {
+      sale = await getSaleById(Number(paymentRef));
+    }
+
+    const tx = await fetchSistecreditoTransaction(
+      sale?.payuReference || paymentRef
+    );
+    const updated = await processSistecreditoNotification(tx);
+    if (!updated) {
+      return res.status(404).json({ error: 'No se encontró el pedido de este pago' });
+    }
+
+    res.json({
+      id: updated.id,
+      status: updated.status,
+      paymentMethod: updated.paymentMethod,
+      payuReference: updated.payuReference,
+      payuTransactionId: updated.payuTransactionId,
     });
   } catch (err) {
     next(err);

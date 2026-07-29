@@ -49,6 +49,7 @@ function saleStatusForPayment(paymentMethod) {
     return 'pendiente_pago';
   }
   if (paymentMethod === 'mercadopago') return 'pendiente_pago';
+  if (paymentMethod === 'sistecredito') return 'pendiente_pago';
   return 'confirmada';
 }
 

@@ -25,6 +25,11 @@ const FALLBACK_PAYMENT_METHODS = [
     label: 'Pago en línea',
     desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
   },
+  {
+    id: 'sistecredito',
+    label: 'Sistecrédito',
+    desc: 'Financia tu compra a cuotas con tu cupo Sistecrédito.',
+  },
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
 ];
 
@@ -32,6 +37,10 @@ const SUCCESS_COPY = {
   mercadopago: {
     title: 'Redirigiendo al pago…',
     body: 'Elige tu medio de pago: tarjeta, PSE, Nequi, Daviplata, Efecty u otro disponible.',
+  },
+  sistecredito: {
+    title: 'Redirigiendo a Sistecrédito…',
+    body: 'Completa tu crédito con tu cédula y el código que llegará a tu celular.',
   },
   contraentrega: {
     title: 'Pedido confirmado',
@@ -52,10 +61,12 @@ const Checkout = ({ items, onOrderComplete }) => {
   const [payment, setPayment] = useState('mercadopago');
 
   const isMercadoPago = payment === 'mercadopago';
+  const isSistecredito = payment === 'sistecredito';
+  const needsDocument = isMercadoPago || isSistecredito;
 
   const normalizeMethods = (methods) =>
     (methods ?? [])
-      .filter((m) => m.id === 'mercadopago' || m.id === 'contraentrega')
+      .filter((m) => m.id === 'mercadopago' || m.id === 'sistecredito' || m.id === 'contraentrega')
       .map((m) =>
         m.id === 'mercadopago'
           ? { ...m, label: 'Pago en línea', desc: FALLBACK_PAYMENT_METHODS[0].desc }
@@ -145,6 +156,24 @@ const Checkout = ({ items, onOrderComplete }) => {
 
         onOrderComplete?.();
         window.location.href = mp.initPoint;
+        return;
+      }
+
+      if (isSistecredito) {
+        if (!customer.documentNumber) {
+          throw new Error('Ingresa tu número de documento para pagar con Sistecrédito');
+        }
+
+        removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+        reloadProducts({ silent: true });
+
+        const sc = await api.createSistecreditoCheckout({
+          saleId: sale.id,
+          customer,
+        });
+
+        onOrderComplete?.();
+        window.location.href = sc.redirectUrl;
         return;
       }
 
@@ -285,11 +314,11 @@ const Checkout = ({ items, onOrderComplete }) => {
               </div>
             </section>
 
-            {isMercadoPago && (
+            {needsDocument && (
             <section className="checkout-card">
               <h2>
                 <Lock size={18} />
-                Identificación (requerida para pago en línea)
+                Identificación (requerida para {isSistecredito ? 'Sistecrédito' : 'pago en línea'})
               </h2>
               <div className="checkout-field-row">
                 <div className="checkout-field">
@@ -308,7 +337,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                     name="documentNumber"
                     type="text"
                     inputMode="numeric"
-                    required={isMercadoPago}
+                    required={needsDocument}
                     placeholder="Ej. 1020304050"
                   />
                 </div>

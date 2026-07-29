@@ -7,6 +7,7 @@ const router = Router();
 
 const VALID_PAYMENT_METHODS = new Set([
   'mercadopago',
+  'sistecredito',
   'payu-online',
   'payu-card',
   'pse',
