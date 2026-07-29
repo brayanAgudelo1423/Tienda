@@ -8,10 +8,36 @@
     <link rel="apple-touch-icon" href="/Logo/Logo.jpg" />
     <meta name="description" content="VirtusMonaco — moda, lociones originales y promociones en Colombia." />
     <title>VirtusMonaco — Moda & Lociones</title>
-    <script type="module" crossorigin src="/assets/index-ZcNbSrPk.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-n9fpLmAt.css">
+    <link rel="preload" href="/Logo/Logo.jpg" as="image" />
+    <style>
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+      }
+      #boot-splash img {
+        width: min(42vw, 168px);
+        height: auto;
+        object-fit: contain;
+        opacity: 0.92;
+        animation: boot-splash-breathe 2.2s ease-in-out infinite;
+      }
+      @keyframes boot-splash-breathe {
+        0%, 100% { opacity: 0.88; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.02); }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-_cxVPO8g.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DbSzkSOJ.css">
   </head>
   <body>
+    <div id="boot-splash" aria-live="polite" aria-label="Cargando VirtusMonaco">
+      <img src="/Logo/Logo.jpg" alt="VirtusMonaco" width="168" height="168" />
+    </div>
     <div id="root"></div>
   </body>
 </html>
