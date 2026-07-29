@@ -6,6 +6,7 @@ const router = Router();
 
 router.get('/', async (_req, res, next) => {
   try {
+    res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
     const brands = await getBrands();
     res.json(brands.map((b) => ({ name: b.name, slug: b.slug, sortOrder: b.sort_order })));
   } catch (err) {

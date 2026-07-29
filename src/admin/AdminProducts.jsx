@@ -100,6 +100,12 @@ const AdminProducts = () => {
     reloadProducts();
   };
 
+  const republish = async (id) => {
+    await api.republishProduct(id);
+    load();
+    reloadProducts();
+  };
+
   const remove = async (id) => {
     if (!window.confirm('¿Eliminar este producto permanentemente?')) return;
     await api.deleteProduct(id);
@@ -235,7 +241,8 @@ const AdminProducts = () => {
           <div className="admin-product-info">
             <h3>
               {displayStoreText(p.name)}
-              {!p.active && <span className="admin-badge-inactive">No disponible</span>}
+              {p.sold && <span className="admin-badge-sold">Vendido</span>}
+              {!p.sold && !p.active && <span className="admin-badge-inactive">No disponible</span>}
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: 0 }}>
               {displayStoreText(p.brand)} · {p.category} · {formatCOP(p.price)}
@@ -244,9 +251,15 @@ const AdminProducts = () => {
               <Link to={`/admin/productos/${p.id}`} className="admin-btn-sm">
                 Editar
               </Link>
-              <button type="button" className="admin-btn-sm" onClick={() => toggleActive(p.id)}>
-                {p.active ? 'No disponible' : 'Publicar'}
-              </button>
+              {p.sold ? (
+                <button type="button" className="admin-btn-sm" onClick={() => republish(p.id)}>
+                  Volver a publicar
+                </button>
+              ) : (
+                <button type="button" className="admin-btn-sm" onClick={() => toggleActive(p.id)}>
+                  {p.active ? 'No disponible' : 'Publicar'}
+                </button>
+              )}
               <button type="button" className="admin-btn-sm danger" onClick={() => remove(p.id)}>
                 Eliminar
               </button>

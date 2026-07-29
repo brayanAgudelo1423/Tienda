@@ -15,6 +15,11 @@ const HomeCatalogs = () => {
   const cards = useMemo(() => {
     const list = [
       {
+        id: 'ver-todo',
+        title: 'Ver todo',
+        to: '/ver-todo',
+      },
+      {
         id: 'lociones',
         title: 'Lociones originales',
         to: '/lociones',

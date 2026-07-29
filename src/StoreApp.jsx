@@ -16,6 +16,7 @@ import Promociones from './pages/Promociones';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import CheckoutResult from './pages/CheckoutResult';
 import RastrearPedido from './pages/RastrearPedido';
+import VerTodo from './pages/VerTodo';
 import { getCartItemId } from './utils/product';
 
 function StoreApp() {
@@ -61,6 +62,7 @@ function StoreApp() {
         <Route path="/marcas/:brandSlug" element={<Brands onAddToCart={addToCart} />} />
         <Route path="/lociones" element={<Lociones onAddToCart={addToCart} />} />
         <Route path="/lociones/marca/:brandSlug" element={<Lociones onAddToCart={addToCart} />} />
+        <Route path="/ver-todo" element={<VerTodo onAddToCart={addToCart} />} />
         <Route path="/cart" element={<Cart items={cartItems} onRemove={removeFromCart} />} />
         <Route path="/checkout" element={<Checkout items={cartItems} onOrderComplete={clearCart} />} />
         <Route path="/checkout/resulto" element={<CheckoutResult />} />

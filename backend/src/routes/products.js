@@ -8,6 +8,7 @@ import {
   deleteProduct,
   bulkSetProductsActive,
   bulkDeleteProducts,
+  republishProduct,
 } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { scheduleCatalogExport } from '../catalogExport.js';
@@ -55,6 +56,7 @@ router.get('/admin/all', requireAuth, async (_req, res, next) => {
 
 router.get('/', async (_req, res, next) => {
   try {
+    res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
     res.json(await getActiveProducts());
   } catch (err) {
     next(err);
@@ -64,7 +66,7 @@ router.get('/', async (_req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const product = await getProductById(Number(req.params.id));
-    if (!product || !product.active) {
+    if (!product || !product.active || product.sold) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
     res.json(product);
@@ -104,7 +106,23 @@ router.patch('/admin/:id/toggle', requireAuth, async (req, res, next) => {
   try {
     const existing = await getProductById(Number(req.params.id));
     if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
+    if (existing.sold && !existing.active) {
+      return res.status(400).json({
+        error: 'Este producto está vendido. Usa "Volver a publicar" para volver a ofrecerlo.',
+      });
+    }
     const product = await updateProduct(existing.id, { active: !existing.active });
+    scheduleCatalogExport();
+    res.json(product);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/admin/:id/republish', requireAuth, async (req, res, next) => {
+  try {
+    const product = await republishProduct(Number(req.params.id));
+    if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
     scheduleCatalogExport();
     res.json(product);
   } catch (err) {

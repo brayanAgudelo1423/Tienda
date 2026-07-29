@@ -74,6 +74,9 @@ export const api = {
   toggleProduct: (id) =>
     request(`/api/products/admin/${id}/toggle`, { method: 'PATCH', auth: true }),
 
+  republishProduct: (id) =>
+    request(`/api/products/admin/${id}/republish`, { method: 'PATCH', auth: true }),
+
   deleteProduct: (id) =>
     request(`/api/products/admin/${id}`, { method: 'DELETE', auth: true }),
 

@@ -15,6 +15,8 @@ import {
 import { api, mediaUrl } from '../api/client';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
+import { removeProductsFromCache } from '../utils/catalogCache';
+import { useProducts } from '../context/ProductsContext';
 import BrandLogo from './BrandLogo';
 
 const FALLBACK_PAYMENT_METHODS = [
@@ -32,17 +34,17 @@ const SUCCESS_COPY = {
     body: 'Elige tu medio de pago: tarjeta, PSE, Nequi, Daviplata, Efecty u otro disponible.',
   },
   contraentrega: {
-    title: '¡Compra exitosa!',
-    body: 'Tu compra fue registrada correctamente. Pronto nos contactaremos contigo para coordinar la entrega.',
+    title: 'Pedido confirmado',
+    body: 'Ya se contactarán contigo en minutos.',
   },
 };
 
 const MP_MIN_AMOUNT_COP = 10000;
 
 const Checkout = ({ items, onOrderComplete }) => {
+  const { reloadProducts } = useProducts();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [orderId, setOrderId] = useState(null);
   const [completedPayment, setCompletedPayment] = useState('contraentrega');
   const [error, setError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -133,6 +135,9 @@ const Checkout = ({ items, onOrderComplete }) => {
           throw new Error('Ingresa tu número de documento para pagar con Mercado Pago');
         }
 
+        removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+        reloadProducts({ silent: true });
+
         const mp = await api.createMercadoPagoCheckout({
           saleId: sale.id,
           customer,
@@ -143,7 +148,8 @@ const Checkout = ({ items, onOrderComplete }) => {
         return;
       }
 
-      setOrderId(sale.id);
+      removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+      reloadProducts({ silent: true });
       setCompletedPayment(payment);
       setIsSuccess(true);
       onOrderComplete?.();
@@ -180,9 +186,6 @@ const Checkout = ({ items, onOrderComplete }) => {
           <CheckCircle size={64} strokeWidth={1.5} />
         </div>
         <h1>{copy.title}</h1>
-        {orderId && completedPayment !== 'contraentrega' && (
-          <p className="checkout-order-id">Pedido #{orderId}</p>
-        )}
         <p>{copy.body}</p>
         <Link to="/" className="btn">
           Volver a la tienda
