@@ -978,7 +978,7 @@ const checkoutStyles = `
     }
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 768px) {
     .checkout-page {
       padding-bottom: 4rem;
     }
@@ -1020,6 +1020,21 @@ const checkoutStyles = `
       background: var(--color-bg-alt);
       border-radius: 14px;
       padding: 1.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .checkout-container {
+      max-width: 1200px;
+    }
+
+    .checkout-grid {
+      grid-template-columns: 1fr 400px;
+      gap: 3.5rem;
+    }
+
+    .checkout-header {
+      text-align: left;
     }
   }
 `;

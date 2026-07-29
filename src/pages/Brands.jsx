@@ -155,7 +155,7 @@ const styles = {
   resultCount: { fontSize: '1rem', color: 'var(--color-text-light)', margin: 0 },
   layout: { display: 'flex', gap: '3rem', alignItems: 'flex-start' },
   sidebar: {
-    width: '220px',
+    width: '260px',
     flexShrink: 0,
     paddingRight: '2rem',
     borderRight: '1px solid var(--color-bg-alt)',
@@ -186,7 +186,7 @@ const styles = {
   grid: {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
     gap: '2rem',
   },
   emptyMessage: { fontSize: '1.1rem', marginTop: '2rem', color: 'var(--color-text-light)' },

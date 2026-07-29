@@ -422,7 +422,7 @@ const locionesStyles = `
   .lociones-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1.75rem;
   }
 
@@ -526,12 +526,17 @@ const locionesStyles = `
     margin-top: 1rem;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .lociones-sidebar { display: none; }
     .lociones-mobile-filters-btn { display: flex; }
     .lociones-drawer-overlay { display: flex; }
     .lociones-header { flex-direction: column; align-items: flex-start; }
     .lociones-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .lociones-sidebar { width: 280px; }
+    .lociones-grid { gap: 2rem; }
   }
 `;
 
