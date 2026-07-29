@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { BRAND, whatsappLink } from '../config/brand';
 
 const WhatsAppIcon = () => (
@@ -17,9 +16,7 @@ const InstagramIcon = () => (
 const FloatingSocials = () => {
   return (
     <div className="floating-socials">
-      <motion.a
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+      <a
         className="floating-socials-wa"
         href={whatsappLink(`Hola ${BRAND.name}, necesito ayuda con mi pedido.`)}
         target="_blank"
@@ -27,10 +24,8 @@ const FloatingSocials = () => {
         title={`WhatsApp – ${BRAND.whatsappDisplay}`}
       >
         <WhatsAppIcon />
-      </motion.a>
-      <motion.a
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+      </a>
+      <a
         className="floating-socials-ig"
         href={BRAND.instagramUrl}
         target="_blank"
@@ -38,7 +33,7 @@ const FloatingSocials = () => {
         title="Instagram"
       >
         <InstagramIcon />
-      </motion.a>
+      </a>
     </div>
   );
 };

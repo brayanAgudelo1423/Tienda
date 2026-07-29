@@ -1,6 +1,5 @@
 import React, { useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProducts } from '../context/ProductsContext';
 import { usePromotions } from '../context/PromotionsContext';
@@ -76,19 +75,11 @@ const HomeCatalogs = () => {
           role="list"
           aria-label="Colecciones"
         >
-          {cards.map((cat, index) => (
-            <motion.div
-              key={cat.id}
-              role="listitem"
-              className="home-catalog-slide"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.28) }}
-            >
+          {cards.map((cat) => (
+            <div key={cat.id} role="listitem" className="home-catalog-slide">
               <Link to={cat.to} className="home-catalog-card" state={{ fromHomeCatalog: true }}>
                 <div className="home-catalog-card-media" aria-hidden="true">
-                  <span className="home-catalog-logo-spin brand-logo-visual--spin">
+                  <span className="home-catalog-logo-mark">
                     <img src={BRAND.logo} alt="" className="home-catalog-logo-img" />
                   </span>
                   <div className="home-catalog-card-shade" />
@@ -100,7 +91,7 @@ const HomeCatalogs = () => {
                   </span>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

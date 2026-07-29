@@ -40,6 +40,7 @@ const FALLBACK_ITEMS = [
 ];
 
 const PromotionsContext = createContext(null);
+const REFRESH_MS = 90000;
 
 function normalizePageData(data) {
   if (Array.isArray(data)) {
@@ -85,15 +86,12 @@ export function PromotionsProvider({ children }) {
   }, [loadPromotions]);
 
   useEffect(() => {
-    const onFocus = () => loadPromotions();
     const onVisibility = () => {
       if (document.visibilityState === 'visible') loadPromotions();
     };
-    window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVisibility);
-    const interval = setInterval(loadPromotions, 15000);
+    const interval = setInterval(loadPromotions, REFRESH_MS);
     return () => {
-      window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
       clearInterval(interval);
     };
