@@ -628,37 +628,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   border: none !important;
 }
 
-.hero-eyebrow {
-  margin: 0 0 0.5rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.hero-headline {
-  margin: 0 0 0.65rem;
-  font-family: var(--font-heading);
-  font-size: clamp(1.85rem, 6vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.08;
-  color: #fff;
-  letter-spacing: 0.03em;
-  text-transform: none;
-}
-
-.hero-subtitle {
-  margin: 0 0 1.25rem;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
-  max-width: 28rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* âââ Home catalogs (carrusel horizontal) âââ */
+/* ——— Home catalogs (carrusel horizontal) ——— */
 .home-catalogs {
   padding: 2.75rem 0 2.25rem;
 }
@@ -2814,45 +2784,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 
   .hero-content-wrap {
     bottom: 12%;
-    justify-content: flex-start;
-  }
-
-  .hero-content {
-    max-width: 640px;
-    text-align: left;
-  }
-
-  .hero-eyebrow {
-    margin: 0 0 0.65rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.92);
-  }
-
-  .hero-headline {
-    margin: 0 0 0.75rem;
-    font-family: var(--font-heading);
-    font-size: clamp(2.75rem, 4.5vw, 4rem);
-    font-weight: 500;
-    line-height: 1.05;
-    color: #fff;
-    letter-spacing: 0.03em;
-    text-transform: none;
-  }
-
-  .hero-subtitle {
-    margin: 0 0 1.5rem;
-    max-width: 32rem;
-    font-size: 1.05rem;
-    line-height: 1.55;
-    color: rgba(255, 255, 255, 0.92);
-  }
-
-  .hero-subtitle {
-    margin-left: 0;
-    margin-right: 0;
   }
 
   .hero-cta-btn {

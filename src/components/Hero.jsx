@@ -50,11 +50,6 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <p className="hero-eyebrow">Moda & lociones originales</p>
-          <h1 className="hero-headline">{BRAND.name}</h1>
-          <p className="hero-subtitle">
-            Piezas premium seleccionadas con envío en Colombia. Compra con confianza desde cualquier dispositivo.
-          </p>
           <div className="hero-cta">
             <button type="button" className="btn hero-cta-btn" onClick={() => navigate('/marcas/novedades')}>
               Comprar Ahora
