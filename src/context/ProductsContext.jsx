@@ -41,6 +41,7 @@ export function ProductsProvider({ children }) {
       : staticBrands
   );
   const [loading, setLoading] = useState(!initialCache);
+  const [initialLoadDone, setInitialLoadDone] = useState(Boolean(initialCache));
   const [usingApi, setUsingApi] = useState(Boolean(initialCache));
   const [apiError, setApiError] = useState(null);
 
@@ -81,6 +82,7 @@ export function ProductsProvider({ children }) {
       }
     } finally {
       if (!silent) setLoading(false);
+      setInitialLoadDone(true);
     }
   }, []);
 
@@ -108,7 +110,7 @@ export function ProductsProvider({ children }) {
         brands: fashionBrands,
         fashionBrands,
         fragranceBrands,
-        loading,
+        loading: loading || !initialLoadDone,
         usingApi,
         apiError,
         reloadProducts: loadProducts,

@@ -61,9 +61,17 @@ html.store-scroll-locked body {
   justify-content: center;
   background: #fff;
   opacity: 1;
-  transition: opacity 0.45s ease;
+  transition: opacity 0.5s ease;
   touch-action: none;
   overscroll-behavior: none;
+}
+
+.store-splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+  padding: 1.5rem;
 }
 
 .store-splash--out {
@@ -79,6 +87,40 @@ html.store-scroll-locked body {
   animation: store-splash-breathe 2.2s ease-in-out infinite;
 }
 
+.store-splash-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+}
+
+.store-splash-bar {
+  width: min(52vw, 200px);
+  height: 3px;
+  border-radius: 999px;
+  background: #ececec;
+  overflow: hidden;
+}
+
+.store-splash-bar-fill {
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-secondary), #004c99);
+  animation: store-splash-progress 1.35s ease-in-out infinite;
+}
+
+@keyframes store-splash-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 @keyframes store-splash-breathe {
   0%,
   100% {
@@ -92,8 +134,14 @@ html.store-scroll-locked body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .store-splash-logo {
+  .store-splash-logo,
+  #boot-splash img {
     animation: none;
+  }
+
+  .store-splash-bar-fill {
+    animation: none;
+    width: 100%;
   }
 }
 
