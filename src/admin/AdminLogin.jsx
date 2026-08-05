@@ -1,8 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, setAdminToken } from '../api/client';
+import { api, setAdminToken, wakeAdminApi } from '../api/client';
 import BrandLogo from '../components/BrandLogo';
 import './admin.css';
+
+async function loginWithRetry(username, password) {
+  let lastError;
+  for (const delay of [0, 1500, 4000]) {
+    if (delay > 0) await new Promise((r) => setTimeout(r, delay));
+    try {
+      return await api.login(username, password);
+    } catch (err) {
+      lastError = err;
+      const msg = String(err.message || '');
+      const retryable =
+        msg.includes('No se pudo conectar') ||
+        msg.includes('servidor estaba dormido') ||
+        msg.includes('Failed to fetch');
+      if (!retryable) throw err;
+    }
+  }
+  throw lastError;
+}
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -11,14 +30,20 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    document.getElementById('boot-splash')?.remove();
+    wakeAdminApi();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const { token } = await api.login(username, password);
+      await wakeAdminApi();
+      const { token } = await loginWithRetry(username, password);
       setAdminToken(token);
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

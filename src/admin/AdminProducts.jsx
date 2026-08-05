@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
 
 const AdminProducts = () => {
+  const { sessionError, logout } = useOutletContext() || {};
   const { reloadProducts } = useProducts();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selected, setSelected] = useState(new Set());
   const [busy, setBusy] = useState(false);
   const [brandFilter, setBrandFilter] = useState('all');
@@ -16,9 +18,11 @@ const AdminProducts = () => {
 
   const load = () => {
     setLoading(true);
+    setError('');
     api
       .getAdminProducts()
       .then(setProducts)
+      .catch((err) => setError(err.message || 'No se pudieron cargar los productos'))
       .finally(() => setLoading(false));
   };
 
@@ -118,7 +122,22 @@ const AdminProducts = () => {
     reloadProducts();
   };
 
+  if (sessionError || /sesión|autorizado|inválida|invalida/i.test(error)) {
+    return (
+      <div className="admin-auth-error-card">
+        <p>{sessionError || error}</p>
+        <button type="button" className="btn" onClick={logout}>
+          Cerrar sesión
+        </button>
+      </div>
+    );
+  }
+
   if (loading) return <p>Cargando productos…</p>;
+
+  if (error) {
+    return <p style={{ color: '#b91c1c' }}>{error}</p>;
+  }
 
   return (
     <>

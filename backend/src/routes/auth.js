@@ -19,7 +19,7 @@ router.post('/login', async (req, res, next) => {
     const token = jwt.sign(
       { id: admin.id, username: admin.username },
       process.env.JWT_SECRET || 'ozono-dev-secret',
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     res.json({ token, username: admin.username });

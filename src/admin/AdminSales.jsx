@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { api, mediaUrl } from '../api/client';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
@@ -20,15 +21,19 @@ const STATUS_LABELS = {
 };
 
 const AdminSales = () => {
+  const { sessionError, logout } = useOutletContext() || {};
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
   const loadSales = () => {
     setLoading(true);
+    setError('');
     api
       .getSales(80)
       .then(setSales)
+      .catch((err) => setError(err.message || 'No se pudieron cargar las ventas'))
       .finally(() => setLoading(false));
   };
 
@@ -49,7 +54,22 @@ const AdminSales = () => {
     }
   };
 
+  if (sessionError || /sesión|autorizado|inválida|invalida/i.test(error)) {
+    return (
+      <div className="admin-auth-error-card">
+        <p>{sessionError || error}</p>
+        <button type="button" className="btn" onClick={logout}>
+          Cerrar sesión
+        </button>
+      </div>
+    );
+  }
+
   if (loading) return <p>Cargando ventas…</p>;
+
+  if (error) {
+    return <p style={{ color: '#b91c1c' }}>{error}</p>;
+  }
 
   return (
     <>
