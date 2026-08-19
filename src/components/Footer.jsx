@@ -19,6 +19,7 @@ const Footer = () => {
           <p className="site-footer-tagline">
             Moda deportiva y urbana de alto rendimiento. 100% original.
           </p>
+          <p>3206887235 Linea Atencion al Cliente</p>
         </div>
 
         <div className="site-footer-columns">
@@ -91,7 +92,7 @@ const Footer = () => {
             </div>
             <p className="site-footer-location">
               <MapPin size={16} aria-hidden="true" />
-              Colombia · {BRAND.whatsappDisplay}
+              Colombia Manizales calle 70B # 23B 151 palermo la camelia · {BRAND.whatsappDisplay}
             </p>
             <Link to="/politica-de-privacidad" className="site-footer-legal">
               Política de Privacidad
@@ -103,7 +104,7 @@ const Footer = () => {
       <div className="site-footer-bottom">
         <div className="container site-footer-bottom-inner">
           <span>
-            &copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} {BRAND.legal}. Todos los derechos reservados. Email: jaramillofelipe528@gmail.com
           </span>
           <span className="site-footer-payu">
             Pagos seguros con <strong>Mercado Pago</strong>
