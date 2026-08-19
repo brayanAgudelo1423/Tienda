@@ -95,6 +95,12 @@ const Header = ({ cartCount }) => {
                 {displayStoreText(brand.name)}
               </Link>
             ))}
+            <Link
+              to="/ver-todo"
+              className={`nav-link nav-link--strong ${location.pathname === '/ver-todo' ? 'is-active' : ''}`}
+            >
+              Ver todo
+            </Link>
             {promoSettings.sectionEnabled && (
               <Link
                 to="/promociones"
@@ -205,6 +211,13 @@ const Header = ({ cartCount }) => {
                   {displayStoreText(brand.name)}
                 </Link>
               ))}
+              <Link
+                to="/ver-todo"
+                onClick={closeMobile}
+                className="nav-link mobile-drawer-link mobile-drawer-link--accent"
+              >
+                Ver todo
+              </Link>
               {promoSettings.sectionEnabled && (
                 <Link
                   to="/promociones"

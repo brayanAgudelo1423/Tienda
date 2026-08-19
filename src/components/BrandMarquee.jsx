@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
+import { usePauseAnimationWhenHidden } from '../utils/usePauseAnimationWhenHidden';
 
 const BrandMarquee = () => {
   const { brands } = useProducts();
   const brandsLoop = [...brands, ...brands];
+  const sectionRef = useRef(null);
+
+  usePauseAnimationWhenHidden(sectionRef, '.brand-marquee-track');
 
   return (
-    <section className="brand-marquee-section" style={styles.section}>
+    <section className="brand-marquee-section" ref={sectionRef} style={styles.section}>
       <p style={styles.label}>Marcas 100% originales</p>
       <div className="brand-marquee">
         <div className="brand-marquee-track">
@@ -30,7 +34,7 @@ const BrandMarquee = () => {
 
 const styles = {
   section: {
-    padding: '2.5rem 0',
+    padding: '3rem 0',
     backgroundColor: 'var(--color-bg)',
     overflow: 'hidden',
   },

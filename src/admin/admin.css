@@ -4,6 +4,60 @@
   padding-bottom: calc(5rem + env(safe-area-inset-bottom));
 }
 
+.admin-session-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin: 0.75rem 1rem 0;
+  padding: 0.9rem 1rem;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.admin-session-banner-text {
+  flex: 1;
+  min-width: 180px;
+}
+
+.admin-session-banner-text strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.admin-session-banner-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #b91c1c;
+}
+
+.admin-session-banner .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.admin-auth-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.admin-auth-error-card p {
+  margin: 0;
+  color: #991b1b;
+}
+
 .admin-topbar {
   position: sticky;
   top: 0;
@@ -465,6 +519,16 @@
   border-radius: 6px;
   background: #fee2e2;
   color: #991b1b;
+  margin-left: 0.35rem;
+}
+
+.admin-badge-sold {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #fef3c7;
+  color: #92400e;
   margin-left: 0.35rem;
 }
 

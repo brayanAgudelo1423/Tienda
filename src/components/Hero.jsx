@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { imageUrl, hugoBossImageUrl } from '../utils/assets';
 import { BRAND } from '../config/brand';
+import { usePauseAnimationWhenHidden } from '../utils/usePauseAnimationWhenHidden';
 
 const HERO_IMAGES = [
   { src: imageUrl('Novedades', 'Polo Michael Kors Cafe Ref1.jpeg'), alt: 'Polo Michael Kors' },
@@ -18,10 +19,13 @@ const HERO_IMAGES = [
 
 const Hero = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef(null);
   const slides = [...HERO_IMAGES, ...HERO_IMAGES];
 
+  usePauseAnimationWhenHidden(sectionRef, '.hero-filmstrip-track');
+
   return (
-    <section className="hero-section">
+    <section className="hero-section" ref={sectionRef}>
       <div className="hero-filmstrip">
         <div className="hero-filmstrip-track">
           {slides.map((image, index) => (

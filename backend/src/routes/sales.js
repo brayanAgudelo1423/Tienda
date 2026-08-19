@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { createSale, deleteSale, getSales, getSalesStats, getSaleForTracking } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { notifyNewOrder } from '../email.js';
+import { scheduleCatalogExport } from '../catalogExport.js';
 
 const router = Router();
 
 const VALID_PAYMENT_METHODS = new Set([
   'mercadopago',
+  'sistecredito',
   'payu-online',
   'payu-card',
   'pse',
@@ -57,7 +58,7 @@ router.post('/', async (req, res, next) => {
       paymentMethod: normalizedPayment,
     });
 
-    notifyNewOrder(sale).catch(() => {});
+    scheduleCatalogExport();
 
     res.status(201).json(sale);
   } catch (err) {

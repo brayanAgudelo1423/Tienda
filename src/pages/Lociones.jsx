@@ -10,6 +10,7 @@ import { LOCIONES_CATEGORY, GENDERS } from '../constants/catalog';
 import { getBrandNameBySlug } from '../utils/brands';
 import ProductDetail from '../components/ProductDetail';
 import StarRating from '../components/StarRating';
+import BackNav from '../components/BackNav';
 
 const Lociones = ({ onAddToCart }) => {
   const { brandSlug } = useParams();
@@ -45,12 +46,10 @@ const Lociones = ({ onAddToCart }) => {
 
   useEffect(() => {
     setBrand(activeBrand || 'all');
-  }, [activeBrand]);
-
-  useEffect(() => {
+    setGender('all');
     setMinPrice(priceBounds.min);
     setMaxPrice(priceBounds.max);
-  }, [priceBounds.min, priceBounds.max]);
+  }, [activeBrand, brandSlug, priceBounds.min, priceBounds.max]);
 
   const filteredProducts = useMemo(() => {
     return lociones.filter((product) => {
@@ -152,6 +151,7 @@ const Lociones = ({ onAddToCart }) => {
   return (
     <>
       <div className="lociones-page container">
+        <BackNav label="Volver" />
         <header className="lociones-header">
           <div>
             <p className="lociones-eyebrow">Perfumería de lujo</p>
@@ -422,7 +422,7 @@ const locionesStyles = `
   .lociones-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1.75rem;
   }
 
@@ -526,12 +526,17 @@ const locionesStyles = `
     margin-top: 1rem;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .lociones-sidebar { display: none; }
     .lociones-mobile-filters-btn { display: flex; }
     .lociones-drawer-overlay { display: flex; }
     .lociones-header { flex-direction: column; align-items: flex-start; }
     .lociones-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .lociones-sidebar { width: 280px; }
+    .lociones-grid { gap: 2rem; }
   }
 `;
 

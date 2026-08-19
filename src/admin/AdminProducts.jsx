@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { api, mediaUrl } from '../api/client';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
 
 const AdminProducts = () => {
+  const { sessionError, logout } = useOutletContext() || {};
   const { reloadProducts } = useProducts();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selected, setSelected] = useState(new Set());
   const [busy, setBusy] = useState(false);
   const [brandFilter, setBrandFilter] = useState('all');
@@ -16,9 +18,11 @@ const AdminProducts = () => {
 
   const load = () => {
     setLoading(true);
+    setError('');
     api
       .getAdminProducts()
       .then(setProducts)
+      .catch((err) => setError(err.message || 'No se pudieron cargar los productos'))
       .finally(() => setLoading(false));
   };
 
@@ -100,6 +104,12 @@ const AdminProducts = () => {
     reloadProducts();
   };
 
+  const republish = async (id) => {
+    await api.republishProduct(id);
+    load();
+    reloadProducts();
+  };
+
   const remove = async (id) => {
     if (!window.confirm('¿Eliminar este producto permanentemente?')) return;
     await api.deleteProduct(id);
@@ -112,7 +122,22 @@ const AdminProducts = () => {
     reloadProducts();
   };
 
+  if (sessionError || /sesión|autorizado|inválida|invalida/i.test(error)) {
+    return (
+      <div className="admin-auth-error-card">
+        <p>{sessionError || error}</p>
+        <button type="button" className="btn" onClick={logout}>
+          Cerrar sesión
+        </button>
+      </div>
+    );
+  }
+
   if (loading) return <p>Cargando productos…</p>;
+
+  if (error) {
+    return <p style={{ color: '#b91c1c' }}>{error}</p>;
+  }
 
   return (
     <>
@@ -235,7 +260,8 @@ const AdminProducts = () => {
           <div className="admin-product-info">
             <h3>
               {displayStoreText(p.name)}
-              {!p.active && <span className="admin-badge-inactive">No disponible</span>}
+              {p.sold && <span className="admin-badge-sold">Vendido</span>}
+              {!p.sold && !p.active && <span className="admin-badge-inactive">No disponible</span>}
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', margin: 0 }}>
               {displayStoreText(p.brand)} · {p.category} · {formatCOP(p.price)}
@@ -244,9 +270,15 @@ const AdminProducts = () => {
               <Link to={`/admin/productos/${p.id}`} className="admin-btn-sm">
                 Editar
               </Link>
-              <button type="button" className="admin-btn-sm" onClick={() => toggleActive(p.id)}>
-                {p.active ? 'No disponible' : 'Publicar'}
-              </button>
+              {p.sold ? (
+                <button type="button" className="admin-btn-sm" onClick={() => republish(p.id)}>
+                  Volver a publicar
+                </button>
+              ) : (
+                <button type="button" className="admin-btn-sm" onClick={() => toggleActive(p.id)}>
+                  {p.active ? 'No disponible' : 'Publicar'}
+                </button>
+              )}
               <button type="button" className="admin-btn-sm danger" onClick={() => remove(p.id)}>
                 Eliminar
               </button>

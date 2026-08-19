@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { BRAND } from '../config/brand';
+import { BRAND, whatsappLink } from '../config/brand';
 
 const COMPANY = BRAND.name;
-const CONTACT_PHONE = '+57 300 990 2243';
-const CONTACT_INSTAGRAM = 'https://www.instagram.com/_ozono_3?igsh=MTJkYTNrNnhhaDRsaQ==';
+const CONTACT_PHONE = BRAND.whatsappDisplayIntl;
+const CONTACT_INSTAGRAM = BRAND.instagramUrl;
+const CONTACT_INSTAGRAM_HANDLE = BRAND.instagramHandle;
 const LAST_UPDATED = '29 de mayo de 2025';
 
 const Section = ({ id, number, title, children }) => (
@@ -86,13 +87,13 @@ const PoliticaPrivacidad = () => {
               <p style={s.infoRow}><strong>Razón social:</strong> {COMPANY}</p>
               <p style={s.infoRow}><strong>País de operación:</strong> República de Colombia</p>
               <p style={s.infoRow}><strong>WhatsApp de contacto:</strong>{' '}
-                <a href={`https://wa.me/573009902243`} target="_blank" rel="noopener noreferrer" style={s.link}>
+                <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" style={s.link}>
                   {CONTACT_PHONE}
                 </a>
               </p>
               <p style={s.infoRow}><strong>Instagram:</strong>{' '}
                 <a href={CONTACT_INSTAGRAM} target="_blank" rel="noopener noreferrer" style={s.link}>
-                  @_ozono_3
+                  {CONTACT_INSTAGRAM_HANDLE}
                 </a>
               </p>
             </div>
@@ -241,12 +242,12 @@ const PoliticaPrivacidad = () => {
             </div>
             <p style={{ marginTop: '1rem' }}>
               Para ejercer estos derechos contáctanos por WhatsApp al{' '}
-              <a href="https://wa.me/573009902243" target="_blank" rel="noopener noreferrer" style={s.link}>
+              <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" style={s.link}>
                 {CONTACT_PHONE}
               </a>{' '}
               o por mensaje directo en Instagram{' '}
               <a href={CONTACT_INSTAGRAM} target="_blank" rel="noopener noreferrer" style={s.link}>
-                @_ozono_3
+                {CONTACT_INSTAGRAM_HANDLE}
               </a>.
               Responderemos dentro de los 15 días hábiles establecidos por la ley.
             </p>
@@ -325,14 +326,14 @@ const PoliticaPrivacidad = () => {
             <div style={s.infoBox}>
               <p style={s.infoRow}>
                 <strong>WhatsApp:</strong>{' '}
-                <a href="https://wa.me/573009902243" target="_blank" rel="noopener noreferrer" style={s.link}>
+                <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" style={s.link}>
                   {CONTACT_PHONE}
                 </a>
               </p>
               <p style={s.infoRow}>
                 <strong>Instagram:</strong>{' '}
                 <a href={CONTACT_INSTAGRAM} target="_blank" rel="noopener noreferrer" style={s.link}>
-                  @_ozono_3
+                  {CONTACT_INSTAGRAM_HANDLE}
                 </a>
               </p>
               <p style={s.infoRow}>

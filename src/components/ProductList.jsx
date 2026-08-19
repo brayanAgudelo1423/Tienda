@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
 import { mediaUrl } from '../api/client';
-import { motion } from 'framer-motion';
 import ProductDetail from './ProductDetail';
 import StarRating from './StarRating';
 
@@ -11,24 +11,23 @@ const ProductList = ({ onAddToCart }) => {
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { products } = useProducts();
-  const novedadesProducts = products.filter((p) => p.brand === 'Novedades').slice(0, 4);
+  const novedadesProducts = products.filter((p) => p.brand === 'Novedades').slice(0, 8);
 
   return (
     <>
       <section id="novedades-section" className="home-products container">
-        <div className="home-products-head">
+        <div className="home-products-head home-products-head-row">
           <h2 className="home-products-title">NOVEDADES</h2>
+          <Link to="/marcas/novedades" className="home-products-link">
+            Ver todas las novedades →
+          </Link>
         </div>
 
         <div className="product-grid home-products-grid">
-          {novedadesProducts.map((product, index) => (
-            <motion.article
+          {novedadesProducts.map((product) => (
+            <article
               key={product.id}
               className="product-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true, margin: '-50px' }}
               onMouseEnter={() => setHoveredProduct(product.id)}
               onMouseLeave={() => setHoveredProduct(null)}
               onClick={() => setSelectedProduct(product)}
@@ -59,7 +58,7 @@ const ProductList = ({ onAddToCart }) => {
                 <StarRating rating={product.rating} size={14} />
                 <p className="product-card-price">{formatCOP(product.price)}</p>
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
       </section>

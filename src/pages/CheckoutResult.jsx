@@ -4,30 +4,31 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BrandLogo from '../components/BrandLogo';
 import { api } from '../api/client';
+import { useProducts } from '../context/ProductsContext';
 
 const STATE_COPY = {
   APPROVED: {
     icon: CheckCircle,
-    title: '¡Pago aprobado!',
-    body: 'Tu pago fue procesado correctamente. Te enviaremos la confirmación por correo.',
+    title: 'Pedido confirmado',
+    body: 'Ya se contactarán contigo en minutos.',
     tone: 'success',
   },
   PENDING: {
     icon: Clock,
     title: 'Pago pendiente',
-    body: 'Mercado Pago aún no confirmó el cobro. Si usaste PSE o efectivo, puede tardar horas. Si pagaste con tarjeta y no ves el descuento, el pago no se completó — intenta de nuevo.',
+    body: 'Aún no confirmamos el pago. Si ya completaste el proceso, espera unos minutos; si no, intenta de nuevo.',
     tone: 'pending',
   },
   CANCELLED: {
     icon: Clock,
     title: 'Pago no completado',
-    body: 'Saliste de Mercado Pago sin pagar. Puedes volver al carrito e intentar de nuevo cuando quieras.',
+    body: 'No se completó el pago. Puedes volver al carrito e intentar de nuevo cuando quieras.',
     tone: 'pending',
   },
   DECLINED: {
     icon: XCircle,
     title: 'Pago rechazado',
-    body: 'Mercado Pago no aprobó el pago. Prueba otro medio (PSE, Nequi u otra tarjeta) o contacta a tu banco.',
+    body: 'El pago no fue aprobado. Prueba otro medio o contacta a soporte.',
     tone: 'error',
   },
   EXPIRED: {
@@ -80,27 +81,15 @@ function mapSaleStatus(status) {
   return null;
 }
 
-function pickReference(params) {
-  const candidates = [
-    params.get('payment_id'),
-    params.get('referenceCode'),
-    params.get('reference_pol'),
-    params.get('merchant_order_id'),
-  ];
-  return candidates.find((value) => !isNullishParam(value)) || null;
-}
-
 const CheckoutResult = () => {
   const [params] = useSearchParams();
   const [state, setState] = useState('PENDING');
+  const { reloadProducts } = useProducts();
 
   useEffect(() => {
+    const gateway = params.get('gateway');
     const urlState = normalizePaymentState(params);
     setState(urlState);
-
-    const orderId = params.get('external_reference');
-    const paymentId = params.get('payment_id');
-    if (!orderId || params.get('gateway') !== 'mp') return undefined;
 
     let cancelled = false;
 
@@ -110,21 +99,49 @@ const CheckoutResult = () => {
       if (backendState) setState(backendState);
     };
 
+    const afterSync = () => reloadProducts({ silent: true });
+
+    if (gateway === 'sc') {
+      const paymentRef = params.get('paymentRef');
+      const orderId = params.get('orderId');
+      const saleId = orderId?.match(/^VM-(\d+)$/i)?.[1] || orderId;
+
+      if (!paymentRef && !saleId) return undefined;
+
+      api
+        .syncSistecreditoPayment({
+          paymentRef: paymentRef || undefined,
+          saleId: saleId || undefined,
+        })
+        .then(applySale)
+        .then(afterSync)
+        .catch(() => {});
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const orderId = params.get('external_reference');
+    const paymentId = params.get('payment_id');
+    if (!orderId || gateway !== 'mp') return undefined;
+
     const syncPromise = isNullishParam(paymentId)
       ? api.getPaymentStatus(orderId)
       : api.syncMercadoPagoPayment({ saleId: orderId, paymentId });
 
-    syncPromise.then(applySale).catch(() => {});
+    syncPromise
+      .then(applySale)
+      .then(afterSync)
+      .catch(() => {});
 
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [params, reloadProducts]);
 
   const copy = STATE_COPY[state] || STATE_COPY.PENDING;
   const Icon = copy.icon;
-  const reference = pickReference(params);
-  const orderId = params.get('external_reference') || params.get('extra1');
 
   return (
     <motion.div
@@ -135,10 +152,6 @@ const CheckoutResult = () => {
       <BrandLogo variant="checkout" asLink={false} />
       <Icon size={56} strokeWidth={1.5} />
       <h1>{copy.title}</h1>
-      {orderId && !isNullishParam(orderId) && (
-        <p className="checkout-result-order">Pedido #{orderId}</p>
-      )}
-      {reference && <p className="checkout-result-ref">Ref. {reference}</p>}
       <p>{copy.body}</p>
       <div className="checkout-result-actions">
         <Link to="/" className="btn">

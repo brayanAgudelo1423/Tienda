@@ -49,6 +49,7 @@ function saleStatusForPayment(paymentMethod) {
     return 'pendiente_pago';
   }
   if (paymentMethod === 'mercadopago') return 'pendiente_pago';
+  if (paymentMethod === 'sistecredito') return 'pendiente_pago';
   return 'confirmada';
 }
 
@@ -71,6 +72,7 @@ function rowToProduct(row) {
     sizes: parseJson(row.sizes, []),
     colors: parseJson(row.colors, []),
     active: Boolean(row.active),
+    sold: Boolean(row.sold),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -181,6 +183,7 @@ export async function initDatabase() {
     ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_before INTEGER;
     ALTER TABLE promotions ADD COLUMN IF NOT EXISTS price_now INTEGER;
     ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_document TEXT;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS sold BOOLEAN NOT NULL DEFAULT FALSE;
   `);
 
   await ensureAdminUser();
@@ -423,7 +426,7 @@ export async function deletePromotion(id) {
 
 export async function getActiveProducts() {
   const { rows } = await getPool().query(
-    'SELECT * FROM products WHERE active = TRUE ORDER BY id DESC'
+    'SELECT * FROM products WHERE active = TRUE AND sold = FALSE ORDER BY id DESC'
   );
   return rows.map(rowToProduct);
 }
@@ -484,8 +487,8 @@ export async function updateProduct(id, data) {
     `UPDATE products SET
       name = $1, brand = $2, brand_slug = $3, product_type = $4, price = $5, category = $6, gender = $7,
       rating = $8, review_count = $9, description = $10, image = $11, hover_image = $12,
-      gallery = $13::jsonb, sizes = $14::jsonb, colors = $15::jsonb, active = $16, updated_at = NOW()
-    WHERE id = $17`,
+      gallery = $13::jsonb, sizes = $14::jsonb, colors = $15::jsonb, active = $16, sold = $17, updated_at = NOW()
+    WHERE id = $18`,
     [
       data.name ?? existing.name,
       data.brand ?? existing.brand,
@@ -503,6 +506,7 @@ export async function updateProduct(id, data) {
       JSON.stringify(sizes),
       JSON.stringify(colors),
       data.active === undefined ? existing.active : Boolean(data.active),
+      data.sold === undefined ? existing.sold : Boolean(data.sold),
       id,
     ]
   );
@@ -526,6 +530,34 @@ export async function upsertBrand({ name, slug, sortOrder = 0 }) {
      ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, sort_order = EXCLUDED.sort_order`,
     [name, slug, sortOrder]
   );
+}
+
+export async function markProductsSoldFromSale(items) {
+  if (!Array.isArray(items) || !items.length) return 0;
+
+  const productIds = [
+    ...new Set(
+      items
+        .filter((item) => !item.isPromotion)
+        .map((item) => Number(item.id))
+        .filter((id) => Number.isInteger(id) && id > 0)
+    ),
+  ];
+
+  if (!productIds.length) return 0;
+
+  const result = await getPool().query(
+    `UPDATE products SET sold = TRUE, active = FALSE, updated_at = NOW()
+     WHERE id = ANY($1::int[]) AND sold = FALSE`,
+    [productIds]
+  );
+  return result.rowCount;
+}
+
+export async function republishProduct(id) {
+  const existing = await getProductById(id);
+  if (!existing) return null;
+  return updateProduct(id, { sold: false, active: true });
 }
 
 export async function createSale(sale) {
@@ -552,6 +584,8 @@ export async function createSale(sale) {
       status,
     ]
   );
+
+  await markProductsSoldFromSale(sale.items);
 
   return getSaleById(rows[0].id);
 }
@@ -665,9 +699,12 @@ export async function getSalesStats() {
 
 export async function bulkSetProductsActive(ids, active) {
   if (!ids?.length) return 0;
+  const isActive = Boolean(active);
   const result = await getPool().query(
-    `UPDATE products SET active = $1, updated_at = NOW() WHERE id = ANY($2::int[])`,
-    [Boolean(active), ids]
+    isActive
+      ? `UPDATE products SET active = TRUE, sold = FALSE, updated_at = NOW() WHERE id = ANY($1::int[])`
+      : `UPDATE products SET active = FALSE, updated_at = NOW() WHERE id = ANY($1::int[])`,
+    [ids]
   );
   return result.rowCount;
 }

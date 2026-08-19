@@ -1,21 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { api } from '../api/client';
 import { formatCOP } from '../utils/currency';
 
 const AdminDashboard = () => {
+  const { sessionError, logout } = useOutletContext() || {};
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (sessionError) return;
     api
       .getSalesStats()
       .then(setStats)
       .catch((e) => setError(e.message));
-  }, []);
+  }, [sessionError]);
+
+  if (sessionError) {
+    return (
+      <div className="admin-auth-error-card">
+        <p>No se pueden cargar los datos con la sesión actual.</p>
+        <button type="button" className="btn" onClick={logout}>
+          Cerrar sesión
+        </button>
+      </div>
+    );
+  }
 
   if (error) {
-    return <p style={{ color: '#b91c1c' }}>{error}</p>;
+    const isAuth =
+      /sesión|autorizado|inválida|invalida/i.test(error);
+    return (
+      <div className="admin-auth-error-card">
+        <p style={{ color: '#b91c1c' }}>{error}</p>
+        {isAuth && (
+          <button type="button" className="btn" onClick={logout}>
+            Cerrar sesión
+          </button>
+        )}
+      </div>
+    );
   }
 
   if (!stats) {

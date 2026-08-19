@@ -66,10 +66,6 @@ const Cart = ({ items, onRemove }) => {
               <span>Subtotal</span>
               <span>{formatCOP(subtotal)}</span>
             </div>
-            <div style={styles.summaryRow}>
-              <span>Envío y manipulación estimados</span>
-              <span>Gratis</span>
-            </div>
             <div style={styles.summaryTotalRow}>
               <span>Total</span>
               <span>{formatCOP(total)}</span>

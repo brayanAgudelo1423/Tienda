@@ -12,8 +12,38 @@ function connectionHint() {
   return 'Verifica https://tienda-1-7f8f.onrender.com/api/health y espera un minuto si el servidor estaba dormido.';
 }
 
+export const ADMIN_AUTH_EXPIRED_EVENT = 'ozono:admin-auth-expired';
+
 function getAdminToken() {
   return localStorage.getItem('ozono_admin_token');
+}
+
+function notifyAdminAuthExpired(message) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent(ADMIN_AUTH_EXPIRED_EVENT, {
+      detail: { message: message || 'Sesión expirada o inválida' },
+    })
+  );
+}
+
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Despierta Render (plan free) antes del login u otras llamadas críticas. */
+export async function wakeAdminApi() {
+  if (import.meta.env.DEV) return;
+  const healthUrl = `${API_BASE || PRODUCTION_API}/api/health`;
+  for (const delay of [0, 1500, 4000]) {
+    if (delay > 0) await sleep(delay);
+    try {
+      const res = await fetch(healthUrl, { mode: 'cors', cache: 'no-store' });
+      if (res.ok) return;
+    } catch {
+      /* retry */
+    }
+  }
 }
 
 async function request(path, options = {}) {
@@ -43,6 +73,11 @@ async function request(path, options = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 && options.auth) {
+      const message = data.error || 'Sesión expirada o inválida';
+      notifyAdminAuthExpired(message);
+      throw new Error(message);
+    }
     if (res.status === 404 && path.startsWith('/api/')) {
       throw new Error(
         'No se encontró la API. Verifica VITE_API_URL en GitHub Actions o espera el redeploy.'
@@ -73,6 +108,9 @@ export const api = {
 
   toggleProduct: (id) =>
     request(`/api/products/admin/${id}/toggle`, { method: 'PATCH', auth: true }),
+
+  republishProduct: (id) =>
+    request(`/api/products/admin/${id}/republish`, { method: 'PATCH', auth: true }),
 
   deleteProduct: (id) =>
     request(`/api/products/admin/${id}`, { method: 'DELETE', auth: true }),
@@ -117,6 +155,15 @@ export const api = {
     request('/api/payments/mercadopago/sync', {
       method: 'POST',
       body: { saleId, paymentId },
+    }),
+
+  createSistecreditoCheckout: (payload) =>
+    request('/api/payments/sistecredito/checkout', { method: 'POST', body: payload }),
+
+  syncSistecreditoPayment: ({ paymentRef, saleId }) =>
+    request('/api/payments/sistecredito/sync', {
+      method: 'POST',
+      body: { paymentRef, saleId },
     }),
 
   getPaymentStatus: (saleId) => request(`/api/payments/status/${saleId}`),

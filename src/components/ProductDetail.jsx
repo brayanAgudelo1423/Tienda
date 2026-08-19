@@ -9,6 +9,7 @@ import { mediaUrl } from '../api/client';
 import { getProductGalleryImages } from '../utils/productImages';
 import { LOCIONES_CATEGORY } from '../constants/catalog';
 import { displayStoreText } from '../utils/displayText';
+import { lockPageScroll, unlockPageScroll } from '../utils/scrollLock';
 
 const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const navigate = useNavigate();
@@ -17,15 +18,12 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (product) {
-      setSelectedSize('');
-      setSelectedColor('');
-      setError('');
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    if (!product) return undefined;
+    setSelectedSize('');
+    setSelectedColor('');
+    setError('');
+    lockPageScroll();
+    return unlockPageScroll;
   }, [product]);
 
   const galleryImages = useMemo(
@@ -76,6 +74,7 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
         onClick={onClose}
       >
         <motion.div
+          className="product-detail-modal-wrap"
           style={styles.modal}
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -106,7 +105,7 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
               <p style={styles.brand}>{displayStoreText(product.brand)}</p>
               <p style={styles.productType}>{product.productType}</p>
 
-              <h2 id="product-detail-title" style={styles.name}>
+              <h2 id="product-detail-title" className="product-detail-name" style={styles.name}>
                 {displayStoreText(product.name)}
               </h2>
 
@@ -222,6 +221,14 @@ const ProductDetail = ({ product, onClose, onAddToCart }) => {
             max-height: none !important;
           }
           .product-detail-image .product-gallery { min-height: 280px; }
+        }
+        @media (min-width: 1024px) {
+          .product-detail-modal-wrap {
+            max-width: 1100px !important;
+          }
+          .product-detail-layout { gap: 3rem !important; }
+          .product-detail-image { flex: 0 0 48% !important; min-height: 480px !important; }
+          .product-detail-name { font-size: 2rem !important; }
         }
       `}</style>
     </AnimatePresence>

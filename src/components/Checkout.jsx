@@ -15,6 +15,8 @@ import {
 import { api, mediaUrl } from '../api/client';
 import { formatCOP } from '../utils/currency';
 import { displayStoreText } from '../utils/displayText';
+import { removeProductsFromCache } from '../utils/catalogCache';
+import { useProducts } from '../context/ProductsContext';
 import BrandLogo from './BrandLogo';
 
 const FALLBACK_PAYMENT_METHODS = [
@@ -23,17 +25,12 @@ const FALLBACK_PAYMENT_METHODS = [
     label: 'Pago en línea',
     desc: 'Tarjetas, PSE, Nequi, Daviplata, Efecty y más medios en Colombia.',
   },
+  {
+    id: 'sistecredito',
+    label: 'Sistecrédito',
+    desc: 'Financia tu compra a cuotas con tu cupo Sistecrédito.',
+  },
   { id: 'contraentrega', label: 'Pago contraentrega', desc: 'Pagas en efectivo o datáfono al recibir' },
-];
-
-const MP_AVAILABLE_METHODS = [
-  'Tarjetas crédito/débito',
-  'PSE — todos los bancos',
-  'Nequi',
-  'Daviplata',
-  'Efecty',
-  'Baloto',
-  'Pago en efectivo',
 ];
 
 const SUCCESS_COPY = {
@@ -41,18 +38,22 @@ const SUCCESS_COPY = {
     title: 'Redirigiendo al pago…',
     body: 'Elige tu medio de pago: tarjeta, PSE, Nequi, Daviplata, Efecty u otro disponible.',
   },
+  sistecredito: {
+    title: 'Redirigiendo a Sistecrédito…',
+    body: 'Completa tu crédito con tu cédula y el código que llegará a tu celular.',
+  },
   contraentrega: {
-    title: '¡Compra exitosa!',
-    body: 'Tu compra fue registrada correctamente. Pronto nos contactaremos contigo para coordinar la entrega.',
+    title: 'Pedido confirmado',
+    body: 'Ya se contactarán contigo en minutos.',
   },
 };
 
 const MP_MIN_AMOUNT_COP = 10000;
 
 const Checkout = ({ items, onOrderComplete }) => {
+  const { reloadProducts } = useProducts();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [orderId, setOrderId] = useState(null);
   const [completedPayment, setCompletedPayment] = useState('contraentrega');
   const [error, setError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -60,10 +61,12 @@ const Checkout = ({ items, onOrderComplete }) => {
   const [payment, setPayment] = useState('mercadopago');
 
   const isMercadoPago = payment === 'mercadopago';
+  const isSistecredito = payment === 'sistecredito';
+  const needsDocument = isMercadoPago || isSistecredito;
 
   const normalizeMethods = (methods) =>
     (methods ?? [])
-      .filter((m) => m.id === 'mercadopago' || m.id === 'contraentrega')
+      .filter((m) => m.id === 'mercadopago' || m.id === 'sistecredito' || m.id === 'contraentrega')
       .map((m) =>
         m.id === 'mercadopago'
           ? { ...m, label: 'Pago en línea', desc: FALLBACK_PAYMENT_METHODS[0].desc }
@@ -143,6 +146,9 @@ const Checkout = ({ items, onOrderComplete }) => {
           throw new Error('Ingresa tu número de documento para pagar con Mercado Pago');
         }
 
+        removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+        reloadProducts({ silent: true });
+
         const mp = await api.createMercadoPagoCheckout({
           saleId: sale.id,
           customer,
@@ -153,7 +159,26 @@ const Checkout = ({ items, onOrderComplete }) => {
         return;
       }
 
-      setOrderId(sale.id);
+      if (isSistecredito) {
+        if (!customer.documentNumber) {
+          throw new Error('Ingresa tu número de documento para pagar con Sistecrédito');
+        }
+
+        removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+        reloadProducts({ silent: true });
+
+        const sc = await api.createSistecreditoCheckout({
+          saleId: sale.id,
+          customer,
+        });
+
+        onOrderComplete?.();
+        window.location.href = sc.redirectUrl;
+        return;
+      }
+
+      removeProductsFromCache(saleItems.filter((item) => !item.isPromotion).map((item) => item.id));
+      reloadProducts({ silent: true });
       setCompletedPayment(payment);
       setIsSuccess(true);
       onOrderComplete?.();
@@ -190,9 +215,6 @@ const Checkout = ({ items, onOrderComplete }) => {
           <CheckCircle size={64} strokeWidth={1.5} />
         </div>
         <h1>{copy.title}</h1>
-        {orderId && completedPayment !== 'contraentrega' && (
-          <p className="checkout-order-id">Pedido #{orderId}</p>
-        )}
         <p>{copy.body}</p>
         <Link to="/" className="btn">
           Volver a la tienda
@@ -282,7 +304,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                   <input id="city" name="city" type="text" required placeholder="Bogotá" />
                 </div>
                 <div className="checkout-field">
-                  <label htmlFor="state">Estado</label>
+                  <label htmlFor="state">Departamento</label>
                   <input id="state" name="state" type="text" required placeholder="Cundinamarca" />
                 </div>
                 <div className="checkout-field">
@@ -292,11 +314,11 @@ const Checkout = ({ items, onOrderComplete }) => {
               </div>
             </section>
 
-            {isMercadoPago && (
+            {needsDocument && (
             <section className="checkout-card">
               <h2>
                 <Lock size={18} />
-                Identificación (requerida para pago en línea)
+                Identificación (requerida para {isSistecredito ? 'Sistecrédito' : 'pago en línea'})
               </h2>
               <div className="checkout-field-row">
                 <div className="checkout-field">
@@ -315,7 +337,7 @@ const Checkout = ({ items, onOrderComplete }) => {
                     name="documentNumber"
                     type="text"
                     inputMode="numeric"
-                    required={isMercadoPago}
+                    required={needsDocument}
                     placeholder="Ej. 1020304050"
                   />
                 </div>
@@ -346,22 +368,6 @@ const Checkout = ({ items, onOrderComplete }) => {
                   </label>
                 ))}
               </div>
-
-              {isMercadoPago && (
-                <div className="checkout-payu-methods">
-                  <p className="checkout-payu-methods-title">Medios disponibles:</p>
-                  <ul className="checkout-payu-methods-list">
-                    {MP_AVAILABLE_METHODS.map((name) => (
-                      <li key={name}>{name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <p className="checkout__payu-note">
-                Al pagar en línea serás redirigido a una pasarela segura donde podrás elegir tarjeta,
-                PSE, Nequi, Daviplata, efectivo y más. VirtusMonaco nunca almacena los datos de tu tarjeta.
-              </p>
             </section>
 
             <button type="submit" className="btn checkout-submit-desktop" disabled={isProcessing}>
@@ -432,10 +438,6 @@ const OrderSummary = ({ items, subtotal, total, compact = false }) => (
       <div className="checkout-order-row">
         <span>Subtotal</span>
         <span>{formatCOP(subtotal)}</span>
-      </div>
-      <div className="checkout-order-row">
-        <span>Envío</span>
-        <span className="checkout-free">Gratis</span>
       </div>
       <div className="checkout-order-row checkout-order-total">
         <span>Total</span>
@@ -976,7 +978,7 @@ const checkoutStyles = `
     }
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 768px) {
     .checkout-page {
       padding-bottom: 4rem;
     }
@@ -1018,6 +1020,21 @@ const checkoutStyles = `
       background: var(--color-bg-alt);
       border-radius: 14px;
       padding: 1.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .checkout-container {
+      max-width: 1200px;
+    }
+
+    .checkout-grid {
+      grid-template-columns: 1fr 400px;
+      gap: 3.5rem;
+    }
+
+    .checkout-header {
+      text-align: left;
     }
   }
 `;

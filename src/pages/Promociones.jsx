@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PromoCardsGrid from '../components/PromoCardsGrid';
+import BackNav from '../components/BackNav';
 import { usePromotions } from '../context/PromotionsContext';
 import { BRAND } from '../config/brand';
 
@@ -21,6 +22,7 @@ const Promociones = ({ onAddToCart }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          <BackNav label="Volver" />
           <p className="promociones-hero-tag">Ofertas {BRAND.short}</p>
           <h1>{settings.pageTitle}</h1>
           {settings.pageSubtitle && <p className="promociones-hero-sub">{settings.pageSubtitle}</p>}
